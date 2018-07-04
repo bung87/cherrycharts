@@ -1,0 +1,15 @@
+{
+
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "target": "es5",
+    "module":"commonjs",
+    "moduleResolution": "Node",
+    "sourceMap": true,
+   
+    "outDir": "dist/lib"
+  },
+  "include": [
+    "src"
+  ]
+}
