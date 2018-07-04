@@ -18,6 +18,16 @@ import {
 type RendererAlias = 'webgl' | 'canvas' | 'svg'
 type dimensionAlias = '2d' | '3d'
 
+
+
+function isElementVisible(elm) {
+  let rect = elm.getBoundingClientRect();
+  let viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+  let r =!(rect.bottom < 0 || rect.top - viewHeight >= 0);
+  return r
+}
+
+
 class Director {
   public rect: DOMRect | ClientRect
   public scene: Scene
@@ -26,10 +36,10 @@ class Director {
   protected dimensionAlias: dimensionAlias
   protected rendererAlias: RendererAlias
   protected mainLight: Light
- 
+  protected dom: Element
   constructor(dom: Element) {
     this.rect = dom.getBoundingClientRect()
-
+    this.dom = dom
     this.scene = new Scene()
     this.scene.background = new Color(0xffffff)
     let width = this.rect.width,
@@ -76,10 +86,15 @@ class Director {
   }
 
   _render() {
-    this.renderer.render(this.scene, this.mainCamera)
+    
+    // if(isElementVisible(this.dom)){
+      this.renderer.render(this.scene, this.mainCamera)
+    // }
+    
   }
 
   animate() {
+   
     requestAnimationFrame(this.animate.bind(this))
     this._render()
   }
