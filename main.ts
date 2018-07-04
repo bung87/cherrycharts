@@ -6,16 +6,16 @@ import AreaChart from './src/charts/area-chart'
   let ele = document.getElementById('chart')
   let c = new BarChart(ele)
   c.datum(data).render()
-})(require('./data/bar-chart-data.js'))
+})(require('./data/bar-chart-data.json'))
 
 ;(function( data) {
   let ele = document.getElementById('line-chart')
   let c = new LineChart(ele)
   c.datum(data).render()
-})(require('./data/line-chart-data.js'))
+})(require('./data/line-chart-data.json'))
 
 ;(function(data) {
   let ele = document.getElementById('area-chart')
   let c = new AreaChart(ele)
   c.datum(data).render()
-})(require('./data/line-chart-data.js'))
+})(require('./data/line-chart-data.json'))
