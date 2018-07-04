@@ -1,6 +1,7 @@
 import BarChart from './src/charts/bar-chart'
 import LineChart from './src/charts/line-chart'
 import AreaChart from './src/charts/area-chart'
+import {getDirector} from './src/director'
 
 ;(function(data) {
   let ele = document.getElementById('chart')
@@ -19,3 +20,6 @@ import AreaChart from './src/charts/area-chart'
   let c = new AreaChart(ele)
   c.datum(data).render()
 })(require('./data/line-chart-data.json'))
+
+let director = getDirector()
+director.animate()
