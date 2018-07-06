@@ -17,6 +17,7 @@ export default class CartesianChart extends Chart {
   datum(data) {
     this.dataSource = data
     this.buildCartesianInfo(data)
+    this.dataProcessed = true
     return this
   }
 

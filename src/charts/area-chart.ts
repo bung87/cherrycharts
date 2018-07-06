@@ -17,13 +17,14 @@ import { timeMonth } from 'd3-time'
 import CartesianChart from './cartesian-chart'
 import { createBufferGeometry } from '../three-helper'
 import { IRect, ICartesian, ICartesianInfo } from '../interfaces'
+import { IChart, IChartInteractable } from '../chart'
 
-export default class AreaChart extends CartesianChart  implements ICartesian {
+export default class AreaChart extends CartesianChart  implements ICartesian,IChartInteractable {
   dataSource: DataSource
 
   lines: LineSegments
   mainRect: IRect
-
+  protected onMouseMoveHandle
   constructor(dom: Element) {
     super(dom)
 
@@ -33,10 +34,10 @@ export default class AreaChart extends CartesianChart  implements ICartesian {
       bottom: 20,
       left: 20
     }
-    this.mainRect.width = this.rect.width - this.mainRect.left - this.mainRect.right
-    this.mainRect.height = this.rect.height - this.mainRect.top - this.mainRect.bottom
+    this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
+    this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
   }
-
+ 
   drawXAxisTick() {
     let material = new LineBasicMaterial({
       color: 0x000000
@@ -181,5 +182,43 @@ export default class AreaChart extends CartesianChart  implements ICartesian {
     this.drawAxis()
 
     this.drawBars()
+  }
+
+  bindingEvents() {
+    this.onMouseMoveHandle = this.onMouseMove.bind(this)
+    let domElement = this.director.getDomElement()
+    domElement.addEventListener('mousemove', this.onMouseMoveHandle)
+    domElement.onmouseout = domElement.onmouseleave = this.onMouseLeave.bind(this)
+  }
+
+  onMouseMove(event) {
+    let domElement = this.director.getDomElement()
+    let rect = domElement.getBoundingClientRect()
+    this.mouse.x = event.clientX - rect.left
+    this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
+    let indexs = this.dataSource.length - 1
+    let offsetX = this.mouse.x - this.mainRect.left
+    let left = Math.floor((offsetX / this.size.width) * indexs)
+    let right = Math.round((offsetX / this.size.width) * indexs)
+
+    const keys = Array(this.dataSource.length).keys()
+
+    if (!(left in Array.from(keys))) {
+      this.hideTooltip()
+      return
+    }
+    this.tooltip.style.display = 'block'
+
+    let [label, value] = this.dataSource[left]
+    this.tooltip.style.left = `${this.mouse.x}px`
+    this.tooltip.style.top = `${event.clientY - 30}px`
+    let html = `${label} ${value}`
+    if (this.tooltip.innerHTML !== html) {
+      this.tooltip.innerHTML = `${label} ${value}`
+    }
+  }
+  
+  onMouseLeave(event) {
+    this.hideTooltip()
   }
 }

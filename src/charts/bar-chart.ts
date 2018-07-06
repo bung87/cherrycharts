@@ -3,17 +3,18 @@ import { createLabel } from '../utils'
 import { createBufferGeometry } from '../three-helper'
 import { DataSource, Bar } from '../components/bar'
 import { IRect, ICartesian, ICartesianInfo } from '../interfaces'
-
+import { IChart, IChartInteractable } from '../chart'
 import CartesianChart from './cartesian-chart'
 
-export default class BarChart extends CartesianChart implements ICartesian {
+export default class BarChart extends CartesianChart implements ICartesian, IChartInteractable {
   dataSource: DataSource
   barWidth: number
   barGap: number
   bars: Bar
+  type = 'BarChart'
   mainRect: IRect
   cartesian: ICartesianInfo
-
+  protected onMouseMoveHandle
   constructor(dom: Element) {
     super(dom)
     this.barWidth = 20
@@ -25,8 +26,8 @@ export default class BarChart extends CartesianChart implements ICartesian {
       bottom: 20,
       left: 20
     }
-    this.mainRect.width = this.rect.width - this.mainRect.left - this.mainRect.right
-    this.mainRect.height = this.rect.height - this.mainRect.top - this.mainRect.bottom
+    this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
+    this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
   }
 
   drawXAxisTick() {
@@ -97,7 +98,7 @@ export default class BarChart extends CartesianChart implements ICartesian {
 
   draw() {
     this.drawAxis()
-    let bar = new Bar(
+    this.bars = new Bar(
       this.dataSource,
       this.cartesian,
       this.mainRect,
@@ -105,6 +106,53 @@ export default class BarChart extends CartesianChart implements ICartesian {
       this.barWidth,
       this.barGap
     )
-    this.add(bar)
+    this.add(this.bars)
+  }
+
+  bindingEvents() {
+    this.onMouseMoveHandle = this.onMouseMove.bind(this)
+    let domElement = this.director.getDomElement()
+    domElement.addEventListener('mousemove', this.onMouseMoveHandle)
+    domElement.onmouseout = domElement.onmouseleave = this.onMouseLeave.bind(this)
+  }
+
+  onMouseMove(event) {
+    let barsLen = this.bars.children.length
+    let domElement = this.director.getDomElement()
+    let rect = domElement.getBoundingClientRect()
+    this.mouse.x = event.clientX - rect.left
+    this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
+    if(this.mouse.y< this.mainRect.bottom){
+      this.hideTooltip()
+      return 
+    }
+    let offsetXWithHalfWidth = this.mouse.x + this.barWidth / 2 
+    let finalIndex = this.bars.children.findIndex( (x)=>{
+      return offsetXWithHalfWidth >=  x.position.x && offsetXWithHalfWidth <= x.position.x  + this.barWidth
+    })
+    if(finalIndex === -1){
+      this.hideTooltip()
+      return
+    }
+    
+    let position = this.bars.children[finalIndex].position
+    const keys = Array(barsLen).keys()
+    if (!(finalIndex in Array.from(keys))) {
+      this.hideTooltip()
+      return
+    }
+    this.tooltip.style.display = 'block'
+
+    let [label, value] = this.dataSource[finalIndex]
+    this.tooltip.style.left = `${position.x - this.tooltip.getBoundingClientRect().width/2}px`
+    this.tooltip.style.top = `${event.clientY - 30}px`
+    let html = `${label} ${value}`
+    if (this.tooltip.innerHTML !== html) {
+      this.tooltip.innerHTML = `${label} ${value}`
+    }
+  }
+
+  onMouseLeave(event) {
+    this.hideTooltip()
   }
 }

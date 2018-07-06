@@ -19,8 +19,8 @@ class LineChart extends AreaChart implements ICartesian {
       bottom: 20,
       left: 20
     }
-    this.mainRect.width = this.rect.width - this.mainRect.left - this.mainRect.right
-    this.mainRect.height = this.rect.height - this.mainRect.top - this.mainRect.bottom
+    this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
+    this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
   }
   
 

@@ -134,7 +134,7 @@ class AreaChartExt extends Chart {
     let material = new MeshLineMaterial({
       color: new Color('#000000'),
       lineWidth: 1,
-      resolution: new Vector2(this.rect.width, this.rect.height)
+      resolution: new Vector2(this.size.width, this.size.height)
       // sizeAttenuation:1
     })
 
