@@ -1,11 +1,5 @@
-import { LineBasicMaterial, LineSegments } from 'three'
 
-import { scaleLinear } from 'd3-scale'
-import { timeMonth } from 'd3-time'
-import CartesianChart from './cartesian-chart'
-import { createBufferGeometry } from '../three-helper'
-import { IRect, ICartesian, ICartesianInfo } from '../interfaces'
-import { DataSource } from '../components/bar'
+import { ICartesian } from '../interfaces'
 import AreaChart from './area-chart'
 
 class LineChart extends AreaChart implements ICartesian {

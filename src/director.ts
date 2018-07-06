@@ -24,6 +24,7 @@ import { ISize } from './interfaces'
 type RendererAlias = 'webgl' | 'canvas' | 'svg'
 type dimensionAlias = '2d' | '3d'
 
+
 function isElementVisible(elm) {
   let rect = elm.getBoundingClientRect()
   let viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight)
@@ -39,14 +40,14 @@ class Director {
   protected dimensionAlias: dimensionAlias
   protected rendererAlias: RendererAlias
   protected mainLight: Light
-
-  constructor(containeer: Element) {
-    let rect = containeer.getBoundingClientRect()
+  protected container: Element
+  constructor(container: Element) {
+    let rect = container.getBoundingClientRect()
     this.size = {
       width: rect.width,
       height: rect.height
     }
-
+    this.container = container
     this.scene = new Scene()
     this.scene.background = new Color(0xffffff)
     let width = this.size.width,
@@ -89,10 +90,10 @@ class Director {
     // let axishelper = new AxesHelper(200)
     // this.scene.add(axishelper)
 
-    containeer.appendChild(this.renderer.domElement)
+    container.appendChild(this.renderer.domElement)
   }
 
-  getDomElement(){
+  getDomElement() {
     return this.renderer.domElement
   }
 

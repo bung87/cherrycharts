@@ -17,7 +17,7 @@ import { timeMonth } from 'd3-time'
 import CartesianChart from './cartesian-chart'
 import { createBufferGeometry } from '../three-helper'
 import { IRect, ICartesian, ICartesianInfo } from '../interfaces'
-import { IChart, IChartInteractable } from '../chart'
+import { IChartInteractable } from '../chart'
 
 export default class AreaChart extends CartesianChart implements ICartesian, IChartInteractable {
   dataSource: DataSource
@@ -230,6 +230,9 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
   }
 
   onMouseLeave(event) {
+    if(event.relatedTarget === this.tooltip ){
+      return
+    }
     this.hideTooltip()
   }
 }

@@ -3,8 +3,9 @@ import { createLabel } from '../utils'
 import { createBufferGeometry } from '../three-helper'
 import { DataSource, Bar } from '../components/bar'
 import { IRect, ICartesian, ICartesianInfo } from '../interfaces'
-import { IChart, IChartInteractable } from '../chart'
+import { IChartInteractable } from '../chart'
 import CartesianChart from './cartesian-chart'
+
 
 export default class BarChart extends CartesianChart implements ICartesian, IChartInteractable {
   dataSource: DataSource
@@ -112,10 +113,12 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
   bindingEvents() {
     this.onMouseMoveHandle = this.onMouseMove.bind(this)
     let domElement = this.director.getDomElement()
-    domElement.addEventListener('mousemove', this.onMouseMoveHandle)
+    domElement.addEventListener('mousemove', this.onMouseMoveHandle,false)
     domElement.onmouseout = domElement.onmouseleave = this.onMouseLeave.bind(this)
+    // domElement.onmouseover = domElement.onmouseenter = this.onMouseEnter.bind(this)
   }
 
+  
   onMouseMove(event) {
     let barsLen = this.bars.children.length
     let domElement = this.director.getDomElement()
@@ -130,6 +133,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     let finalIndex = this.bars.children.findIndex( (x)=>{
       return offsetXWithHalfWidth >=  x.position.x && offsetXWithHalfWidth <= x.position.x  + this.barWidth
     })
+    
     if(finalIndex === -1){
       this.hideTooltip()
       return
@@ -141,7 +145,8 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
       this.hideTooltip()
       return
     }
-    this.tooltip.style.display = 'block'
+
+    this.showTooltip()
 
     let [label, value] = this.dataSource[finalIndex]
     let tooltipRect = this.tooltip.getBoundingClientRect()
@@ -153,7 +158,17 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     }
   }
 
+  onMouseEnter(event) {
+    if(event.relatedTarget === this.tooltip ){
+      return
+    }
+    this.showTooltip()
+  }
+
   onMouseLeave(event) {
+    if(event.relatedTarget === this.tooltip ){
+      return
+    }
     this.hideTooltip()
   }
 }

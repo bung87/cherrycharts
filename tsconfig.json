@@ -6,7 +6,7 @@
     "module":"commonjs",
     "moduleResolution": "Node",
     "sourceMap": true,
-   
+    "experimentalDecorators": true,
     "outDir": "dist/lib"
   },
   "include": [
