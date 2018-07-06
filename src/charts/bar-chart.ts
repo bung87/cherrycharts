@@ -144,8 +144,9 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     this.tooltip.style.display = 'block'
 
     let [label, value] = this.dataSource[finalIndex]
-    this.tooltip.style.left = `${position.x - this.tooltip.getBoundingClientRect().width/2}px`
-    this.tooltip.style.top = `${event.clientY - 30}px`
+    let tooltipRect = this.tooltip.getBoundingClientRect()
+    this.tooltip.style.left = `${position.x - tooltipRect.width/2}px`
+    this.tooltip.style.top = `${event.clientY - tooltipRect.height}px`
     let html = `${label} ${value}`
     if (this.tooltip.innerHTML !== html) {
       this.tooltip.innerHTML = `${label} ${value}`

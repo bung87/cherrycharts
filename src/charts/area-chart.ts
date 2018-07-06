@@ -19,12 +19,14 @@ import { createBufferGeometry } from '../three-helper'
 import { IRect, ICartesian, ICartesianInfo } from '../interfaces'
 import { IChart, IChartInteractable } from '../chart'
 
-export default class AreaChart extends CartesianChart  implements ICartesian,IChartInteractable {
+export default class AreaChart extends CartesianChart implements ICartesian, IChartInteractable {
   dataSource: DataSource
 
   lines: LineSegments
   mainRect: IRect
   protected onMouseMoveHandle
+  protected vectors: Array<Vector2>
+  protected lineScale
   constructor(dom: Element) {
     super(dom)
 
@@ -37,7 +39,7 @@ export default class AreaChart extends CartesianChart  implements ICartesian,ICh
     this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
     this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
   }
- 
+
   drawXAxisTick() {
     let material = new LineBasicMaterial({
       color: 0x000000
@@ -119,12 +121,7 @@ export default class AreaChart extends CartesianChart  implements ICartesian,ICh
   }
 
   drawBasicLine() {
-    let xScale = scaleLinear()
-      .domain([0, this.dataSource.length])
-      .range([this.mainRect.left, this.mainRect.left + this.mainRect.width])
-    //   let colorScale = scaleOrdinal()
-    //     .domain([0, this.dataSource.length])
-    //     .range(colors)
+    this.buildVectors()
 
     let material = new LineBasicMaterial({
       color: this.colors[2]
@@ -132,7 +129,7 @@ export default class AreaChart extends CartesianChart  implements ICartesian,ICh
 
     let arr = this.dataSource.reduce((accumulator, currentValue, index) => {
       let h = this.cartesian.yScale(currentValue[1]) + this.mainRect.bottom
-      let x = xScale(index)
+      let x = this.lineScale(index)
       if (index > 0 && index < this.dataSource.length) {
         return accumulator.concat(x, h, 0, x, h, 0)
       } else {
@@ -145,25 +142,34 @@ export default class AreaChart extends CartesianChart  implements ICartesian,ICh
     this.add(this.lines)
   }
 
-  drawBars() {
-    let xScale = scaleLinear()
-      .domain([0, this.dataSource.length])
-      .range([this.mainRect.left, this.mainRect.left + this.mainRect.width])
+  buildVectors() {
+    if (!this.lineScale) {
+      this.lineScale = scaleLinear()
+        .domain([0, this.dataSource.length])
+        .range([this.mainRect.left, this.mainRect.left + this.mainRect.width])
+    }
+
+    if (!this.vectors) {
+      this.vectors = this.dataSource.reduce((accumulator, currentValue, index) => {
+        let h = this.cartesian.yScale(currentValue[1]) + this.mainRect.bottom
+        let x = this.lineScale(index)
+
+        return accumulator.concat(new Vector2(x, h))
+      }, [])
+    }
+  }
+
+  drawArea() {
     //   let colorScale = scaleOrdinal()
     //     .domain([0, this.dataSource.length])
     //     .range(colors)
 
-    let arr2 = this.dataSource.reduce((accumulator, currentValue, index) => {
-      let h = this.cartesian.yScale(currentValue[1]) + this.mainRect.bottom
-      let x = xScale(index)
-
-      return accumulator.concat(new Vector2(x, h))
-    }, [])
+    this.buildVectors()
 
     let shape = new Shape()
     let end = new Vector2(this.mainRect.left + this.mainRect.width, this.mainRect.bottom)
     let start = new Vector2(this.mainRect.left, this.mainRect.bottom)
-    shape.setFromPoints(arr2.concat(end, start))
+    shape.setFromPoints(this.vectors.concat(end, start))
 
     let geometry2 = new ShapeBufferGeometry(shape)
 
@@ -181,7 +187,7 @@ export default class AreaChart extends CartesianChart  implements ICartesian,ICh
   draw() {
     this.drawAxis()
 
-    this.drawBars()
+    this.drawArea()
   }
 
   bindingEvents() {
@@ -196,28 +202,33 @@ export default class AreaChart extends CartesianChart  implements ICartesian,ICh
     let rect = domElement.getBoundingClientRect()
     this.mouse.x = event.clientX - rect.left
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
-    let indexs = this.dataSource.length - 1
-    let offsetX = this.mouse.x - this.mainRect.left
-    let left = Math.floor((offsetX / this.size.width) * indexs)
-    let right = Math.round((offsetX / this.size.width) * indexs)
+    let offsetX = this.mouse.x
+    const keys = Array(this.vectors.length).keys()
+    let finalIndex = this.vectors.findIndex(x => {
+      return offsetX === Math.floor(x.x) || offsetX === Math.round(x.x)
+    })
+    if (finalIndex === -1) {
+      this.hideTooltip()
+      return
+    }
 
-    const keys = Array(this.dataSource.length).keys()
-
-    if (!(left in Array.from(keys))) {
+    let x = this.vectors[finalIndex].x
+    if (!(finalIndex in Array.from(keys))) {
       this.hideTooltip()
       return
     }
     this.tooltip.style.display = 'block'
 
-    let [label, value] = this.dataSource[left]
-    this.tooltip.style.left = `${this.mouse.x}px`
-    this.tooltip.style.top = `${event.clientY - 30}px`
+    let [label, value] = this.dataSource[finalIndex]
+    let tooltipRect = this.tooltip.getBoundingClientRect()
+    this.tooltip.style.left = `${x - tooltipRect.width / 2}px`
+    this.tooltip.style.top = `${event.clientY - tooltipRect.height}px`
     let html = `${label} ${value}`
     if (this.tooltip.innerHTML !== html) {
       this.tooltip.innerHTML = `${label} ${value}`
     }
   }
-  
+
   onMouseLeave(event) {
     this.hideTooltip()
   }
