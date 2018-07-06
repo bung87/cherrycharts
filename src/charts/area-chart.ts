@@ -29,22 +29,15 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
   protected lineScale
   constructor(dom: Element) {
     super(dom)
-
-    this.mainRect = {
-      top: 20,
-      right: 20,
-      bottom: 20,
-      left: 20
-    }
-    this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
-    this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
   }
 
   drawXAxisTick() {
+    let mainRect = this.getMainRect()
+   
     let material = new LineBasicMaterial({
       color: 0x000000
     })
-    let Y = this.mainRect.bottom
+    let Y = mainRect.bottom
     let arr = []
 
     let xScale = scaleTime()
@@ -52,14 +45,14 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
         new Date(this.dataSource[0][0]),
         new Date(this.dataSource[this.dataSource.length - 1][0])
       ])
-      .range([this.mainRect.left, this.mainRect.left + this.mainRect.width])
+      .range([mainRect.left, mainRect.left + mainRect.width])
 
     let ticks = xScale.ticks()
     let xArr = ticks.map((v, i) => {
       return xScale(v)
     })
 
-    let xMax = this.mainRect.left + this.mainRect.width
+    let xMax = mainRect.left + mainRect.width
     xArr.some((v, i) => {
       if (v > xMax) {
         return true
@@ -74,22 +67,23 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
   }
 
   drawXAxisLabel() {
+    let mainRect = this.getMainRect()
     let size = 12
     let tickSize = 4
-    let Y = this.mainRect.bottom
+    let Y = mainRect.bottom
     let xScale = scaleTime()
       .domain([
         new Date(this.dataSource[0][0]),
         new Date(this.dataSource[this.dataSource.length - 1][0])
       ])
-      .range([this.mainRect.left, this.mainRect.left + this.mainRect.width])
+      .range([mainRect.left, mainRect.left + mainRect.width])
 
     let ticks = xScale.ticks()
     let xArr = ticks.map((v, i) => {
       return xScale(v)
     })
 
-    let xMax = this.mainRect.left + this.mainRect.width
+    let xMax = mainRect.left + mainRect.width
     xArr.some((v, i) => {
       if (v > xMax) {
         return true
@@ -108,13 +102,15 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
   }
 
   drawYAxisLabel() {
-    let ticks = this.cartesian.yScale.ticks().slice(1)
+    let cartesian = this.getCartesianInfo()
+    let mainRect = this.getMainRect()
+    let ticks = cartesian.yScale.ticks().slice(1)
 
-    const X1 = this.mainRect.left
+    const X1 = mainRect.left
     let size = 10
 
     ticks.forEach((v, i) => {
-      let h = this.cartesian.yScale(v) + this.mainRect.bottom
+      let h = cartesian.yScale(v) + mainRect.bottom
       let mesh = createLabel(v.toString(), X1 - size, h, 0, size, new Color(0x444444))
       this.add(mesh)
     })
@@ -122,13 +118,14 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
 
   drawBasicLine() {
     this.buildVectors()
-
+    let cartesian = this.getCartesianInfo()
+    let mainRect = this.getMainRect()
     let material = new LineBasicMaterial({
       color: this.colors[2]
     })
 
     let arr = this.dataSource.reduce((accumulator, currentValue, index) => {
-      let h = this.cartesian.yScale(currentValue[1]) + this.mainRect.bottom
+      let h = cartesian.yScale(currentValue[1]) + mainRect.bottom
       let x = this.lineScale(index)
       if (index > 0 && index < this.dataSource.length) {
         return accumulator.concat(x, h, 0, x, h, 0)
@@ -143,20 +140,22 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
   }
 
   buildVectors() {
-    if (!this.lineScale) {
+    let cartesian = this.getCartesianInfo()
+    let mainRect = this.getMainRect();
+    // if (!this.lineScale) {
       this.lineScale = scaleLinear()
         .domain([0, this.dataSource.length])
-        .range([this.mainRect.left, this.mainRect.left + this.mainRect.width])
-    }
+        .range([mainRect.left, mainRect.left + mainRect.width])
+    // }
 
-    if (!this.vectors) {
+    // if (!this.vectors) {
       this.vectors = this.dataSource.reduce((accumulator, currentValue, index) => {
-        let h = this.cartesian.yScale(currentValue[1]) + this.mainRect.bottom
+        let h = cartesian.yScale(currentValue[1]) + mainRect.bottom
         let x = this.lineScale(index)
 
         return accumulator.concat(new Vector2(x, h))
       }, [])
-    }
+    // }
   }
 
   drawArea() {
@@ -165,10 +164,10 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
     //     .range(colors)
 
     this.buildVectors()
-
+    let mainRect = this.getMainRect();
     let shape = new Shape()
-    let end = new Vector2(this.mainRect.left + this.mainRect.width, this.mainRect.bottom)
-    let start = new Vector2(this.mainRect.left, this.mainRect.bottom)
+    let end = new Vector2(mainRect.left + mainRect.width, mainRect.bottom)
+    let start = new Vector2(mainRect.left, mainRect.bottom)
     shape.setFromPoints(this.vectors.concat(end, start))
 
     let geometry2 = new ShapeBufferGeometry(shape)

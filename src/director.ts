@@ -36,7 +36,7 @@ class Director {
   public size: ISize
   public scene: Scene
   public renderer: CanvasRenderer | SVGRenderer | WebGLRenderer
-  protected mainCamera: Camera
+  public mainCamera: Camera
   protected dimensionAlias: dimensionAlias
   protected rendererAlias: RendererAlias
   protected mainLight: Light
@@ -80,17 +80,43 @@ class Director {
         break
       default:
         this.renderer = new WebGLRenderer({ antialias: true })
+        
         break
     }
     this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setSize(this.size.width, this.size.height)
 
-    // let helper = new CameraHelper(this.mainCamera)
-    // this.scene.add(helper)
-    // let axishelper = new AxesHelper(200)
-    // this.scene.add(axishelper)
+    let helper = new CameraHelper(this.mainCamera)
+    this.scene.add(helper)
+    let axishelper = new AxesHelper(200)
+    this.scene.add(axishelper)
 
     container.appendChild(this.renderer.domElement)
+  }
+
+  updateSize(size: ISize){
+    this.size = {...size}
+    this.renderer.setSize(size.width, size.height ,false)
+    // this.updateCamera()
+    // this.scene.updateMatrix()
+    // this.scene.updateMatrixWorld(false)
+  }
+
+  updateCamera(){
+    let width = this.size.width,
+      height = this.size.height,
+      left = width / -2,
+      right = width / 2,
+      top = height / 2,
+      bottom = height / -2
+      this.mainCamera.left = left
+      this.mainCamera.right = right
+      this.mainCamera.top = top
+      this.mainCamera.bottom = bottom
+      this.mainCamera.position.set(right, top, 1)
+      this.mainCamera.updateMatrix()
+      this.mainCamera.updateMatrixWorld(true)
+     
   }
 
   getDomElement() {

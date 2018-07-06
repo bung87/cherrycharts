@@ -1,7 +1,7 @@
 import Chart from '../chart'
 
 import { DataSource } from '../components/bar'
-import { IRect, ICartesianInfo } from '../interfaces'
+import { IRect,ISize, ICartesianInfo } from '../interfaces'
 import { scaleLinear } from 'd3-scale'
 import { createBufferGeometry } from '../three-helper'
 
@@ -13,6 +13,7 @@ export default class CartesianChart extends Chart {
   mainRect: IRect
   constructor(dom: Element) {
     super(dom)
+    this.updateMainRect()
   }
   datum(data) {
     this.dataSource = data
@@ -21,12 +22,17 @@ export default class CartesianChart extends Chart {
     return this
   }
 
-  buildCartesianInfo(data: DataSource) {
-    let dataMax = data.reduce(function(max, arr) {
+  getMainRect(){
+    return this.mainRect
+  }
+
+  buildCartesianInfo(data?: DataSource) {
+    let theData = data? data :this.dataSource
+    let dataMax = theData.reduce(function(max, arr) {
       return Math.max(max, arr[1])
     }, -Infinity)
 
-    let dataMin = data.reduce(function(min, arr) {
+    let dataMin = theData.reduce(function(min, arr) {
       return Math.min(min, arr[1])
     }, Infinity)
     let yScale = scaleLinear()
@@ -39,6 +45,30 @@ export default class CartesianChart extends Chart {
       yScale
     }
   }
+
+  getCartesianInfo(){
+    return this.cartesian
+  }
+
+  updateMainRect(size?){
+    this.mainRect = {
+      top: 20,
+      right: 20,
+      bottom: 20,
+      left: 20
+    }
+    let theSize = size? size:this.size
+    this.size = {...theSize}
+    this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
+    this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
+  }
+
+  updateSize(size: ISize){
+    this.updateMainRect(size)
+    this.buildCartesianInfo()
+    
+  }
+
   drawAxisLine() {
     let material = new LineBasicMaterial({
       color: 0x000000
@@ -56,7 +86,8 @@ export default class CartesianChart extends Chart {
   }
 
   drawYSplitLine() {
-    let ticks = this.cartesian.yScale.ticks().slice(1)
+    let cartesian = this.getCartesianInfo()
+    let ticks = cartesian.yScale.ticks().slice(1)
 
     let material = new LineDashedMaterial({
       color: '#ccc',
@@ -70,7 +101,7 @@ export default class CartesianChart extends Chart {
     const X2 = this.mainRect.left + this.mainRect.width
 
     let arr = ticks.reduce((accumulator, currentValue) => {
-      let h = this.cartesian.yScale(currentValue) + this.mainRect.bottom
+      let h = cartesian.yScale(currentValue) + this.mainRect.bottom
       return accumulator.concat(X1, h, 0, X2, h, 0)
     }, [])
 

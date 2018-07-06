@@ -2,12 +2,12 @@
 import Director from './director'
 import { Object3D, Vector2 } from 'three'
 import { ICartesian, ISize } from './interfaces'
-import Debounce from 'debounce-decorator'
-import optimizedResize from './interactions/optimized-resize'
+import {throttle} from 'lodash'
 
 export interface IChart {
   populateOptions()
   draw()
+  updateSize(size: ISize)
 }
 
 export interface IChartInteractable {
@@ -41,20 +41,26 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   }
 
   init() {
-    optimizedResize.add(this.updateSize.bind(this))
+    window.addEventListener("resize",throttle(this.onResize.bind(this) ,300) )
     this.addTooltip()
     this.bindingEvents()
   }
 
-  updateSize() {
+  onResize() {
     let rect = this.container.getBoundingClientRect()
     let width = rect.width
     let height = rect.height
 
     if (this.size.width !== width || this.size.height !== height) {
-      this.director.size = this.size = { width, height }
-      this.director.renderer.setSize(width, height)
+      this.director.updateSize({width,height}) 
+      
+      this.updateSize({ width, height })
+      
+      // this.director.updateCamera()
+    
+      // this.director.scene.updateMatrixWorld(true)
       this.redraw()
+     
       this.director._render()
     }
   }
@@ -88,8 +94,24 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     throw new Error('Method not implemented.')
   }
 
+  updateSize(size: ISize): void {
+    throw new Error('Method not implemented.')
+  }
+  
+  clearThree(obj) {
+    while (obj.children.length > 0) {
+      this.clearThree(obj.children[0])
+      obj.remove(obj.children[0])
+    }
+    if (obj.geometry) obj.geometry.dispose()
+    if (obj.material) obj.material.dispose()
+    if (obj.texture) obj.texture.dispose()
+  }
+
   redraw(): void {
-    this.director.scene.remove(...this.children)
+    this.clearThree(this)
+    // this.updateMatrix()
+    // this.updateMatrixWorld(true)
     this.draw()
   }
 
