@@ -5,7 +5,7 @@ import { DataSource, Bar } from '../components/bar'
 import { IRect, ICartesian, ICartesianInfo } from '../interfaces'
 import { IChartInteractable } from '../chart'
 import CartesianChart from './cartesian-chart'
-
+import { scaleOrdinal, scaleBand } from 'd3-scale'
 
 export default class BarChart extends CartesianChart implements ICartesian, IChartInteractable {
   dataSource: DataSource
@@ -13,22 +13,32 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
   barGap: number
   bars: Bar
   type = 'BarChart'
-  mainRect: IRect
-  cartesian: ICartesianInfo
+
   protected onMouseMoveHandle
   constructor(dom: Element) {
     super(dom)
     this.barWidth = 20
     this.barGap = 10
 
-    this.mainRect = {
-      top: 20,
-      right: 20,
-      bottom: 20,
-      left: 20
-    }
-    this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
-    this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
+  }
+
+  buildCartesianInfo(data?: DataSource) {
+    let theData = data ? data : this.dataSource
+    let padding = 0.2 // this.barGap /this.mainRect.width
+    super.buildCartesianInfo(theData)
+    let keys =Array(theData.length).keys()
+
+    let domain = Array.from(keys)
+
+    let xScale = scaleBand()
+    .domain(domain)
+    .rangeRound([0,  this.mainRect.width])
+    .paddingInner(padding)
+    .paddingOuter(padding)
+    // this.setCartesianXscale(xScale)
+
+    this.cartesian.xScale = xScale
+
   }
 
   drawXAxisTick() {
@@ -38,10 +48,12 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     let Y = this.mainRect.bottom
     let arr = []
 
-    let offsetX = this.mainRect.left + this.barGap + this.barWidth / 2
-    let stepWidth = this.barWidth + this.barGap
+    // let offsetX = this.mainRect.left + this.barGap + this.barWidth / 2
+    
+    // let stepWidth = this.barWidth + this.barGap
+ 
     let xArr = this.dataSource.map((v, i) => {
-      return i * stepWidth + offsetX
+      return this.cartesian.xScale(i) + this.mainRect.left  + this.cartesian.xScale.bandwidth() / 2 // +this.cartesian.xScale.paddingOuter()*this.mainRect.width
     })
     let xMax = this.mainRect.left + this.mainRect.width
     xArr.some((v, i) => {
@@ -61,10 +73,13 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     let size = 12
     let tickSize = 4
     let Y = this.mainRect.bottom
-    let offsetX = this.mainRect.left + this.barGap + this.barWidth / 2
-    let stepWidth = this.barWidth + this.barGap
+    // let offsetX = this.mainRect.left + this.barGap + this.barWidth / 2
+    // let stepWidth = this.barWidth + this.barGap
+    // let xArr = this.dataSource.map((v, i) => {
+    //   return i * stepWidth + offsetX
+    // })
     let xArr = this.dataSource.map((v, i) => {
-      return i * stepWidth + offsetX
+      return this.cartesian.xScale(i) + this.mainRect.left  + this.cartesian.xScale.bandwidth() / 2  // + this.cartesian.xScale.paddingOuter()*this.mainRect.width
     })
     let xMax = this.mainRect.left + this.mainRect.width
     xArr.some((v, i) => {
@@ -113,32 +128,33 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
   bindingEvents() {
     this.onMouseMoveHandle = this.onMouseMove.bind(this)
     let domElement = this.director.getDomElement()
-    domElement.addEventListener('mousemove', this.onMouseMoveHandle,false)
+    domElement.addEventListener('mousemove', this.onMouseMoveHandle, false)
     domElement.onmouseout = domElement.onmouseleave = this.onMouseLeave.bind(this)
     // domElement.onmouseover = domElement.onmouseenter = this.onMouseEnter.bind(this)
   }
 
-  
   onMouseMove(event) {
     let barsLen = this.bars.children.length
     let domElement = this.director.getDomElement()
     let rect = domElement.getBoundingClientRect()
     this.mouse.x = event.clientX - rect.left
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
-    if(this.mouse.y< this.mainRect.bottom){
-      this.hideTooltip()
-      return 
-    }
-    let offsetXWithHalfWidth = this.mouse.x + this.barWidth / 2 
-    let finalIndex = this.bars.children.findIndex( (x)=>{
-      return offsetXWithHalfWidth >=  x.position.x && offsetXWithHalfWidth <= x.position.x  + this.barWidth
-    })
-    
-    if(finalIndex === -1){
+    if (this.mouse.y < this.mainRect.bottom) {
       this.hideTooltip()
       return
     }
-    
+    let offsetXWithHalfWidth = this.mouse.x + this.barWidth / 2
+    let finalIndex = this.bars.children.findIndex(x => {
+      return (
+        offsetXWithHalfWidth >= x.position.x && offsetXWithHalfWidth <= x.position.x + this.barWidth
+      )
+    })
+
+    if (finalIndex === -1) {
+      this.hideTooltip()
+      return
+    }
+
     let position = this.bars.children[finalIndex].position
     const keys = Array(barsLen).keys()
     if (!(finalIndex in Array.from(keys))) {
@@ -150,7 +166,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
     let [label, value] = this.dataSource[finalIndex]
     let tooltipRect = this.tooltip.getBoundingClientRect()
-    this.tooltip.style.left = `${position.x - tooltipRect.width/2}px`
+    this.tooltip.style.left = `${position.x - tooltipRect.width / 2}px`
     this.tooltip.style.top = `${event.clientY - tooltipRect.height}px`
     let html = `${label} ${value}`
     if (this.tooltip.innerHTML !== html) {
@@ -159,14 +175,14 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
   }
 
   onMouseEnter(event) {
-    if(event.relatedTarget === this.tooltip ){
+    if (event.relatedTarget === this.tooltip) {
       return
     }
     this.showTooltip()
   }
 
   onMouseLeave(event) {
-    if(event.relatedTarget === this.tooltip ){
+    if (event.relatedTarget === this.tooltip) {
       return
     }
     this.hideTooltip()

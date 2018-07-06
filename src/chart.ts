@@ -17,12 +17,18 @@ export interface IChartInteractable {
 class Chart extends Object3D implements IChart, IChartInteractable {
   colors = ['#3fb1e3', '#6be6c1', '#626c91', '#a0a7e6', '#c4ebad', '#96dee8'] // walden
   protected director: Director
-  protected size: ISize
+  
+  protected get size(): ISize {
+    return this._size;
+  }
+  protected set size(value: ISize) {
+    this._size = value;
+  }
   protected container: Element
   protected mouse: Vector2 = new Vector2()
   protected tooltip
-
   protected dataProcessed: Boolean
+  private _size: ISize;
   constructor(container: Element) {
     super()
     this.container = container

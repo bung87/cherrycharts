@@ -33,7 +33,13 @@ function isElementVisible(elm) {
 }
 
 class Director {
-  public size: ISize
+  
+  public get size(): ISize {
+    return this._size;
+  }
+  public set size(value: ISize) {
+    this._size = {...value};
+  }
   public scene: Scene
   public renderer: CanvasRenderer | SVGRenderer | WebGLRenderer
   public mainCamera: Camera
@@ -41,6 +47,7 @@ class Director {
   protected rendererAlias: RendererAlias
   protected mainLight: Light
   protected container: Element
+  private _size: ISize;
   constructor(container: Element) {
     let rect = container.getBoundingClientRect()
     this.size = {
@@ -86,12 +93,14 @@ class Director {
     this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setSize(this.size.width, this.size.height)
 
+    container.appendChild(this.renderer.domElement)
+  }
+
+  debug(){
     let helper = new CameraHelper(this.mainCamera)
     this.scene.add(helper)
     let axishelper = new AxesHelper(200)
     this.scene.add(axishelper)
-
-    container.appendChild(this.renderer.domElement)
   }
 
   updateSize(size: ISize){

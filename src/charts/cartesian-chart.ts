@@ -9,21 +9,31 @@ import { LineBasicMaterial, LineDashedMaterial, LineSegments } from 'three'
 
 export default class CartesianChart extends Chart {
   dataSource: DataSource
-  cartesian: ICartesianInfo
-  mainRect: IRect
+  
+  public get cartesian(): ICartesianInfo {
+    return this._cartesian;
+  }
+  public set cartesian(value: ICartesianInfo) {
+    this._cartesian = {...value};
+  }
+  public get mainRect(): IRect {
+    return this._mainRect;
+  }
+  public set mainRect(value: IRect) {
+    this._mainRect = {...value};
+  }
+  private _mainRect: IRect;
+  private _cartesian: ICartesianInfo;
   constructor(dom: Element) {
     super(dom)
     this.updateMainRect()
   }
+  
   datum(data) {
     this.dataSource = data
     this.buildCartesianInfo(data)
     this.dataProcessed = true
     return this
-  }
-
-  getMainRect(){
-    return this.mainRect
   }
 
   buildCartesianInfo(data?: DataSource) {
@@ -39,15 +49,12 @@ export default class CartesianChart extends Chart {
       .domain([dataMin, dataMax])
       .range([0, this.mainRect.height])
       .nice()
+
     this.cartesian = {
       dataMax,
       dataMin,
       yScale
     }
-  }
-
-  getCartesianInfo(){
-    return this.cartesian
   }
 
   updateMainRect(size?){
@@ -86,8 +93,7 @@ export default class CartesianChart extends Chart {
   }
 
   drawYSplitLine() {
-    let cartesian = this.getCartesianInfo()
-    let ticks = cartesian.yScale.ticks().slice(1)
+    let ticks = this.cartesian.yScale.ticks().slice(1)
 
     let material = new LineDashedMaterial({
       color: '#ccc',
@@ -101,7 +107,7 @@ export default class CartesianChart extends Chart {
     const X2 = this.mainRect.left + this.mainRect.width
 
     let arr = ticks.reduce((accumulator, currentValue) => {
-      let h = cartesian.yScale(currentValue) + this.mainRect.bottom
+      let h = this.cartesian.yScale(currentValue) + this.mainRect.bottom
       return accumulator.concat(X1, h, 0, X2, h, 0)
     }, [])
 

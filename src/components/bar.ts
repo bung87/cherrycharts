@@ -1,7 +1,7 @@
 import { Object3D, MeshBasicMaterial,PlaneGeometry, Mesh } from 'three'
 
 import { IRect,ICartesianInfo } from '../interfaces'
-import {scaleOrdinal} from 'd3-scale'
+import {scaleOrdinal,scaleLinear} from 'd3-scale'
 
 export type DataSource = Array<Array<any>>
 
@@ -12,12 +12,10 @@ export class Bar extends Object3D {
     let colorScale = scaleOrdinal()
       .domain([0, data.length])
       .range(colors)
-    // let xScale = scaleBand()
-    //   .domain([0, data.length])
-    //   .rangeRound([rect.left,rect.left+rect.width])
    
     data.some((v, i) => {
-      let x = i * (barWidth + barGap) + rect.left + barGap + barWidth / 2
+      // let x = i * (barWidth + barGap) + rect.left + barGap + barWidth / 2
+      let x = cartesian.xScale(i) + rect.left + cartesian.xScale.bandwidth() / 2 
       if (x>rect.left+rect.width){
         return true
       }
