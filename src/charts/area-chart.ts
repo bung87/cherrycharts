@@ -6,6 +6,7 @@ import {
   ShapeBufferGeometry,
   LineSegments,
   Mesh,
+  LineDashedMaterial,
   MeshBasicMaterial
 } from 'three'
 
@@ -16,15 +17,37 @@ import { scaleLinear, scaleTime } from 'd3-scale'
 import { timeMonth } from 'd3-time'
 import CartesianChart from './cartesian-chart'
 import { createBufferGeometry } from '../three-helper'
-import { IRect,ISize, ICartesian, ICartesianInfo } from '../interfaces'
+import { IRect, ISize, ICartesian, ICartesianInfo } from '../interfaces'
 import { IChartInteractable } from '../chart'
 
 export default class AreaChart extends CartesianChart implements ICartesian, IChartInteractable {
+  type = "AreaChart"
   dataSource: DataSource
-  lines: LineSegments
+
   protected onMouseMoveHandle
-  protected vectors: Array<Vector2>
-  protected lineScale
+  private _vectors: Array<Vector2>;
+  protected get vectors(): Array<Vector2> {
+    return this._vectors;
+  }
+  protected set vectors(value: Array<Vector2>) {
+    this._vectors = value;
+  }
+
+  protected get lineScale() {
+    return this._lineScale
+  }
+  protected set lineScale(value) {
+    this._lineScale = value
+  }
+  public get lines(): LineSegments {
+    return this._lines
+  }
+  public set lines(value: LineSegments) {
+    this._lines = value
+  }
+  private _lineScale
+  private _lines: LineSegments
+
   constructor(dom: Element) {
     super(dom)
   }
@@ -97,8 +120,6 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
   }
 
   drawYAxisLabel() {
-    
-
     let ticks = this.cartesian.yScale.ticks().slice(1)
 
     const X1 = this.mainRect.left
@@ -113,7 +134,6 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
 
   drawBasicLine() {
     this.buildVectors()
-    
 
     let material = new LineBasicMaterial({
       color: this.colors[2]
@@ -134,42 +154,36 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
     this.add(this.lines)
   }
 
-  updateSize(size: ISize){
+  updateSize(size: ISize) {
     this.updateMainRect(size)
-    this.buildVectors(true)
     this.buildCartesianInfo()
-    
+    this.buildVectors(true)
   }
 
+
   buildVectors(force?:Boolean) {
-    
-    if (!force || !this.lineScale) {
-    this.lineScale = scaleLinear()
-      .domain([0, this.dataSource.length])
-      .range([this.mainRect.left, this.mainRect.left + this.mainRect.width])
+    if (force || !this.lineScale) {
+      this.lineScale = scaleLinear()
+        .domain([0, this.dataSource.length])
+        .range([this.mainRect.left, this.mainRect.left + this.mainRect.width])
     }
 
-    if (!force || !this.vectors) {
-    this.vectors = this.dataSource.reduce((accumulator, currentValue, index) => {
-      let h = this.cartesian.yScale(currentValue[1]) + this.mainRect.bottom
-      let x = this.lineScale(index)
+    if (force || !this.vectors) {
+      this.vectors = this.dataSource.reduce((accumulator, currentValue, index) => {
+        let h = this.cartesian.yScale(currentValue[1]) + this.mainRect.bottom
+        let x = this.lineScale(index)
 
-      return accumulator.concat(new Vector2(x, h))
-    }, [])
+        return accumulator.concat(new Vector2(x, h))
+      }, [])
     }
   }
 
   drawArea() {
-    //   let colorScale = scaleOrdinal()
-    //     .domain([0, this.dataSource.length])
-    //     .range(colors)
-
     this.buildVectors()
     let shape = new Shape()
     let end = new Vector2(this.mainRect.left + this.mainRect.width, this.mainRect.bottom)
     let start = new Vector2(this.mainRect.left, this.mainRect.bottom)
     shape.setFromPoints(this.vectors.concat(end, start))
-
     let geometry2 = new ShapeBufferGeometry(shape)
 
     let material2 = new MeshBasicMaterial({ color: this.colors[0] })
@@ -183,23 +197,23 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
 
     this.add(m)
   }
-  draw() {
-    
-    this.drawAxis()
 
+  draw() {
+    this.drawAxis()
+    this.drawBasicLine()
     this.drawArea()
   }
 
   bindingEvents() {
     this.onMouseMoveHandle = this.onMouseMove.bind(this)
-    let domElement = this.director.getDomElement()
-    domElement.addEventListener('mousemove', this.onMouseMoveHandle)
-    domElement.onmouseout = domElement.onmouseleave = this.onMouseLeave.bind(this)
+    let canvas = this.director.getCanvas()
+    canvas.addEventListener('mousemove', this.onMouseMoveHandle)
+    canvas.onmouseout = canvas.onmouseleave = this.onMouseLeave.bind(this)
   }
 
   onMouseMove(event) {
-    let domElement = this.director.getDomElement()
-    let rect = domElement.getBoundingClientRect()
+    let canvas = this.director.getCanvas()
+    let rect = canvas.getBoundingClientRect()
     this.mouse.x = event.clientX - rect.left
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
     let offsetX = this.mouse.x

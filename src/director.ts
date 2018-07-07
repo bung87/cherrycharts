@@ -39,6 +39,7 @@ class Director {
   }
   public set size(value: ISize) {
     this._size = {...value};
+    // this._size = value
   }
   public scene: Scene
   public renderer: CanvasRenderer | SVGRenderer | WebGLRenderer
@@ -94,6 +95,7 @@ class Director {
     this.renderer.setSize(this.size.width, this.size.height)
 
     container.appendChild(this.renderer.domElement)
+    // this.debug()
   }
 
   debug(){
@@ -104,31 +106,31 @@ class Director {
   }
 
   updateSize(size: ISize){
-    this.size = {...size}
-    this.renderer.setSize(size.width, size.height ,false)
+    this.size = size
+    this.renderer.setSize(size.width, size.height ,false) // needs to be false here
     // this.updateCamera()
     // this.scene.updateMatrix()
-    // this.scene.updateMatrixWorld(false)
+    // this.scene.updateMatrixWorld(true)
   }
 
-  updateCamera(){
-    let width = this.size.width,
-      height = this.size.height,
-      left = width / -2,
-      right = width / 2,
-      top = height / 2,
-      bottom = height / -2
-      this.mainCamera.left = left
-      this.mainCamera.right = right
-      this.mainCamera.top = top
-      this.mainCamera.bottom = bottom
-      this.mainCamera.position.set(right, top, 1)
-      this.mainCamera.updateMatrix()
-      this.mainCamera.updateMatrixWorld(true)
+  // updateCamera(){
+  //   let width = this.size.width,
+  //     height = this.size.height,
+  //     left = width / -2,
+  //     right = width / 2,
+  //     top = height / 2,
+  //     bottom = height / -2
+  //     this.mainCamera.left = left
+  //     this.mainCamera.right = right
+  //     this.mainCamera.top = top
+  //     this.mainCamera.bottom = bottom
+  //     this.mainCamera.position.set(right, top, 1)
+  //     this.mainCamera.updateMatrix()
+  //     this.mainCamera.updateMatrixWorld(true)
      
-  }
+  // }
 
-  getDomElement() {
+  getCanvas() {
     return this.renderer.domElement
   }
 

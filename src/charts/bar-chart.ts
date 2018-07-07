@@ -19,26 +19,23 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     super(dom)
     this.barWidth = 20
     this.barGap = 10
-
   }
 
   buildCartesianInfo(data?: DataSource) {
     let theData = data ? data : this.dataSource
     let padding = 0.2 // this.barGap /this.mainRect.width
     super.buildCartesianInfo(theData)
-    let keys =Array(theData.length).keys()
+    let keys = Array(theData.length).keys()
 
     let domain = Array.from(keys)
 
     let xScale = scaleBand()
-    .domain(domain)
-    .rangeRound([0,  this.mainRect.width])
-    .paddingInner(padding)
-    .paddingOuter(padding)
-    // this.setCartesianXscale(xScale)
+      .domain(domain)
+      .rangeRound([0, this.mainRect.width])
+      .paddingInner(padding)
+      .paddingOuter(padding)
 
     this.cartesian.xScale = xScale
-
   }
 
   drawXAxisTick() {
@@ -49,11 +46,11 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     let arr = []
 
     // let offsetX = this.mainRect.left + this.barGap + this.barWidth / 2
-    
+
     // let stepWidth = this.barWidth + this.barGap
- 
+
     let xArr = this.dataSource.map((v, i) => {
-      return this.cartesian.xScale(i) + this.mainRect.left  + this.cartesian.xScale.bandwidth() / 2 // +this.cartesian.xScale.paddingOuter()*this.mainRect.width
+      return this.cartesian.xScale(i) + this.mainRect.left + this.cartesian.xScale.bandwidth() / 2 // +this.cartesian.xScale.paddingOuter()*this.mainRect.width
     })
     let xMax = this.mainRect.left + this.mainRect.width
     xArr.some((v, i) => {
@@ -79,7 +76,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     //   return i * stepWidth + offsetX
     // })
     let xArr = this.dataSource.map((v, i) => {
-      return this.cartesian.xScale(i) + this.mainRect.left  + this.cartesian.xScale.bandwidth() / 2  // + this.cartesian.xScale.paddingOuter()*this.mainRect.width
+      return this.cartesian.xScale(i) + this.mainRect.left + this.cartesian.xScale.bandwidth() / 2 // + this.cartesian.xScale.paddingOuter()*this.mainRect.width
     })
     let xMax = this.mainRect.left + this.mainRect.width
     xArr.some((v, i) => {
@@ -127,7 +124,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
   bindingEvents() {
     this.onMouseMoveHandle = this.onMouseMove.bind(this)
-    let domElement = this.director.getDomElement()
+    let domElement = this.director.getCanvas()
     domElement.addEventListener('mousemove', this.onMouseMoveHandle, false)
     domElement.onmouseout = domElement.onmouseleave = this.onMouseLeave.bind(this)
     // domElement.onmouseover = domElement.onmouseenter = this.onMouseEnter.bind(this)
@@ -135,7 +132,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
   onMouseMove(event) {
     let barsLen = this.bars.children.length
-    let domElement = this.director.getDomElement()
+    let domElement = this.director.getCanvas()
     let rect = domElement.getBoundingClientRect()
     this.mouse.x = event.clientX - rect.left
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)

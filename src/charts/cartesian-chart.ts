@@ -26,6 +26,12 @@ export default class CartesianChart extends Chart {
   private _cartesian: ICartesianInfo;
   constructor(dom: Element) {
     super(dom)
+    this.mainRect = {
+      top: 20,
+      right: 20,
+      bottom: 20,
+      left: 20
+    }
     this.updateMainRect()
   }
   
@@ -57,13 +63,8 @@ export default class CartesianChart extends Chart {
     }
   }
 
-  updateMainRect(size?){
-    this.mainRect = {
-      top: 20,
-      right: 20,
-      bottom: 20,
-      left: 20
-    }
+  updateMainRect(size?: ISize){
+    
     let theSize = size? size:this.size
     this.size = {...theSize}
     this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
@@ -71,7 +72,8 @@ export default class CartesianChart extends Chart {
   }
 
   updateSize(size: ISize){
-    this.updateMainRect(size)
+    let theSize = size? size:this.size
+    this.updateMainRect(theSize)
     this.buildCartesianInfo()
     
   }

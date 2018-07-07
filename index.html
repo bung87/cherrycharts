@@ -13,35 +13,11 @@
         width:100%;
         height:100%;
     }
-    .cherrycharts-tooltip{
-        box-sizing: border-box;
-        display:none;overflow: hidden;
-        position:fixed;
-        border:1px solid rgba(25,156,214,0.5);
-        padding:4px;
-        background:rgba(255,255,255,0.5);
-        font-size:12px;
-        border-radius:3px;
-        user-select: none;
-        
-    }
-    .cherrycharts-tooltip:before{
-    content:" ";
-    background: inherit; 
-    position: absolute;
-    left: -25px; 
-    right: 0;
-    top: -25px; 
-    z-index: -1;
-    bottom: 0;
-    box-shadow: inset 0 0 0 3000px rgba(255,255,255,0.3);
-    filter: blur(10px);
-    }
-    </style>
     
+    </style>
 </head>
 <body>
-    <div id="chart" style="width:500px;height:300px;"></div>
+    <div id="chart" style="height:300px;"></div>
     <div id="line-chart" style="height:300px;"></div>
     <div id="area-chart" style="height:300px;"></div>
     <script src="main.ts"></script>

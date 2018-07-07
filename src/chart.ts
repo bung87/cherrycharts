@@ -2,7 +2,9 @@
 import Director from './director'
 import { Object3D, Vector2 } from 'three'
 import { ICartesian, ISize } from './interfaces'
-import {throttle} from 'lodash'
+import { throttle, debounce } from 'lodash'
+import optimizedResize from './interactions/optimized-resize'
+import Debounce from 'debounce-decorator'
 
 export interface IChart {
   populateOptions()
@@ -17,18 +19,18 @@ export interface IChartInteractable {
 class Chart extends Object3D implements IChart, IChartInteractable {
   colors = ['#3fb1e3', '#6be6c1', '#626c91', '#a0a7e6', '#c4ebad', '#96dee8'] // walden
   protected director: Director
-  
+
   protected get size(): ISize {
-    return this._size;
+    return this._size
   }
   protected set size(value: ISize) {
-    this._size = value;
+    this._size = { ...value }
   }
   protected container: Element
   protected mouse: Vector2 = new Vector2()
   protected tooltip
   protected dataProcessed: Boolean
-  private _size: ISize;
+  private _size: ISize
   constructor(container: Element) {
     super()
     this.container = container
@@ -47,32 +49,30 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   }
 
   init() {
-    window.addEventListener("resize",throttle(this.onResize.bind(this) ,300) )
+    window.addEventListener('resize', throttle(this.onResize.bind(this), 250))
     this.addTooltip()
     this.bindingEvents()
   }
 
   onResize() {
-    let rect = this.container.getBoundingClientRect()
-    let width = rect.width
-    let height = rect.height
+    let { width, height } = this.container.getBoundingClientRect()
 
     if (this.size.width !== width || this.size.height !== height) {
-      this.director.updateSize({width,height}) 
-      
-      this.updateSize({ width, height })
-      
-      // this.director.updateCamera()
-    
-      // this.director.scene.updateMatrixWorld(true)
-      this.redraw()
-     
-      this.director._render()
+      this.resize()
     }
   }
 
+  @Debounce(300)
+  resize() {
+    let { width, height } = this.container.getBoundingClientRect()
+    this.director.updateSize({ width, height })
+    this.updateSize({ width, height })
+    this.redraw()
+    this.director._render()
+  }
+
   onMouseLeaveTooltip(event) {
-    if (event.relatedTarget === this.director.getDomElement()) {
+    if (event.relatedTarget === this.director.getCanvas()) {
       return
     }
     this.hideTooltip()
@@ -103,7 +103,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   updateSize(size: ISize): void {
     throw new Error('Method not implemented.')
   }
-  
+
   clearThree(obj) {
     while (obj.children.length > 0) {
       this.clearThree(obj.children[0])
