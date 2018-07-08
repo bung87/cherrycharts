@@ -52,6 +52,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     window.addEventListener('resize', throttle(this.onResize.bind(this), 250))
     this.addTooltip()
     this.bindingEvents()
+ 
   }
 
   onResize() {
