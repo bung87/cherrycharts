@@ -1,11 +1,11 @@
 import { Color, LineBasicMaterial, LineSegments } from 'three'
-import { createLabel } from '../utils'
-import { createBufferGeometry } from '../three-helper'
+import { createBufferGeometry,createLabel } from '../three-helper'
 import { DataSource, Bar } from '../components/bar'
 import { IRect, ICartesian, ICartesianInfo } from '../interfaces'
 import { IChartInteractable } from '../chart'
 import CartesianChart from './cartesian-chart'
 import { scaleOrdinal, scaleBand } from 'd3-scale'
+import {range} from '../utils'
 
 export default class BarChart extends CartesianChart implements ICartesian, IChartInteractable {
   dataSource: DataSource
@@ -25,12 +25,9 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     let theData = data ? data : this.dataSource
     let padding = 0.2 // this.barGap /this.mainRect.width
     super.buildCartesianInfo(theData)
-    let keys = Array(theData.length).keys()
-
-    let domain = Array.from(keys)
 
     let xScale = scaleBand()
-      .domain(domain)
+      .domain(range(theData.length))
       .rangeRound([0, this.mainRect.width])
       .paddingInner(padding)
       .paddingOuter(padding)

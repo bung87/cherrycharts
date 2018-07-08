@@ -10,13 +10,12 @@ import {
   MeshBasicMaterial
 } from 'three'
 
-import { createLabel } from '../utils'
 import { DataSource } from '../components/bar'
 
 import { scaleLinear, scaleTime } from 'd3-scale'
 import { timeMonth } from 'd3-time'
 import CartesianChart from './cartesian-chart'
-import { createBufferGeometry } from '../three-helper'
+import { createBufferGeometry,createLabel } from '../three-helper'
 import { IRect, ISize, ICartesian, ICartesianInfo } from '../interfaces'
 import { IChartInteractable } from '../chart'
 

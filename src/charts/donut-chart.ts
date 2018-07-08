@@ -1,8 +1,9 @@
 import Chart, { IChart } from '../chart'
 import { DataSource } from '../components/bar'
-import { RingGeometry, Vector2, MeshBasicMaterial, Mesh, Raycaster } from 'three'
+import { RingGeometry, Vector2, MeshBasicMaterial, Mesh } from 'three'
 import { IRect, ISize } from '../interfaces'
 import { scaleOrdinal } from 'd3-scale'
+import {range} from '../utils'
 
 function angle(start, end) {
   let diffX = end.x - start.x,
@@ -55,7 +56,7 @@ export default class DonutChart extends Chart implements IChart {
 
   drawDonut() {
     let colorScale = scaleOrdinal()
-      .domain([0, this.dataSource.length])
+      .domain(range(this.dataSource.length).reverse())
       .range(this.colors)
     let count = this.dataSource.reduce(function(acc, arr) {
       return acc + arr[1]

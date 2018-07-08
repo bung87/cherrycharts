@@ -1,7 +1,7 @@
 import { Object3D, MeshBasicMaterial,PlaneGeometry, Mesh } from 'three'
-
 import { IRect,ICartesianInfo } from '../interfaces'
 import {scaleOrdinal,scaleLinear} from 'd3-scale'
+import {range} from '../utils'
 
 export type DataSource = Array<Array<any>>
 
@@ -10,7 +10,7 @@ export class Bar extends Object3D {
     super()
     
     let colorScale = scaleOrdinal()
-      .domain([0, data.length])
+      .domain(range(data.length))
       .range(colors)
    
     data.some((v, i) => {
