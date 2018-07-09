@@ -3,6 +3,7 @@ import LineChart from './src/charts/line-chart'
 import AreaChart from './src/charts/area-chart'
 import DonutChart from './src/charts/donut-chart'
 import PieChart from './src/charts/pie-chart'
+import ScatterChart from './src/charts/scatter-chart'
 
 import './src/scss/cherrycharts.scss'
 ;(function(data) {
@@ -40,3 +41,9 @@ import './src/scss/cherrycharts.scss'
   let c = new PieChart(ele)
   c.datum(data).render()
 })(require('./data/bar-chart-data.json'))
+
+;(function(data) {
+  let ele = document.getElementById('scatter-chart')
+  let c = new ScatterChart(ele)
+  c.datum(data).render()
+})(require('./data/scatter-chart-data.json'))
