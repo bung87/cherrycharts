@@ -10,8 +10,10 @@ export interface IRect {
 }
 
 export interface ICartesianInfo {
-  dataMax: number
-  dataMin: number
+  dataMax?: number
+  dataMin?: number
+  yMax?: number
+  yMin?: number
   xScale?: Continuous
   yScale?: Continuous
 }

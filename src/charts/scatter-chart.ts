@@ -2,8 +2,6 @@ import {
   Color,
   LineBasicMaterial,
   Vector2,
-  Shape,
-  ShapeBufferGeometry,
   LineSegments,
   Mesh,
   MeshBasicMaterial,
@@ -11,9 +9,7 @@ import {
   CircleGeometry
 } from 'three'
 
-import { DataSource } from '../components/bar'
 import { scaleLinear, scaleTime, scaleOrdinal } from 'd3-scale'
-
 import { createBufferGeometry, createLabel } from '../three-helper'
 import { ISize, IRect } from '../interfaces'
 import Chart, { IChartInteractable } from '../chart'
@@ -24,9 +20,9 @@ export default class ScatterChart extends Chart implements IChartInteractable {
   dataSource: Array<any>
   xScale
   yScale
-  protected onMouseMoveHandle
-  colorScale: any
-
+  colorScale
+  protected onMouseMoveHandle:Function
+  
   public get mainRect(): IRect {
     return this._mainRect
   }

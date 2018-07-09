@@ -6,6 +6,7 @@ import { scaleOrdinal } from 'd3-scale'
 import {range,angle} from '../utils'
 
 export default class DonutChart extends Chart implements IChart {
+  type = 'DonutChart'
   dataSource: DataSource
   maxRadius: number
   angles: Array<any>

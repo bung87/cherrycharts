@@ -3,9 +3,10 @@ import { DataSource } from '../components/bar'
 import { Vector2, MeshBasicMaterial, Mesh, ShapeGeometry, Shape } from 'three'
 import { IRect, ISize } from '../interfaces'
 import { scaleOrdinal } from 'd3-scale'
-import {range,angle} from '../utils'
+import { range, angle } from '../utils'
 
 export default class PieChart extends Chart implements IChart {
+  type = 'PieChart'
   dataSource: DataSource
   maxRadius: number
   angles: Array<any>
@@ -65,7 +66,7 @@ export default class PieChart extends Chart implements IChart {
 
       let ang = startAngleDegree + angle
       let endAngleDegree = ang < 360 ? ang : ang - 360
-      let ret = { thetaStart, thetaLength, thetaEnd,startAngleDegree, endAngleDegree,angle }
+      let ret = { thetaStart, thetaLength, thetaEnd, startAngleDegree, endAngleDegree, angle }
       startPer += v
       startAngleDegree += angle
       return ret
@@ -74,7 +75,7 @@ export default class PieChart extends Chart implements IChart {
     let origin = new Vector2(this.mainRect.width / 2, this.mainRect.height / 2)
     this.angles.forEach((v, i) => {
       let circleShape = new Shape()
-      circleShape.arc(origin.x, origin.y,this.maxRadius,v.thetaStart,v.thetaEnd,false)
+      circleShape.arc(origin.x, origin.y, this.maxRadius, v.thetaStart, v.thetaEnd, false)
       circleShape.lineTo(origin.x, origin.y)
       let geometry = new ShapeGeometry(circleShape)
       let material = new MeshBasicMaterial({ color: colorScale(i) })
