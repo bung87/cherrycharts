@@ -12,7 +12,7 @@ import {
 } from 'three'
 
 import { DataSource } from '../components/bar'
-import { scaleLinear, scaleTime } from 'd3-scale'
+import { scaleLinear, scaleTime, scaleOrdinal } from 'd3-scale'
 
 import { createBufferGeometry, createLabel } from '../three-helper'
 import { ISize, IRect } from '../interfaces'
@@ -25,6 +25,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
   xScale
   yScale
   protected onMouseMoveHandle
+  colorScale: any
 
   public get mainRect(): IRect {
     return this._mainRect
@@ -47,30 +48,54 @@ export default class ScatterChart extends Chart implements IChartInteractable {
 
   buildScale(data?) {
     let theData = data ? data : this.dataSource
-    let xMax = theData.reduce(function(max, arr) {
-      return Math.max(max, arr.x)
-    }, -Infinity)
+    let xMax = Math.max.apply(
+      null,
+      theData.map(data =>
+        data.reduce(function(max, arr) {
+          return Math.max(max, arr.x)
+        }, -Infinity)
+      )
+    )
 
-    let xMin = theData.reduce(function(min, arr) {
-      return Math.min(min, arr.x)
-    }, Infinity)
+    let xMin = Math.min.apply(
+      null,
+      theData.map(data =>
+        data.reduce(function(min, arr) {
+          return Math.min(min, arr.x)
+        }, Infinity)
+      )
+    )
 
     this.xScale = scaleLinear()
       .domain([xMin, xMax])
       .range([0, this.mainRect.width])
       .nice()
-    console.log(xMin, xMax)
-    let yMax = theData.reduce(function(max, arr) {
-      return Math.max(max, arr.y)
-    }, -Infinity)
 
-    let yMin = theData.reduce(function(min, arr) {
-      return Math.min(min, arr.y)
-    }, Infinity)
+    let yMax = Math.max.apply(
+      null,
+      theData.map(data =>
+        data.reduce(function(max, arr) {
+          return Math.max(max, arr.y)
+        }, -Infinity)
+      )
+    )
+
+    let yMin = Math.min.apply(
+      null,
+      theData.map(data =>
+        data.reduce(function(min, arr) {
+          return Math.min(min, arr.y)
+        }, Infinity)
+      )
+    )
     this.yScale = scaleLinear()
       .domain([yMin, yMax])
       .range([0, this.mainRect.height])
       .nice()
+
+    this.colorScale = scaleOrdinal()
+      .domain(range(data.length))
+      .range(this.colors)
   }
 
   datum(data) {
@@ -151,17 +176,19 @@ export default class ScatterChart extends Chart implements IChartInteractable {
 
   draw() {
     this.drawAxis()
-    this.dataSource.forEach(v => {
-      let geometry = new CircleGeometry(5, 32)
-      let material = new MeshBasicMaterial({ color: this.colors[0] })
-      let circle = new Mesh(geometry, material)
-      geometry.translate(
-        this.xScale(v.x) + this.mainRect.left,
-        this.yScale(v.y) + this.mainRect.bottom,
-        0
-      )
-      this.add(circle)
-    })
+    this.dataSource.forEach((data, index) =>
+      data.forEach(v => {
+        let geometry = new CircleGeometry(5, 32)
+        let material = new MeshBasicMaterial({ color: this.colorScale(index) })
+        let circle = new Mesh(geometry, material)
+        geometry.translate(
+          this.xScale(v.x) + this.mainRect.left,
+          this.yScale(v.y) + this.mainRect.bottom,
+          0
+        )
+        this.add(circle)
+      })
+    )
 
     // this.drawArea()
   }
@@ -264,27 +291,34 @@ export default class ScatterChart extends Chart implements IChartInteractable {
     this.mouse.x = event.clientX - rect.left
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
 
-    let finalIndex = this.dataSource.findIndex(x => {
-      let vector = new Vector2(
-        this.xScale(x.x) + this.mainRect.left,
-        this.yScale(x.y) + this.mainRect.bottom
-      )
-      let dis = vector.distanceTo(this.mouse)
-      return dis <= 5
+    let seriesIndex, dataIndex
+    this.dataSource.some((data, index) => {
+      seriesIndex = index
+      let indx = data.findIndex(x => {
+        let vector = new Vector2(
+          this.xScale(x.x) + this.mainRect.left,
+          this.yScale(x.y) + this.mainRect.bottom
+        )
+        let dis = vector.distanceTo(this.mouse)
+        return dis <= 5
+      }, this)
+      dataIndex = indx
+      if (indx !== -1) {
+        return true
+      }
+
+      return false
     }, this)
-    if (finalIndex === -1) {
+    if (dataIndex === -1) {
       this.hideTooltip()
       return
     }
 
-    let finalX = this.xScale(this.dataSource[finalIndex].x) + this.mainRect.left
-    if (!(finalIndex in range(this.dataSource.length))) {
-      this.hideTooltip()
-      return
-    }
-    this.tooltip.style.display = 'block'
+    let finalX = this.xScale(this.dataSource[seriesIndex][dataIndex].x) + this.mainRect.left
 
-    let { x, y } = this.dataSource[finalIndex]
+    this.showTooltip()
+
+    let { x, y } = this.dataSource[seriesIndex][dataIndex]
     let tooltipRect = this.tooltip.getBoundingClientRect()
     this.tooltip.style.left = `${finalX - tooltipRect.width / 2}px`
     this.tooltip.style.top = `${event.clientY - tooltipRect.height}px`
