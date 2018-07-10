@@ -21,7 +21,7 @@ import './src/scss/cherrycharts.scss'
   let series = [data, data2]
   let ele = document.getElementById('line-chart')
   let c = new LineChart(ele)
-  c.datum(series).render()
+  c.setOptions({theme:{colors:["#626c91", "#a0a7e6", "#c4ebad"]}}).datum(series).render()
 })(require('./data/line-chart-data.json'))
 ;(function(data) {
   let data2 = data.map(v => {

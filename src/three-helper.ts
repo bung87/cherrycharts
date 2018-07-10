@@ -3,6 +3,7 @@ import {
   BufferGeometry,
   MeshBasicMaterial,
   Mesh,
+  Color,
   CanvasTexture,
   PlaneGeometry,
   ClampToEdgeWrapping,
@@ -36,7 +37,7 @@ export function createLabel(text, x, y, z, size, color) {
 
   context.textAlign = 'center'
   context.textBaseline = 'middle'
-  context.fillStyle = color.getStyle()
+  context.fillStyle = new Color(color).getStyle()
 
   context.fillText(text, canvas.width / 2, canvas.height / 2)
 

@@ -14,7 +14,7 @@ class LineChart extends AreaChart implements ICartesian {
 
     let colorScale = scaleOrdinal()
       .domain(range(this.dataSource[0].length))
-      .range(this.colors)
+      .range(this.options.theme.colors)
 
     this.dataSource.forEach((v, i) => {
      

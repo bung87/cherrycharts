@@ -91,14 +91,12 @@ export default class ScatterChart extends Chart implements IChartInteractable {
 
     this.colorScale = scaleOrdinal()
       .domain(range(data.length))
-      .range(this.colors)
+      .range(this.options.theme.colors)
   }
 
-  datum(data) {
-    this.dataSource = data
-    this.buildScale(data)
-    this.dataProcessed = true
-    return this
+  build(data?: any) {
+    let theData = data ? data : this.dataSource
+    this.buildScale(theData)
   }
 
   updateMainRect(size?: ISize) {
@@ -110,7 +108,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
 
   drawXAxisTick() {
     let material = new LineBasicMaterial({
-      color: 0x000000
+      color: this.options.theme.axisTick.style.color
     })
     let Y = this.mainRect.bottom
     let arr = []
@@ -145,7 +143,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
       if (x > xMax) {
         return true
       }
-      let mesh = createLabel(v, x, Y - tickSize - size / 2 - 2, 0, size, new Color(0x444444))
+      let mesh = createLabel(v, x, Y - tickSize - size / 2 - 2, 0, size, this.options.theme.labels.style.color)
       this.add(mesh)
       return false
     })
@@ -159,7 +157,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
 
     ticks.forEach((v, i) => {
       let h = this.yScale(v) + this.mainRect.bottom
-      let mesh = createLabel(v.toString(), X1 - size, h, 0, size, new Color(0x444444))
+      let mesh = createLabel(v.toString(), X1 - size, h, 0, size,  this.options.theme.labels.style.color)
       this.add(mesh)
     })
   }

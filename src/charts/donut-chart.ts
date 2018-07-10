@@ -41,7 +41,7 @@ export default class DonutChart extends Chart implements IChart {
   drawDonut() {
     let colorScale = scaleOrdinal()
       .domain(range(this.dataSource.length).reverse())
-      .range(this.colors)
+      .range(this.options.theme.colors)
     let count = this.dataSource.reduce(function(acc, arr) {
       return acc + arr[1]
     }, 0)
@@ -133,15 +133,13 @@ export default class DonutChart extends Chart implements IChart {
     this.hideTooltip()
   }
 
+  build(){
+    
+  }
+  
   draw() {
     this.drawDonut()
   }
 
-  datum(data) {
-    this.dataSource = data
-
-    // this.buildCartesianInfo(data)
-    this.dataProcessed = true
-    return this
-  }
+ 
 }

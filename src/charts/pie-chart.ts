@@ -41,7 +41,7 @@ export default class PieChart extends Chart implements IChart {
   drawPie() {
     let colorScale = scaleOrdinal()
       .domain(range(this.dataSource.length).reverse())
-      .range(this.colors)
+      .range(this.options.theme.colors)
     let count = this.dataSource.reduce(function(acc, arr) {
       return acc + arr[1]
     }, 0)
@@ -130,15 +130,11 @@ export default class PieChart extends Chart implements IChart {
     this.hideTooltip()
   }
 
+  build(){
+    
+  }
   draw() {
     this.drawPie()
   }
 
-  datum(data) {
-    this.dataSource = data
-
-    // this.buildCartesianInfo(data)
-    this.dataProcessed = true
-    return this
-  }
 }

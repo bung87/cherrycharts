@@ -31,7 +31,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
 
   drawXAxisTick() {
     let material = new LineBasicMaterial({
-      color: 0x000000
+      color: this.options.theme.axisTick.style.color
     })
     let Y = this.mainRect.bottom
     let arr = []
@@ -64,7 +64,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
     let tickFormat = this.cartesian.xScale.tickFormat("%B")
     let xArr = ticks.map((v, i) => {
       return this.cartesian.xScale(v)
-    }, this)
+    })
 
     let xMax = this.mainRect.left + this.mainRect.width
     xArr.some((v, i) => {
@@ -77,7 +77,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
         Y - tickSize - size / 2 - 2,
         0,
         size,
-        new Color(0x444444)
+        this.options.theme.labels.style.color
       )
       this.add(mesh)
       return false
@@ -92,7 +92,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
 
     ticks.forEach((v, i) => {
       let h = this.cartesian.yScale(v) + this.mainRect.bottom
-      let mesh = createLabel(v.toString(), X1 - size, h, 0, size, new Color(0x444444))
+      let mesh = createLabel(v.toString(), X1 - size, h, 0, size,  this.options.theme.labels.style.color)
       this.add(mesh)
     })
   }
@@ -148,7 +148,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
 
     let colorScale = scaleOrdinal()
       .domain(range(this.dataSource[0].length))
-      .range(this.colors)
+      .range(this.options.theme.colors)
 
     this.dataSource.forEach((v, i) => {
       let vectors = v.reduce((accumulator, currentValue, index) => {
@@ -220,7 +220,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
     let finalIndex = data.findIndex(x => {
       let dateX = this.cartesian.xScale(new Date(x[0]))
       return Math.floor(dateX) === this.mouse.x || Math.round(dateX) === this.mouse.x
-    }, this)
+    })
  
     if (finalIndex === -1) {
       this.hideTooltip()

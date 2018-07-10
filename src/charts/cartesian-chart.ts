@@ -1,7 +1,7 @@
 import Chart from '../chart'
 
 import { DataSource } from '../components/bar'
-import { IRect,ISize, ICartesianInfo } from '../interfaces'
+import { IRect, ISize, ICartesianInfo } from '../interfaces'
 import { scaleLinear } from 'd3-scale'
 import { createBufferGeometry } from '../three-helper'
 
@@ -9,21 +9,21 @@ import { LineBasicMaterial, LineDashedMaterial, LineSegments } from 'three'
 
 export default class CartesianChart extends Chart {
   dataSource: DataSource
-  
+
   public get cartesian(): ICartesianInfo {
-    return this._cartesian;
+    return this._cartesian
   }
   public set cartesian(value: ICartesianInfo) {
-    this._cartesian = {...value};
+    this._cartesian = { ...value }
   }
   public get mainRect(): IRect {
-    return this._mainRect;
+    return this._mainRect
   }
   public set mainRect(value: IRect) {
-    this._mainRect = {...value};
+    this._mainRect = { ...value }
   }
-  private _mainRect: IRect;
-  private _cartesian: ICartesianInfo;
+  private _mainRect: IRect
+  private _cartesian: ICartesianInfo
   constructor(dom: Element) {
     super(dom)
     this.mainRect = {
@@ -34,16 +34,14 @@ export default class CartesianChart extends Chart {
     }
     this.updateMainRect()
   }
-  
-  datum(data) {
-    this.dataSource = data
-    this.buildCartesianInfo(data)
-    this.dataProcessed = true
-    return this
+
+  build(data?: DataSource) {
+    let theData = data ? data : this.dataSource
+    this.buildCartesianInfo(theData)
   }
 
   buildCartesianInfo(data?: DataSource) {
-    let theData = data? data :this.dataSource
+    let theData = data ? data : this.dataSource
     let dataMax = theData.reduce(function(max, arr) {
       return Math.max(max, arr[1])
     }, -Infinity)
@@ -63,19 +61,17 @@ export default class CartesianChart extends Chart {
     }
   }
 
-  updateMainRect(size?: ISize){
-    
-    let theSize = size? size:this.size
-    this.size = {...theSize}
+  updateMainRect(size?: ISize) {
+    let theSize = size ? size : this.size
+    this.size = { ...theSize }
     this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
     this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
   }
 
-  updateSize(size: ISize){
-    let theSize = size? size:this.size
+  updateSize(size: ISize) {
+    let theSize = size ? size : this.size
     this.updateMainRect(theSize)
     this.buildCartesianInfo()
-    
   }
 
   drawAxisLine() {
@@ -98,9 +94,9 @@ export default class CartesianChart extends Chart {
     let ticks = this.cartesian.yScale.ticks().slice(1)
 
     let material = new LineDashedMaterial({
-      color: '#ccc',
-      dashSize: 5,
-      gapSize: 5,
+      color: this.options.theme.splitLine.style.color,
+      dashSize: this.options.theme.splitLine.style.dashSize,
+      gapSize: this.options.theme.splitLine.style.gapSize,
       fog: false,
       depthWrite: false
     })

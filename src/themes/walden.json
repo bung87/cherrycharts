@@ -1,0 +1,25 @@
+{
+  "colors": ["#3fb1e3", "#6be6c1", "#626c91", "#a0a7e6", "#c4ebad", "#96dee8"],
+  "labels": {
+    "style": {
+      "color": "#444444"
+    }
+  },
+  "axisLine": {
+    "style": {
+      "color": "#333333"
+    }
+  },
+  "axisTick": {
+    "style": {
+      "color": "#333333"
+    }
+  },
+  "splitLine": {
+    "style": {
+      "color": "#cccccc",
+      "dashSize": 5,
+      "gapSize": 5
+    }
+  }
+}

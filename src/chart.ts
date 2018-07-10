@@ -2,13 +2,17 @@
 import Director from './director'
 import { Object3D, Vector2 } from 'three'
 import { ICartesian, ISize } from './interfaces'
-import { throttle, debounce } from 'lodash'
+import { throttle, defaultsDeep } from 'lodash'
 import optimizedResize from './interactions/optimized-resize'
 import Debounce from 'debounce-decorator'
+import * as themes from './themes'
+
+const defualtTheme = 'walden'
 
 export interface IChart {
   populateOptions()
   draw()
+  build(data: any)
   updateSize(size: ISize)
 }
 
@@ -17,7 +21,7 @@ export interface IChartInteractable {
 }
 
 class Chart extends Object3D implements IChart, IChartInteractable {
-  colors = ['#3fb1e3', '#6be6c1', '#626c91', '#a0a7e6', '#c4ebad', '#96dee8'] // walden
+  dataSource
   protected director: Director
 
   protected get size(): ISize {
@@ -30,7 +34,18 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   protected mouse: Vector2 = new Vector2()
   protected tooltip
   protected dataProcessed: Boolean
+
   private _size: ISize
+
+  private _options = { theme: defualtTheme }
+
+  public get options() {
+    return this._options
+  }
+  public set options(value) {
+    this._options = {...value}
+  }
+
   constructor(container: Element) {
     super()
     this.container = container
@@ -39,6 +54,11 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this.size = this.director.size
     this.director.scene.add(this)
     this.init()
+  }
+
+  public setOptions(value) {
+    this.options = value
+    return this
   }
 
   addTooltip() {
@@ -52,7 +72,6 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     window.addEventListener('resize', throttle(this.onResize.bind(this), 250))
     this.addTooltip()
     this.bindingEvents()
- 
   }
 
   onResize() {
@@ -94,6 +113,23 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   }
 
   populateOptions() {
+    if (typeof this.options.theme === 'string') {
+      let themeName = this.options.theme
+      this.options.theme = themes[themeName]
+    } else {
+      defaultsDeep(this.options.theme, themes[defualtTheme])
+    }
+  }
+
+  datum(data) {
+    this.dataSource = data
+    this.populateOptions()
+    this.build(data)
+    this.dataProcessed = true
+    return this
+  }
+
+  build(data) {
     throw new Error('Method not implemented.')
   }
 

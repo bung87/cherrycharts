@@ -37,7 +37,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
   drawXAxisTick() {
     let material = new LineBasicMaterial({
-      color: 0x000000
+      color: this.options.theme.axisTick.style.color
     })
     let Y = this.mainRect.bottom
     let arr = []
@@ -86,7 +86,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
         Y - tickSize - size / 2 - 2,
         0,
         size,
-        new Color(0x444444)
+        this.options.theme.labels.style.color
       )
       this.add(mesh)
       return false
@@ -101,7 +101,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
     ticks.forEach((v, i) => {
       let h = this.cartesian.yScale(v) + this.mainRect.bottom
-      let mesh = createLabel(v.toString(), X1 - size, h, 0, size, new Color(0x444444))
+      let mesh = createLabel(v.toString(), X1 - size, h, 0, size,  this.options.theme.labels.style.color)
       this.add(mesh)
     })
   }
@@ -112,7 +112,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
       this.dataSource,
       this.cartesian,
       this.mainRect,
-      this.colors,
+      this.options.theme.colors,
       this.barWidth,
       this.barGap
     )
