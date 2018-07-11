@@ -54,7 +54,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
       if (v > xMax) {
         return true
       }
-      arr.push(v, Y, 0, v, Y - 4, 0)
+      arr.push(v, Y, 0, v, Y - this.options.theme.axisTick.style.length, 0)
       return false
     })
 
@@ -64,8 +64,8 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
   }
 
   drawXAxisLabel() {
-    let size = 12
-    let tickSize = 4
+    let size = this.options.theme.labels.style.fontSize
+    let tickSize = this.options.theme.axisTick.style.length
     let Y = this.mainRect.bottom
     // let offsetX = this.mainRect.left + this.barGap + this.barWidth / 2
     // let stepWidth = this.barWidth + this.barGap
@@ -97,7 +97,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     let ticks = this.cartesian.yScale.ticks().slice(1)
 
     const X1 = this.mainRect.left
-    let size = 10
+    let size = this.options.theme.labels.style.fontSize
 
     ticks.forEach((v, i) => {
       let h = this.cartesian.yScale(v) + this.mainRect.bottom

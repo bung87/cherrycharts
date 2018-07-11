@@ -121,7 +121,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
         return true
       }
 
-      arr.push(x, Y, 0, x, Y - 4, 0)
+      arr.push(x, Y, 0, x, Y - this.options.theme.axisTick.style.length, 0)
       return false
     })
     let geometry = createBufferGeometry(arr, 'xAxisTick')
@@ -131,8 +131,8 @@ export default class ScatterChart extends Chart implements IChartInteractable {
   }
 
   drawXAxisLabel() {
-    let size = 12
-    let tickSize = 4
+    let size = this.options.theme.labels.style.fontSize
+    let tickSize = this.options.theme.axisTick.style.length
     let Y = this.mainRect.bottom
 
     let xMax = this.mainRect.left + this.mainRect.width
@@ -153,7 +153,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
     let ticks = this.yScale.ticks().slice(1)
 
     const X1 = this.mainRect.left
-    let size = 10
+    let size = this.options.theme.labels.style.fontSize
 
     ticks.forEach((v, i) => {
       let h = this.yScale(v) + this.mainRect.bottom
@@ -169,10 +169,11 @@ export default class ScatterChart extends Chart implements IChartInteractable {
   }
 
   draw() {
+    let radius = this.options.theme.scatter.radius
     this.drawAxis()
     this.dataSource.forEach((data, index) =>
       data.forEach(v => {
-        let geometry = new CircleGeometry(5, 32)
+        let geometry = new CircleGeometry(radius, 32)
         let material = new MeshBasicMaterial({ color: this.colorScale(index) })
         let circle = new Mesh(geometry, material)
         geometry.translate(
@@ -189,7 +190,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
 
   drawAxisLine() {
     let material = new LineBasicMaterial({
-      color: 0x000000
+      color: this.options.theme.axisLine.style.color
     })
     let lineWidth = 1 / window.devicePixelRatio
 
@@ -207,9 +208,9 @@ export default class ScatterChart extends Chart implements IChartInteractable {
     let ticks = this.xScale.ticks().slice(1)
 
     let material = new LineDashedMaterial({
-      color: '#ccc',
-      dashSize: 5,
-      gapSize: 5,
+      color: this.options.theme.splitLine.style.color,
+      dashSize: this.options.theme.splitLine.style.dashSize,
+      gapSize: this.options.theme.splitLine.style.gapSize,
       fog: false,
       depthWrite: false
     })
@@ -232,9 +233,9 @@ export default class ScatterChart extends Chart implements IChartInteractable {
     let ticks = this.yScale.ticks().slice(1)
 
     let material = new LineDashedMaterial({
-      color: '#ccc',
-      dashSize: 5,
-      gapSize: 5,
+      color: this.options.theme.splitLine.style.color,
+      dashSize: this.options.theme.splitLine.style.dashSize,
+      gapSize: this.options.theme.splitLine.style.gapSize,
       fog: false,
       depthWrite: false
     })
@@ -280,6 +281,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
   }
 
   onMouseMove(event) {
+    let radius = this.options.theme.scatter.radius
     let canvas = this.director.getCanvas()
     let rect = canvas.getBoundingClientRect()
     this.mouse.x = event.clientX - rect.left
@@ -294,7 +296,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
           this.yScale(x.y) + this.mainRect.bottom
         )
         let dis = vector.distanceTo(this.mouse)
-        return dis <= 5
+        return dis <= radius
       }, this)
       dataIndex = indx
       if (indx !== -1) {

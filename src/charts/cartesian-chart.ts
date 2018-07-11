@@ -76,7 +76,7 @@ export default class CartesianChart extends Chart {
 
   drawAxisLine() {
     let material = new LineBasicMaterial({
-      color: 0x000000
+      color: this.options.theme.axisLine.style.color
     })
     let lineWidth = 1 / window.devicePixelRatio
 
