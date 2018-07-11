@@ -238,9 +238,9 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       let [label, value] = v[finalIndex]
       html += `${label} ${value}<br>`
     })
-
+    let offsetX = rect.left + this.mouse.x
     let tooltipRect = this.tooltip.getBoundingClientRect()
-    this.tooltip.style.left = `${this.mouse.x - tooltipRect.width / 2}px`
+    this.tooltip.style.left = `${offsetX - tooltipRect.width / 2}px`
     this.tooltip.style.top = `${event.clientY - tooltipRect.height}px`
 
     if (this.tooltip.innerHTML !== html) {

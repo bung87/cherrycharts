@@ -131,6 +131,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     let barsLen = this.bars.children.length
     let domElement = this.director.getCanvas()
     let rect = domElement.getBoundingClientRect()
+
     this.mouse.x = event.clientX - rect.left
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
     if (this.mouse.y < this.mainRect.bottom) {
@@ -157,10 +158,10 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     }
 
     this.showTooltip()
-
+    let offsetX = rect.left + position.x
     let [label, value] = this.dataSource[finalIndex]
     let tooltipRect = this.tooltip.getBoundingClientRect()
-    this.tooltip.style.left = `${position.x - tooltipRect.width / 2}px`
+    this.tooltip.style.left = `${offsetX - tooltipRect.width / 2}px`
     this.tooltip.style.top = `${event.clientY - tooltipRect.height}px`
     let html = `${label} ${value}`
     if (this.tooltip.innerHTML !== html) {

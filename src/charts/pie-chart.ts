@@ -112,10 +112,10 @@ export default class PieChart extends Chart implements IChart {
     }
     let finalIndex = Math.abs(index - (this.dataSource.length - 1)) || 0
     this.tooltip.style.display = 'block'
-
+    let offsetX = rect.left + origin.x
     let [label, value] = this.dataSource[finalIndex]
     let tooltipRect = this.tooltip.getBoundingClientRect()
-    this.tooltip.style.left = `${origin.x - tooltipRect.width / 2}px`
+    this.tooltip.style.left = `${offsetX - tooltipRect.width / 2}px`
     this.tooltip.style.top = `${event.clientY - tooltipRect.height}px`
     let html = `${label} ${value}`
     if (this.tooltip.innerHTML !== html) {

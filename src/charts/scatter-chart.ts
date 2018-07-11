@@ -311,12 +311,12 @@ export default class ScatterChart extends Chart implements IChartInteractable {
     }
 
     let finalX = this.xScale(this.dataSource[seriesIndex][dataIndex].x) + this.mainRect.left
-
+    let offsetX = rect.left + finalX
     this.showTooltip()
 
     let { x, y } = this.dataSource[seriesIndex][dataIndex]
     let tooltipRect = this.tooltip.getBoundingClientRect()
-    this.tooltip.style.left = `${finalX - tooltipRect.width / 2}px`
+    this.tooltip.style.left = `${offsetX - tooltipRect.width / 2}px`
     this.tooltip.style.top = `${event.clientY - tooltipRect.height}px`
     let html = `${x} ${y}`
     if (this.tooltip.innerHTML !== html) {

@@ -36,20 +36,19 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   protected dataProcessed: Boolean
 
   private _size: ISize
-
+  private isResponsive:boolean
   private _options = { theme: defualtTheme }
 
   public get options() {
     return this._options
   }
   public set options(value) {
-    this._options = {...value}
+    this._options = { ...value }
   }
 
   constructor(container: Element) {
     super()
     this.container = container
-
     this.director = new Director(container)
     this.size = this.director.size
     this.director.scene.add(this)
@@ -69,7 +68,11 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   }
 
   init() {
-    window.addEventListener('resize', throttle(this.onResize.bind(this), 250))
+    this.isResponsive = this.getResponsive()
+    if (this.isResponsive){
+      window.addEventListener('resize', throttle(this.onResize.bind(this), 250))
+    }
+    
     this.addTooltip()
     this.bindingEvents()
   }
@@ -164,6 +167,15 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     }
     this.draw()
     this.director._render()
+  }
+
+  private getResponsive() {
+    let responsive =
+      this.container.style.width === '' ||
+      this.container.style.height === '' ||
+      this.container.style.width.indexOf('%') !== -1 ||
+      this.container.style.height.indexOf('%') !== -1
+    return responsive
   }
 }
 export default Chart
