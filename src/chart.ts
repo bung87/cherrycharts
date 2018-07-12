@@ -24,7 +24,7 @@ export interface IChartInteractable {
 }
 
 class Chart extends Object3D implements IChart, IChartInteractable {
-  dataSource
+  
   xUnit
   xInterval
   xFormat
@@ -45,6 +45,13 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   protected dataProcessed: Boolean
   protected timeStart
   protected timeEnd
+  private _dataSource;
+  public get dataSource() {
+    return this._dataSource;
+  }
+  public set dataSource(value) {
+    this._dataSource = [...value];
+  }
   private _useTimeRange: boolean = false
   protected get useTimeRange(): boolean {
     return this._useTimeRange
@@ -64,13 +71,34 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this._options = { ...value }
   }
 
-  constructor(container: Element) {
+  constructor(container?: Element) {
     super()
+    if (container) {
+      this.container = container
+      this.director = new Director(container)
+      this.size = this.director.size
+      this.director.scene.add(this)
+      this.init()
+    }
+  }
+
+  renderTo(container: Element) {
     this.container = container
     this.director = new Director(container)
     this.size = this.director.size
     this.director.scene.add(this)
     this.init()
+    this.render()
+  }
+
+  clone() {
+    this.clearThree(this)
+    this.container = null
+    this.dataSource = []
+    this.dataProcessed = false
+    this.director = null
+    this.size = null
+    return this
   }
 
   public setOptions(value) {
@@ -169,9 +197,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
 
   datum(data) {
     this.dataSource = data
-    this.populateOptions()
-    this.build(data)
-    this.dataProcessed = true
+
     return this
   }
 
@@ -205,9 +231,9 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   }
 
   render() {
-    if (!this.dataProcessed) {
-      throw new Error('no data')
-    }
+    this.populateOptions()
+    this.build(this.dataSource)
+    this.dataProcessed = true
     this.draw()
     this.director._render()
   }
@@ -221,4 +247,5 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     return responsive
   }
 }
+
 export default Chart

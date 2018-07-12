@@ -6,6 +6,7 @@ import PieChart from './src/charts/pie-chart'
 import ScatterChart from './src/charts/scatter-chart'
 
 import './src/scss/cherrycharts.scss'
+
 ;(function(data) {
   let ele = document.getElementById('bar-chart-responsive')
   let c = new BarChart(ele)
@@ -21,18 +22,39 @@ import './src/scss/cherrycharts.scss'
   let series = [data, data2]
   let ele = document.getElementById('line-chart')
   let c = new LineChart(ele)
-  c.setOptions({theme:{colors:["#626c91", "#a0a7e6", "#c4ebad"]}}).datum(series).render()
+  c.setOptions({theme:{colors:["#626c91", "#a0a7e6", "#c4ebad"]}})
+  .datum(series)
+  .render()
 })(require('./data/line-chart-data.json'))
 
 ;(function( data) {
- 
+  let data1 = data[0]
+  let data2 = data1.map(v => {
+    
+    let v2 = parseFloat( (v + 100 + Math.random() * v).toFixed(2)) 
+    return  v2
+  })
+  let series = [data1, data2]
   let ele = document.getElementById('line-chart2')
-  let c = new LineChart(ele)
+  let c = new LineChart()
   c.setOptions({theme:{colors:["#626c91", "#a0a7e6", "#c4ebad"]}})
   .timeRange(new Date("7/30/2015"),new Date("7/2/2018"),"day")
   .xLabel("month",3)
-  .datum(data)
-  .render()
+
+  c
+  .datum(series)
+  .renderTo(ele)
+
+  let data3 = data1.map(v => {
+    let v2 = parseFloat( (v + 500 + Math.random() * v).toFixed(2)) 
+    return  v2
+  })
+  let ele3 = document.getElementById('line-chart3')
+  let series3 = [data1, data3]
+  c.clone()
+  .datum(series3)
+  .renderTo(ele3)
+
 })(require('./data/line-chart-data2.json'))
 
 ;(function(data) {

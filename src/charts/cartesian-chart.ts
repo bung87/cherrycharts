@@ -24,7 +24,7 @@ export default class CartesianChart extends Chart {
   }
   private _mainRect: IRect
   private _cartesian: ICartesianInfo
-  constructor(dom: Element) {
+  constructor(dom?: Element) {
     super(dom)
     this.mainRect = {
       top: 20,
@@ -32,10 +32,11 @@ export default class CartesianChart extends Chart {
       bottom: 20,
       left: 20
     }
-    this.updateMainRect()
+   
   }
 
   build(data?: DataSource) {
+    this.updateMainRect()
     let theData = data ? data : this.dataSource
     this.buildCartesianInfo(theData)
   }
