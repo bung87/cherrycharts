@@ -33,3 +33,7 @@ export function binarySearch(array, pred) {
   }
   return hi!==array.length ? hi:-1 ;
 }
+
+export function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}

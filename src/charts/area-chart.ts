@@ -12,7 +12,8 @@ import {
 import { DataSource } from '../components/bar'
 
 import { scaleLinear, scaleOrdinal, scaleTime } from 'd3-scale'
-import { timeMonth, timeDay } from 'd3-time'
+// import { timeMonth, timeDay } from 'd3-time'
+
 import CartesianChart from './cartesian-chart'
 import { createBufferGeometry, createLabel } from '../three-helper'
 import { ISize, ICartesian } from '../interfaces'
@@ -22,7 +23,6 @@ import { range, binarySearch } from '../utils'
 export default class AreaChart extends CartesianChart implements ICartesian, IChartInteractable {
   type = 'AreaChart'
   dataSource: DataSource
-
   protected onMouseMoveHandle
 
   constructor(dom: Element) {
@@ -36,7 +36,13 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
     let Y = this.mainRect.bottom
     let arr = []
 
-    let ticks = this.cartesian.xScale.ticks()
+    let ticks
+    if(this.useTimeRange){
+      ticks = this.cartesian.xScale.ticks(this.labelUnit.every(this.labelInterval))
+    }else{
+      ticks = this.cartesian.xScale.ticks()
+    }
+     
     let xArr = ticks.map((v, i) => {
       return this.cartesian.xScale(v)
     }, this)
@@ -62,8 +68,8 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
 
     let ticks, tickFormat
     if (this.useTimeRange) {
-      ticks = this.cartesian.xScale.ticks()
-      tickFormat = this.cartesian.xScale.tickFormat('%B')
+      ticks = this.cartesian.xScale.ticks(this.labelUnit.every(this.labelInterval))
+      tickFormat = this.cartesian.xScale.tickFormat(this.labelFormat)
     } else {
       ticks = this.cartesian.xScale.ticks()
       tickFormat = this.cartesian.xScale.tickFormat('%B')
@@ -189,7 +195,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       .domain(range(this.dataSource[0].length))
       .range(this.options.theme.colors)
       let useTimeRange = this.useTimeRange
-    let ticks = useTimeRange ? this.cartesian.xScale.ticks() : null
+    let ticks = useTimeRange ? this.cartesian.xScale.ticks(this.xUnit.every(this.xInterval)) : null
     this.dataSource.forEach((v, i) => {
       let vectors = v.reduce((accumulator, currentValue, index) => {
         let value = useTimeRange ? currentValue : currentValue[1]
@@ -259,9 +265,11 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
 
     let data = this.dataSource[0]
-    let ticks = this.cartesian.xScale.ticks(timeDay)
+    
     let finalIndex 
+    let ticks
     if(this.useTimeRange){
+      ticks = this.cartesian.xScale.ticks(this.xUnit.every(this.xInterval))
       finalIndex = binarySearch(ticks, x => {
         let dateX = this.cartesian.xScale(x)
         return Math.floor(dateX) >= this.mouse.x || Math.round(dateX) >= this.mouse.x
@@ -288,7 +296,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
     this.tooltip.style.display = 'block'
     let html = ''
     if(this.useTimeRange){
-      let tickFormat = this.cartesian.xScale.tickFormat(timeDay,'%b %d')
+      let tickFormat = this.cartesian.xScale.tickFormat(this.xUnit,this.xFormat)
       this.dataSource.forEach( (v,i) => {
         let label = tickFormat(ticks[finalIndex])
         let value = v[finalIndex]

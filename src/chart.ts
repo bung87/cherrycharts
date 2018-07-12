@@ -6,8 +6,11 @@ import { throttle, defaultsDeep } from 'lodash'
 import optimizedResize from './interactions/optimized-resize'
 import Debounce from 'debounce-decorator'
 import * as themes from './themes'
+import * as d3time from 'd3-time'
+import { capitalize } from './utils'
 
 const defualtTheme = 'walden'
+type TimeUnit = 'year' | 'month' | 'week' | 'day' | 'hour' | 'minute' | 'second' | 'millisecond'
 
 export interface IChart {
   populateOptions()
@@ -22,6 +25,12 @@ export interface IChartInteractable {
 
 class Chart extends Object3D implements IChart, IChartInteractable {
   dataSource
+  xUnit
+  xInterval
+  xFormat
+  labelUnit
+  labelFormat
+  labelInterval
   protected director: Director
 
   protected get size(): ISize {
@@ -36,17 +45,16 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   protected dataProcessed: Boolean
   protected timeStart
   protected timeEnd
-  private _useTimeRange: boolean = false;
+  private _useTimeRange: boolean = false
   protected get useTimeRange(): boolean {
-    return this._useTimeRange;
+    return this._useTimeRange
   }
   protected set useTimeRange(value: boolean) {
-    this._useTimeRange = value;
+    this._useTimeRange = value
   }
 
-
   private _size: ISize
-  private isResponsive:boolean
+  private isResponsive: boolean
   private _options = { theme: defualtTheme }
 
   public get options() {
@@ -70,11 +78,28 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     return this
   }
 
-  public timeRange(start,end){
+  public timeRange(start, end, unit: TimeUnit, interval = 1) {
     this.useTimeRange = true
     this.timeStart = start
     this.timeEnd = end
-    
+    this.xUnit = d3time[`time${capitalize(unit)}`]
+    this.xInterval = interval
+    switch (unit) {
+      case 'day':
+        this.xFormat = '%b %d'
+        break
+    }
+    return this
+  }
+
+  public xLabel(unit: TimeUnit, interval = 1) {
+    this.labelUnit = d3time[`time${capitalize(unit)}`]
+    this.labelInterval = interval
+    switch (unit) {
+      case 'month':
+        this.labelFormat = '%B'
+        break
+    }
     return this
   }
 
@@ -87,10 +112,10 @@ class Chart extends Object3D implements IChart, IChartInteractable {
 
   init() {
     this.isResponsive = this.getResponsive()
-    if (this.isResponsive){
+    if (this.isResponsive) {
       window.addEventListener('resize', throttle(this.onResize.bind(this), 250))
     }
-    
+
     this.addTooltip()
     this.bindingEvents()
   }
