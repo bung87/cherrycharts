@@ -34,6 +34,16 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   protected mouse: Vector2 = new Vector2()
   protected tooltip
   protected dataProcessed: Boolean
+  protected timeStart
+  protected timeEnd
+  private _useTimeRange: boolean = false;
+  protected get useTimeRange(): boolean {
+    return this._useTimeRange;
+  }
+  protected set useTimeRange(value: boolean) {
+    this._useTimeRange = value;
+  }
+
 
   private _size: ISize
   private isResponsive:boolean
@@ -57,6 +67,14 @@ class Chart extends Object3D implements IChart, IChartInteractable {
 
   public setOptions(value) {
     this.options = value
+    return this
+  }
+
+  public timeRange(start,end){
+    this.useTimeRange = true
+    this.timeStart = start
+    this.timeEnd = end
+    
     return this
   }
 

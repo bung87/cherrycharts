@@ -23,6 +23,17 @@ import './src/scss/cherrycharts.scss'
   let c = new LineChart(ele)
   c.setOptions({theme:{colors:["#626c91", "#a0a7e6", "#c4ebad"]}}).datum(series).render()
 })(require('./data/line-chart-data.json'))
+
+;(function( data) {
+ 
+  let ele = document.getElementById('line-chart2')
+  let c = new LineChart(ele)
+  c.setOptions({theme:{colors:["#626c91", "#a0a7e6", "#c4ebad"]}})
+  .timeRange(new Date("7/30/2015"),new Date("7/2/2018"))
+  .datum(data)
+  .render()
+})(require('./data/line-chart-data2.json'))
+
 ;(function(data) {
   let data2 = data.map(v => {
     let v1 = v[0]
