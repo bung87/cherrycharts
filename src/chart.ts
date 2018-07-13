@@ -2,13 +2,13 @@
 import Director from './director'
 import { Object3D, Vector2 } from 'three'
 import { ICartesian, ISize } from './interfaces'
-import { throttle, defaultsDeep } from 'lodash'
+import { throttle, defaultsDeep ,cloneDeep,clone} from 'lodash'
 import optimizedResize from './interactions/optimized-resize'
 import Debounce from 'debounce-decorator'
 import * as themes from './themes'
 import * as d3time from 'd3-time'
 import { capitalize } from './utils'
-
+// import LineChart from './charts/line-chart'
 const defualtTheme = 'walden'
 type TimeUnit = 'year' | 'month' | 'week' | 'day' | 'hour' | 'minute' | 'second' | 'millisecond'
 
@@ -23,7 +23,8 @@ export interface IChartInteractable {
   bindingEvents()
 }
 
-class Chart extends Object3D implements IChart, IChartInteractable {
+
+class Chart  extends Object3D implements IChart, IChartInteractable {
   
   xUnit
   xInterval
@@ -31,7 +32,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   labelUnit
   labelFormat
   labelInterval
-  protected director: Director
+  
 
   protected get size(): ISize {
     return this._size
@@ -51,6 +52,13 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   }
   public set dataSource(value) {
     this._dataSource = [...value];
+  }
+  private _director: Director;
+  protected get director(): Director {
+    return this._director;
+  }
+  protected set director(value: Director) {
+    this._director = value;
   }
   private _useTimeRange: boolean = false
   protected get useTimeRange(): boolean {
@@ -91,14 +99,16 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this.render()
   }
 
-  clone() {
-    this.clearThree(this)
-    this.container = null
-    this.dataSource = []
-    this.dataProcessed = false
-    this.director = null
-    this.size = null
-    return this
+  cloneDeep() {
+    let obj = cloneDeep(this)
+    obj.container = null
+    obj.dataSource = []
+    obj.dataProcessed = false
+    obj.director = null
+    obj.size = null
+    obj.children = []
+    delete obj.uuid
+    return obj
   }
 
   public setOptions(value) {
@@ -247,5 +257,6 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     return responsive
   }
 }
+
 
 export default Chart

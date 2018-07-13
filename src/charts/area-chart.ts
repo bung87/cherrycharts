@@ -25,7 +25,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
   dataSource: DataSource
   protected onMouseMoveHandle
 
-  constructor(dom: Element) {
+  constructor(dom?: Element) {
     super(dom)
   }
 

@@ -44,14 +44,16 @@ import './src/scss/cherrycharts.scss'
   c
   .datum(series)
   .renderTo(ele)
-
+  console.log(c)
   let data3 = data1.map(v => {
     let v2 = parseFloat( (v + 500 + Math.random() * v).toFixed(2)) 
     return  v2
   })
   let ele3 = document.getElementById('line-chart3')
   let series3 = [data1, data3]
-  c.clone()
+
+  let d = c.cloneDeep()
+  LineChart.call(d)
   .datum(series3)
   .renderTo(ele3)
 
