@@ -2,7 +2,7 @@
 import Director from './director'
 import { Object3D, Vector2 } from 'three'
 import { ICartesian, ISize } from './interfaces'
-import { throttle, defaultsDeep ,cloneDeep,clone} from 'lodash'
+import { throttle, defaultsDeep ,extend,cloneDeep,clone} from 'lodash'
 import optimizedResize from './interactions/optimized-resize'
 import Debounce from 'debounce-decorator'
 import * as themes from './themes'
@@ -22,7 +22,6 @@ export interface IChart {
 export interface IChartInteractable {
   bindingEvents()
 }
-
 
 class Chart  extends Object3D implements IChart, IChartInteractable {
   
@@ -100,9 +99,9 @@ class Chart  extends Object3D implements IChart, IChartInteractable {
     return this
   }
 
-  cloneDeep() {
+  makeCopy() {
     // dirty work
-    let obj = clone(this)
+    let obj = Object.assign({},this)
     obj.container = null
     obj.dataSource = []
     obj.dataProcessed = false
@@ -110,7 +109,14 @@ class Chart  extends Object3D implements IChart, IChartInteractable {
     obj.size = null
     obj.children = []
     delete obj.uuid
-    return obj
+    delete obj.position
+    delete obj.rotation
+    delete obj.quaternion
+    delete obj.scale
+    const theClass = Object.getPrototypeOf(this).constructor
+    let a = new theClass()
+    Object.assign(a,obj)
+    return a
   }
 
   public setOptions(value) {
