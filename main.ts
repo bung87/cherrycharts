@@ -44,7 +44,7 @@ import './src/scss/cherrycharts.scss'
   c
   .datum(series)
   .renderTo(ele)
-  console.log(c)
+
   let data3 = data1.map(v => {
     let v2 = parseFloat( (v + 500 + Math.random() * v).toFixed(2)) 
     return  v2
@@ -52,9 +52,7 @@ import './src/scss/cherrycharts.scss'
   let ele3 = document.getElementById('line-chart3')
   let series3 = [data1, data3]
 
-  let d = c.cloneDeep()
-  LineChart.call(d)
-  .datum(series3)
+  let d = c.cloneDeep().datum(series3)
   .renderTo(ele3)
 
 })(require('./data/line-chart-data2.json'))

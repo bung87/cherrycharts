@@ -97,10 +97,12 @@ class Chart  extends Object3D implements IChart, IChartInteractable {
     this.director.scene.add(this)
     this.init()
     this.render()
+    return this
   }
 
   cloneDeep() {
-    let obj = cloneDeep(this)
+    // dirty work
+    let obj = clone(this)
     obj.container = null
     obj.dataSource = []
     obj.dataProcessed = false
