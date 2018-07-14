@@ -80,7 +80,6 @@ export default class CartesianChart extends Chart {
       color: this.options.theme.axisLine.style.color
     })
     let lineWidth = 1 / window.devicePixelRatio
-
     let hStart = [this.mainRect.left, this.mainRect.bottom - lineWidth, 0]
     let hEnd = [this.mainRect.left + this.mainRect.width, this.mainRect.bottom - lineWidth, 0]
     let vEnd = [this.mainRect.left, this.mainRect.bottom - lineWidth + this.mainRect.height, 0]
@@ -123,7 +122,7 @@ export default class CartesianChart extends Chart {
   drawYAxisLabel() {
     let ticks = this.cartesian.yScale.ticks().slice(1)
     let size = this.options.theme.labels.style.fontSize
-
+    
     let labels = ticks.map((v, i) => {
       let h = this.cartesian.yScale(v) + this.mainRect.bottom
       let mesh = createLabel(
@@ -141,13 +140,11 @@ export default class CartesianChart extends Chart {
       return Math.max(max, arr.userData.textWidth)
     }, -Infinity)
     const labelMarginRight = 4
-    let offsetX = Math.max(this.mainRect.left,maxTextWidth) + labelMarginRight
+    let offsetX = Math.max(this.mainRect.left,maxTextWidth + labelMarginRight) 
     this.mainRect.left = offsetX
-    this.mainRect.width = this.size.width - offsetX - this.mainRect.right
     if(this.cartesian.xScale){
       this.cartesian.xScale.range([offsetX,offsetX+this.mainRect.width])
     }
-    console.log(offsetX)
     labels.forEach( (v,i)=>{
       v.translateX(offsetX-labelMarginRight)
     })

@@ -1,14 +1,13 @@
-// tslint:disable:one-variable-per-declaration
+
 import Director from './director'
 import { Object3D, Vector2 } from 'three'
-import { ICartesian, ISize } from './interfaces'
-import { throttle, defaultsDeep ,extend,cloneDeep,clone} from 'lodash'
+import {  ISize } from './interfaces'
+import {  defaultsDeep } from 'lodash'
 import optimizedResize from './interactions/optimized-resize'
-import Debounce from 'debounce-decorator'
 import * as themes from './themes'
 import * as d3time from 'd3-time'
 import { capitalize } from './utils'
-// import LineChart from './charts/line-chart'
+
 const defualtTheme = 'walden'
 type TimeUnit = 'year' | 'month' | 'week' | 'day' | 'hour' | 'minute' | 'second' | 'millisecond'
 
@@ -159,7 +158,7 @@ class Chart  extends Object3D implements IChart, IChartInteractable {
   init() {
     this.isResponsive = this.getResponsive()
     if (this.isResponsive) {
-      window.addEventListener('resize', throttle(this.onResize.bind(this), 250))
+      optimizedResize.add(this.onResize.bind(this))
     }
 
     this.addTooltip()
@@ -168,13 +167,11 @@ class Chart  extends Object3D implements IChart, IChartInteractable {
 
   onResize() {
     let { width, height } = this.container.getBoundingClientRect()
-
     if (this.size.width !== width || this.size.height !== height) {
       this.resize()
     }
   }
 
-  @Debounce(300)
   resize() {
     let { width, height } = this.container.getBoundingClientRect()
     this.director.updateSize({ width, height })
