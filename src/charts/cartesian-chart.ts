@@ -3,7 +3,7 @@ import Chart from '../chart'
 import { DataSource } from '../components/bar'
 import { IRect, ISize, ICartesianInfo } from '../interfaces'
 import { scaleLinear } from 'd3-scale'
-import { createBufferGeometry } from '../three-helper'
+import { createBufferGeometry,createLabel } from '../three-helper'
 
 import { LineBasicMaterial, LineDashedMaterial, LineSegments } from 'three'
 
@@ -120,8 +120,38 @@ export default class CartesianChart extends Chart {
     throw new Error('Method not implemented.')
   }
 
-  drawYAxisLabel(): void {
-    throw new Error('Method not implemented.')
+  drawYAxisLabel() {
+    let ticks = this.cartesian.yScale.ticks().slice(1)
+    let size = this.options.theme.labels.style.fontSize
+
+    let labels = ticks.map((v, i) => {
+      let h = this.cartesian.yScale(v) + this.mainRect.bottom
+      let mesh = createLabel(
+        v.toString(),
+        0,
+        h,
+        0,
+        size,
+        this.options.theme.labels.style.color
+      )
+      return mesh
+    })
+    // adjust mainRect
+    let maxTextWidth = labels.reduce(function(max, arr) {
+      return Math.max(max, arr.userData.textWidth)
+    }, -Infinity)
+    const labelMarginRight = 4
+    let offsetX = Math.max(this.mainRect.left,maxTextWidth) + labelMarginRight
+    this.mainRect.left = offsetX
+    this.mainRect.width = this.size.width - offsetX - this.mainRect.right
+    if(this.cartesian.xScale){
+      this.cartesian.xScale.range([offsetX,offsetX+this.mainRect.width])
+    }
+    console.log(offsetX)
+    labels.forEach( (v,i)=>{
+      v.translateX(offsetX-labelMarginRight)
+    })
+    this.add(...labels)
   }
 
   drawXAxisTick(): void {
@@ -129,8 +159,9 @@ export default class CartesianChart extends Chart {
   }
 
   drawAxisLabel(): void {
-    this.drawXAxisLabel()
     this.drawYAxisLabel()
+    this.drawXAxisLabel()
+    
   }
   drawAxisTick(): void {
     this.drawXAxisTick()
@@ -140,8 +171,9 @@ export default class CartesianChart extends Chart {
   }
 
   drawAxis() {
-    this.drawAxisLine()
     this.drawAxisLabel()
+    this.drawAxisLine()
+    
     this.drawAxisTick()
     this.drawSplitLine()
   }

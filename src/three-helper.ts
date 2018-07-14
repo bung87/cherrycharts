@@ -28,7 +28,7 @@ export function createLabel(text, x, y, z, size, color) {
   let canvas = document.createElement('canvas')
   let context = canvas.getContext('2d')
   context.font = size + 'px Arial'
-  let textWidth = context.measureText(text).width
+  let textWidth = Math.round(context.measureText(text).width)
   canvas.width = textWidth * window.devicePixelRatio
   canvas.height = size * window.devicePixelRatio
   canvas.style.cssText = `width:${textWidth}px;height:${size}px`
@@ -58,8 +58,9 @@ export function createLabel(text, x, y, z, size, color) {
     ),
     material
   )
-  mesh.position.x = x
+  mesh.position.x = x||-textWidth/2
   mesh.position.y = y
   mesh.position.z = z
+  mesh.userData.textWidth = textWidth
   return mesh
 }

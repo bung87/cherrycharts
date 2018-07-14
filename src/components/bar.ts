@@ -15,7 +15,7 @@ export class Bar extends Object3D {
    
     data.some((v, i) => {
       // let x = i * (barWidth + barGap) + rect.left + barGap + barWidth / 2
-      let x = cartesian.xScale(i) + rect.left + cartesian.xScale.bandwidth() / 2 
+      let x = cartesian.xScale(i) + cartesian.xScale.bandwidth() / 2 
       if (x>rect.left+rect.width){
         return true
       }

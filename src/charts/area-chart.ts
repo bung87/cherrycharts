@@ -97,25 +97,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
     })
   }
 
-  drawYAxisLabel() {
-    let ticks = this.cartesian.yScale.ticks().slice(1)
-
-    const X1 = this.mainRect.left
-    let size = this.options.theme.labels.style.fontSize
-
-    ticks.forEach((v, i) => {
-      let h = this.cartesian.yScale(v) + this.mainRect.bottom
-      let mesh = createLabel(
-        v.toString(),
-        X1 - size,
-        h,
-        0,
-        size,
-        this.options.theme.labels.style.color
-      )
-      this.add(mesh)
-    })
-  }
+  
 
   buildCartesianInfo(data?: DataSource) {
     let theData = data ? data : this.dataSource
@@ -263,7 +245,10 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
     let rect = canvas.getBoundingClientRect()
     this.mouse.x = event.clientX - rect.left
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
-
+    if (this.mouse.y < this.mainRect.bottom || this.mouse.x < this.mainRect.left) {
+      this.hideTooltip()
+      return
+    }
     let data = this.dataSource[0]
     
     let finalIndex 

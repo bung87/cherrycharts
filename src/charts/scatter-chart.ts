@@ -13,23 +13,17 @@ import { scaleLinear, scaleTime, scaleOrdinal } from 'd3-scale'
 import { createBufferGeometry, createLabel } from '../three-helper'
 import { ISize, IRect } from '../interfaces'
 import Chart, { IChartInteractable } from '../chart'
+import CartesianChart from './cartesian-chart'
 import { range } from '../utils'
+import { DataSource } from '../components/bar'
 
-export default class ScatterChart extends Chart implements IChartInteractable {
+export default class ScatterChart extends CartesianChart implements IChartInteractable {
   type = 'ScatterChart'
   dataSource: Array<any>
-  xScale
-  yScale
+  cartesian.xScale
+  cartesian.yScale
   colorScale
   protected onMouseMoveHandle:Function
-  
-  public get mainRect(): IRect {
-    return this._mainRect
-  }
-  public set mainRect(value: IRect) {
-    this._mainRect = { ...value }
-  }
-  private _mainRect: IRect
 
   constructor(dom: Element) {
     super(dom)
@@ -42,7 +36,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
     this.updateMainRect()
   }
 
-  buildScale(data?) {
+  buildCartesianInfo(data?) {
     let theData = data ? data : this.dataSource
     let xMax = Math.max.apply(
       null,
@@ -62,9 +56,9 @@ export default class ScatterChart extends Chart implements IChartInteractable {
       )
     )
 
-    this.xScale = scaleLinear()
+    let xScale = scaleLinear()
       .domain([xMin, xMax])
-      .range([0, this.mainRect.width])
+      .range([this.mainRect.left, this.mainRect.left + this.mainRect.width])
       .nice()
 
     let yMax = Math.max.apply(
@@ -84,7 +78,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
         }, Infinity)
       )
     )
-    this.yScale = scaleLinear()
+    let yScale = scaleLinear()
       .domain([yMin, yMax])
       .range([0, this.mainRect.height])
       .nice()
@@ -92,12 +86,22 @@ export default class ScatterChart extends Chart implements IChartInteractable {
     this.colorScale = scaleOrdinal()
       .domain(range(data.length))
       .range(this.options.theme.colors)
+
+      this.cartesian = {
+        xMin,
+        xMax,
+        yMin,
+        yMax,
+        yScale,
+        xScale
+      }
   }
 
-  build(data?: any) {
-    let theData = data ? data : this.dataSource
-    this.buildScale(theData)
-  }
+
+  // build(data?: any) {
+  //   let theData = data ? data : this.dataSource
+  //   this.buildScale(theData)
+  // }
 
   updateMainRect(size?: ISize) {
     let theSize = size ? size : this.size
@@ -114,9 +118,9 @@ export default class ScatterChart extends Chart implements IChartInteractable {
     let arr = []
 
     let xMax = this.mainRect.left + this.mainRect.width
-    let ticks = this.xScale.ticks().slice(1)
+    let ticks = this.cartesian.xScale.ticks().slice(1)
     ticks.some((v, i) => {
-      let x = this.xScale(v) + this.mainRect.left
+      let x = this.cartesian.xScale(v) 
       if (x > xMax) {
         return true
       }
@@ -136,29 +140,16 @@ export default class ScatterChart extends Chart implements IChartInteractable {
     let Y = this.mainRect.bottom
 
     let xMax = this.mainRect.left + this.mainRect.width
-    let ticks = this.xScale.ticks().slice(1)
+    let ticks = this.cartesian.xScale.ticks().slice(1)
 
     ticks.some((v, i) => {
-      let x = this.xScale(v) + this.mainRect.left
+      let x = this.cartesian.xScale(v) 
       if (x > xMax) {
         return true
       }
       let mesh = createLabel(v, x, Y - tickSize - size / 2 - 2, 0, size, this.options.theme.labels.style.color)
       this.add(mesh)
       return false
-    })
-  }
-
-  drawYAxisLabel() {
-    let ticks = this.yScale.ticks().slice(1)
-
-    const X1 = this.mainRect.left
-    let size = this.options.theme.labels.style.fontSize
-
-    ticks.forEach((v, i) => {
-      let h = this.yScale(v) + this.mainRect.bottom
-      let mesh = createLabel(v.toString(), X1 - size, h, 0, size,  this.options.theme.labels.style.color)
-      this.add(mesh)
     })
   }
 
@@ -177,8 +168,8 @@ export default class ScatterChart extends Chart implements IChartInteractable {
         let material = new MeshBasicMaterial({ color: this.colorScale(index) })
         let circle = new Mesh(geometry, material)
         geometry.translate(
-          this.xScale(v.x) + this.mainRect.left,
-          this.yScale(v.y) + this.mainRect.bottom,
+          this.cartesian.xScale(v.x) ,
+          this.cartesian.yScale(v.y) + this.mainRect.bottom,
           0
         )
         this.add(circle)
@@ -205,7 +196,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
   }
 
   drawXSplitLine() {
-    let ticks = this.xScale.ticks().slice(1)
+    let ticks = this.cartesian.xScale.ticks().slice(1)
 
     let material = new LineDashedMaterial({
       color: this.options.theme.splitLine.style.color,
@@ -219,7 +210,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
     const Y2 = this.mainRect.bottom + this.mainRect.height
 
     let arr = ticks.reduce((accumulator, currentValue) => {
-      let x = this.xScale(currentValue) + this.mainRect.bottom
+      let x = this.cartesian.xScale(currentValue) 
       return accumulator.concat(x, Y1, 0, x, Y2, 0)
     }, [])
 
@@ -230,7 +221,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
   }
 
   drawYSplitLine() {
-    let ticks = this.yScale.ticks().slice(1)
+    let ticks = this.cartesian.yScale.ticks().slice(1)
 
     let material = new LineDashedMaterial({
       color: this.options.theme.splitLine.style.color,
@@ -244,7 +235,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
     const X2 = this.mainRect.left + this.mainRect.width
 
     let arr = ticks.reduce((accumulator, currentValue) => {
-      let h = this.yScale(currentValue) + this.mainRect.bottom
+      let h = this.cartesian.yScale(currentValue) + this.mainRect.bottom
       return accumulator.concat(X1, h, 0, X2, h, 0)
     }, [])
 
@@ -267,8 +258,9 @@ export default class ScatterChart extends Chart implements IChartInteractable {
   }
 
   drawAxis() {
-    this.drawAxisLine()
     this.drawAxisLabel()
+    this.drawAxisLine()
+    
     this.drawAxisTick()
     this.drawSplitLine()
   }
@@ -292,8 +284,8 @@ export default class ScatterChart extends Chart implements IChartInteractable {
       seriesIndex = index
       let indx = data.findIndex(x => {
         let vector = new Vector2(
-          this.xScale(x.x) + this.mainRect.left,
-          this.yScale(x.y) + this.mainRect.bottom
+          this.cartesian.xScale(x.x) ,
+          this.cartesian.yScale(x.y) + this.mainRect.bottom
         )
         let dis = vector.distanceTo(this.mouse)
         return dis <= radius
@@ -310,7 +302,7 @@ export default class ScatterChart extends Chart implements IChartInteractable {
       return
     }
 
-    let finalX = this.xScale(this.dataSource[seriesIndex][dataIndex].x) + this.mainRect.left
+    let finalX = this.cartesian.xScale(this.dataSource[seriesIndex][dataIndex].x)
     let offsetX = rect.left + finalX
     this.showTooltip()
 

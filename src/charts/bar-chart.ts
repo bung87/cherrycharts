@@ -28,7 +28,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
     let xScale = scaleBand()
       .domain(range(theData.length))
-      .rangeRound([0, this.mainRect.width])
+      .rangeRound([this.mainRect.left, this.mainRect.left + this.mainRect.width])
       .paddingInner(padding)
       .paddingOuter(padding)
 
@@ -47,7 +47,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     // let stepWidth = this.barWidth + this.barGap
 
     let xArr = this.dataSource.map((v, i) => {
-      return this.cartesian.xScale(i) + this.mainRect.left + this.cartesian.xScale.bandwidth() / 2 // +this.cartesian.xScale.paddingOuter()*this.mainRect.width
+      return this.cartesian.xScale(i) + this.cartesian.xScale.bandwidth() / 2 // +this.cartesian.xScale.paddingOuter()*this.mainRect.width
     })
     let xMax = this.mainRect.left + this.mainRect.width
     xArr.some((v, i) => {
@@ -73,7 +73,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     //   return i * stepWidth + offsetX
     // })
     let xArr = this.dataSource.map((v, i) => {
-      return this.cartesian.xScale(i) + this.mainRect.left + this.cartesian.xScale.bandwidth() / 2 // + this.cartesian.xScale.paddingOuter()*this.mainRect.width
+      return this.cartesian.xScale(i) + this.cartesian.xScale.bandwidth() / 2 // + this.cartesian.xScale.paddingOuter()*this.mainRect.width
     })
     let xMax = this.mainRect.left + this.mainRect.width
     xArr.some((v, i) => {
@@ -93,18 +93,6 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     })
   }
 
-  drawYAxisLabel() {
-    let ticks = this.cartesian.yScale.ticks().slice(1)
-
-    const X1 = this.mainRect.left
-    let size = this.options.theme.labels.style.fontSize
-
-    ticks.forEach((v, i) => {
-      let h = this.cartesian.yScale(v) + this.mainRect.bottom
-      let mesh = createLabel(v.toString(), X1 - size, h, 0, size,  this.options.theme.labels.style.color)
-      this.add(mesh)
-    })
-  }
 
   draw() {
     this.drawAxis()
@@ -134,7 +122,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
     this.mouse.x = event.clientX - rect.left
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
-    if (this.mouse.y < this.mainRect.bottom) {
+    if (this.mouse.y < this.mainRect.bottom || this.mouse.x < this.mainRect.left) {
       this.hideTooltip()
       return
     }
