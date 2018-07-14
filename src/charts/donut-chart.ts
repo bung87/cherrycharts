@@ -4,12 +4,16 @@ import { RingGeometry, Vector2, MeshBasicMaterial, Mesh } from 'three'
 import { IRect, ISize } from '../interfaces'
 import { scaleOrdinal } from 'd3-scale'
 import { range, angle } from '../utils'
+import { createBufferGeometry, createLabel } from '../three-helper'
 
 export default class DonutChart extends Chart implements IChart {
   type = 'DonutChart'
   dataSource: DataSource
   maxRadius: number
+  total:number
   angles: Array<any>
+  centerLabel: Mesh
+  isCenterLabel:boolean
   public get mainRect(): IRect {
     return this._mainRect
   }
@@ -42,12 +46,9 @@ export default class DonutChart extends Chart implements IChart {
     let colorScale = scaleOrdinal()
       .domain(range(this.dataSource.length).reverse())
       .range(this.options.theme.colors)
-    let count = this.dataSource.reduce(function(acc, arr) {
-      return acc + arr[1]
-    }, 0)
 
-    let arr = this.dataSource.map(function(v, i) {
-      return v[1] / count
+    let arr = this.dataSource.map((v, i) =>{
+      return v[1] / this.total
       // return parseFloat((v[1]/count).toFixed(2))
     })
 
@@ -111,6 +112,10 @@ export default class DonutChart extends Chart implements IChart {
     this.mouse.x = event.clientX - rect.left
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
     if (this.isOutOfArea(this.mouse)) {
+      if (this.centerLabel) {
+        this.remove(this.centerLabel)
+        this.director._render()
+      }
       this.hideTooltip()
       return
     }
@@ -128,15 +133,38 @@ export default class DonutChart extends Chart implements IChart {
       return
     }
     let finalIndex = Math.abs(index - (this.dataSource.length - 1)) || 0
+    let [label, value] = this.dataSource[finalIndex]
+    let percent = (value / this.total * 100).toFixed(2)
+    let html = `${label} ${value} (${percent}%)`
+    let size = this.options.theme.labels.style.fontSize
+    
+    if (this.isCenterLabel) {
+      if (this.centerLabel) {
+        this.remove(this.centerLabel)
+      }
+      this.centerLabel = createLabel(
+        `${label} ${value} (${percent}%)`,
+        origin.x,
+        origin.y,
+        0,
+        size,
+        this.options.theme.labels.style.color
+      )
+      this.add(this.centerLabel)
+      this.director._render()
+    }
+
+    
+
     this.tooltip.style.display = 'block'
     let offsetX = event.clientX
-    let [label, value] = this.dataSource[finalIndex]
+
     let tooltipRect = this.tooltip.getBoundingClientRect()
     this.tooltip.style.left = `${offsetX - tooltipRect.width / 2}px`
     this.tooltip.style.top = `${event.clientY - tooltipRect.height}px`
-    let html = `${label} ${value}`
+    
     if (this.tooltip.innerHTML !== html) {
-      this.tooltip.innerHTML = `${label} ${value}`
+      this.tooltip.innerHTML = html
     }
   }
 
@@ -147,7 +175,12 @@ export default class DonutChart extends Chart implements IChart {
     this.hideTooltip()
   }
 
-  build() {}
+  build() {
+    this.isCenterLabel = this.options.theme.plotOptions.donut.label.position === 'center'
+    this.total = this.dataSource.reduce(function(acc, arr) {
+      return acc + arr[1]
+    }, 0)
+  }
 
   draw() {
     this.drawDonut()
