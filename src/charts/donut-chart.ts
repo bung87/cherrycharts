@@ -3,7 +3,7 @@ import { DataSource } from '../components/bar'
 import { RingGeometry, Vector2, MeshBasicMaterial, Mesh } from 'three'
 import { IRect, ISize } from '../interfaces'
 import { scaleOrdinal } from 'd3-scale'
-import {range,angle} from '../utils'
+import { range, angle } from '../utils'
 
 export default class DonutChart extends Chart implements IChart {
   type = 'DonutChart'
@@ -94,14 +94,28 @@ export default class DonutChart extends Chart implements IChart {
     canvas.onmouseout = canvas.onmouseleave = this.onMouseLeave.bind(this)
   }
 
+  isOutOfArea(vector2) {
+    let radius = this.maxRadius * 0.5
+    let origin = new Vector2(this.mainRect.width / 2, this.mainRect.height / 2)
+    let isInside =
+      Math.pow(vector2.x - origin.x, 2) + Math.pow(vector2.y - origin.y, 2) < Math.pow(radius, 2)
+    let isOutside =
+      Math.pow(vector2.x - origin.x, 2) + Math.pow(vector2.y - origin.y, 2) >
+      Math.pow(this.maxRadius, 2)
+    return isInside || isOutside
+  }
+
   onMouseMove(event) {
     let canvas = this.director.getCanvas()
     let rect = canvas.getBoundingClientRect()
     this.mouse.x = event.clientX - rect.left
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
+    if (this.isOutOfArea(this.mouse)) {
+      this.hideTooltip()
+      return
+    }
     let origin = new Vector2(this.mainRect.width / 2, this.mainRect.height / 2)
     let deg = angle(origin, this.mouse)
-
     let index = this.angles.findIndex(v => {
       if (v.endAngleDegree > v.startAngleDegree) {
         return deg >= v.startAngleDegree && deg <= v.endAngleDegree
@@ -115,7 +129,7 @@ export default class DonutChart extends Chart implements IChart {
     }
     let finalIndex = Math.abs(index - (this.dataSource.length - 1)) || 0
     this.tooltip.style.display = 'block'
-    let offsetX = rect.left + origin.x
+    let offsetX = event.clientX
     let [label, value] = this.dataSource[finalIndex]
     let tooltipRect = this.tooltip.getBoundingClientRect()
     this.tooltip.style.left = `${offsetX - tooltipRect.width / 2}px`
@@ -133,13 +147,9 @@ export default class DonutChart extends Chart implements IChart {
     this.hideTooltip()
   }
 
-  build(){
-    
-  }
-  
+  build() {}
+
   draw() {
     this.drawDonut()
   }
-
- 
 }

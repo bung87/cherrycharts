@@ -3,7 +3,7 @@
   "labels": {
     "style": {
       "color": "#444444",
-      "fontSize":12
+      "fontSize": 12
     }
   },
   "axisLine": {
@@ -14,7 +14,7 @@
   "axisTick": {
     "style": {
       "color": "#333333",
-      "length":4
+      "length": 4
     }
   },
   "splitLine": {
@@ -24,7 +24,20 @@
       "gapSize": 5
     }
   },
-  "scatter":{
-    "radius":5
+  "plotOptions": {
+    "scatter": {
+      "radius": 5
+    },
+    "donut": {
+      "label": {
+        "position": "center"
+      }
+    },
+    "pie": {
+      "label": {
+        "position": "outside"
+      }
+    }
   }
+
 }

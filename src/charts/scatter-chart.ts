@@ -160,7 +160,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   }
 
   draw() {
-    let radius = this.options.theme.scatter.radius
+    let radius = this.options.theme.plotOptions.scatter.radius
     this.drawAxis()
     this.dataSource.forEach((data, index) =>
       data.forEach(v => {
@@ -273,7 +273,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   }
 
   onMouseMove(event) {
-    let radius = this.options.theme.scatter.radius
+    let radius = this.options.theme.plotOptions.scatter.radius
     let canvas = this.director.getCanvas()
     let rect = canvas.getBoundingClientRect()
     this.mouse.x = event.clientX - rect.left
