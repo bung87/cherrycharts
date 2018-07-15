@@ -3,5 +3,5 @@ This project currently is not productive.
 
 screenshot: 
 
-![preview](preview.png)
+![preview](preview.jpg)
 
