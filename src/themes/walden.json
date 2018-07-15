@@ -29,11 +29,16 @@
       "radius": 5
     },
     "donut": {
+      "clockwise":true,
+      "startAngle":90,
+      "innerRadius":"50%",
       "label": {
         "position": "center"
       }
     },
     "pie": {
+      "clockwise":true,
+      "startAngle":90,
       "label": {
         "position": "outside"
       }

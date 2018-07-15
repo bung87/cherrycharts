@@ -4,16 +4,19 @@ import { RingGeometry, Vector2, MeshBasicMaterial, Mesh } from 'three'
 import { IRect, ISize } from '../interfaces'
 import { scaleOrdinal } from 'd3-scale'
 import { range, angle } from '../utils'
-import { createBufferGeometry, createLabel } from '../three-helper'
+import { createLabel } from '../three-helper'
 
 export default class DonutChart extends Chart implements IChart {
   type = 'DonutChart'
   dataSource: DataSource
   maxRadius: number
-  total:number
+  total: number
+  colorScale
   angles: Array<any>
   centerLabel: Mesh
-  isCenterLabel:boolean
+  isCenterLabel: boolean
+  innerRadiusPer: number
+  origin: Vector2;
   public get mainRect(): IRect {
     return this._mainRect
   }
@@ -42,52 +45,6 @@ export default class DonutChart extends Chart implements IChart {
     this.maxRadius = Math.min(this.mainRect.width, this.mainRect.height) / 2
   }
 
-  drawDonut() {
-    let colorScale = scaleOrdinal()
-      .domain(range(this.dataSource.length).reverse())
-      .range(this.options.theme.colors)
-
-    let arr = this.dataSource.map((v, i) =>{
-      return v[1] / this.total
-      // return parseFloat((v[1]/count).toFixed(2))
-    })
-
-    // arr.reverse()
-    let startAngleDegree = 90
-    let startPer = startAngleDegree / 360
-    let innerRadiusPer = 0.5
-    this.angles = arr.map(v => {
-      if (startAngleDegree > 360) {
-        startAngleDegree = startAngleDegree - 360
-      }
-      let thetaStart = startPer * Math.PI * 2
-      let thetaLength = v * Math.PI * 2
-      let angle = Math.floor(v * 360)
-
-      let ang = startAngleDegree + angle
-      let endAngleDegree = ang < 360 ? ang : ang - 360
-      let ret = { thetaStart, thetaLength, startAngleDegree, endAngleDegree }
-      startPer += v
-      startAngleDegree += angle
-      return ret
-    })
-
-    this.angles.forEach((v, i) => {
-      let geometry = new RingGeometry(
-        this.maxRadius * innerRadiusPer,
-        this.maxRadius,
-        this.maxRadius,
-        1,
-        v.thetaStart,
-        v.thetaLength
-      )
-      let material = new MeshBasicMaterial({ color: colorScale(i) })
-      let mesh = new Mesh(geometry, material)
-      geometry.translate(this.mainRect.width / 2, this.mainRect.height / 2, 0)
-      this.add(mesh)
-    })
-  }
-
   bindingEvents() {
     this.onMouseMoveHandle = this.onMouseMove.bind(this)
     let canvas = this.director.getCanvas()
@@ -96,13 +53,10 @@ export default class DonutChart extends Chart implements IChart {
   }
 
   isOutOfArea(vector2) {
-    let radius = this.maxRadius * 0.5
-    let origin = new Vector2(this.mainRect.width / 2, this.mainRect.height / 2)
-    let isInside =
-      Math.pow(vector2.x - origin.x, 2) + Math.pow(vector2.y - origin.y, 2) < Math.pow(radius, 2)
-    let isOutside =
-      Math.pow(vector2.x - origin.x, 2) + Math.pow(vector2.y - origin.y, 2) >
-      Math.pow(this.maxRadius, 2)
+    let radius = this.maxRadius * this.innerRadiusPer
+    let vpow = Math.pow(vector2.x - this.origin.x, 2) + Math.pow(vector2.y - this.origin.y, 2)
+    let isInside = vpow < Math.pow(radius, 2)
+    let isOutside = vpow > Math.pow(this.maxRadius, 2)
     return isInside || isOutside
   }
 
@@ -119,8 +73,7 @@ export default class DonutChart extends Chart implements IChart {
       this.hideTooltip()
       return
     }
-    let origin = new Vector2(this.mainRect.width / 2, this.mainRect.height / 2)
-    let deg = angle(origin, this.mouse)
+    let deg = angle(this.origin, this.mouse)
     let index = this.angles.findIndex(v => {
       if (v.endAngleDegree > v.startAngleDegree) {
         return deg >= v.startAngleDegree && deg <= v.endAngleDegree
@@ -132,20 +85,20 @@ export default class DonutChart extends Chart implements IChart {
       this.hideTooltip()
       return
     }
-    // let finalIndex = Math.abs(index - (this.dataSource.length - 1)) || 0
+  
     let [label, value] = this.dataSource[index]
-    let percent = (value / this.total * 100).toFixed(2)
+    let percent = ((value / this.total) * 100).toFixed(2)
     let html = `${label} ${value} (${percent}%)`
     let size = this.options.theme.labels.style.fontSize
-    
-    if (this.isCenterLabel) {
+
+    if (this.options.theme.plotOptions.donut.label.position === 'center') {
       if (this.centerLabel) {
         this.remove(this.centerLabel)
       }
       this.centerLabel = createLabel(
         `${label} ${value} (${percent}%)`,
-        origin.x,
-        origin.y,
+        this.origin.x,
+        this.origin.y,
         0,
         size,
         this.options.theme.labels.style.color
@@ -154,15 +107,13 @@ export default class DonutChart extends Chart implements IChart {
       this.director._render()
     }
 
-    
-
     this.tooltip.style.display = 'block'
     let offsetX = event.clientX
 
     let tooltipRect = this.tooltip.getBoundingClientRect()
     this.tooltip.style.left = `${offsetX - tooltipRect.width / 2}px`
     this.tooltip.style.top = `${event.clientY - tooltipRect.height}px`
-    
+
     if (this.tooltip.innerHTML !== html) {
       this.tooltip.innerHTML = html
     }
@@ -175,14 +126,73 @@ export default class DonutChart extends Chart implements IChart {
     this.hideTooltip()
   }
 
+  buildColorScale() {
+    let indexs = range(this.dataSource.length)
+
+    if (this.options.theme.plotOptions.donut.clockwise) {
+      indexs.reverse()
+    }
+    this.colorScale = scaleOrdinal()
+      .domain(indexs)
+      .range(this.options.theme.colors)
+  }
+
+  buildAngles() {
+    let arr = this.dataSource.map(v => {
+      return v[1] / this.total
+    })
+    let startAngleDegree = this.options.theme.plotOptions.donut.startAngle
+    let startPer = startAngleDegree / 360
+
+    this.angles = arr.map(v => {
+      if (startAngleDegree > 360) {
+        startAngleDegree = startAngleDegree - 360
+      }
+      let thetaStart = startPer * Math.PI * 2
+      let thetaLength = v * Math.PI * 2
+      let angle = v * 360
+
+      let ang = startAngleDegree + angle
+      let endAngleDegree = ang < 360 ? ang : ang - 360
+      let ret = { thetaStart, thetaLength, startAngleDegree, endAngleDegree }
+      startPer += v
+      startAngleDegree += angle
+      return ret
+    })
+  }
+
   build() {
-    this.isCenterLabel = this.options.theme.plotOptions.donut.label.position === 'center'
+    this.origin = new Vector2(this.mainRect.width / 2, this.mainRect.height / 2)
+    this.innerRadiusPer = parseInt(this.options.theme.plotOptions.donut.innerRadius, 10) / 100
+    this.buildColorScale()
     this.dataSource.sort((a, b) => {
       return a[1] - b[1]
     })
+    if (!this.options.theme.plotOptions.donut.clockwise) {
+      this.dataSource.reverse()
+    }
+
     this.total = this.dataSource.reduce(function(acc, arr) {
       return acc + arr[1]
     }, 0)
+    this.buildAngles()
+  }
+
+  drawDonut() {
+    this.angles.forEach((v, i) => {
+      let geometry = new RingGeometry(
+        this.maxRadius * this.innerRadiusPer,
+        this.maxRadius,
+        this.maxRadius,
+        1,
+        v.thetaStart,
+        v.thetaLength
+      )
+      let material = new MeshBasicMaterial({ color: this.colorScale(i) })
+      let mesh = new Mesh(geometry, material)
+      geometry.translate(this.mainRect.width / 2, this.mainRect.height / 2, 0)
+      this.add(mesh)
+    })
   }
 
   draw() {

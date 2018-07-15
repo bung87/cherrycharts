@@ -22,6 +22,7 @@ export default class PieChart extends Chart implements IChart {
   total: number
   colorScale
   angles: Array<any>
+  origin: Vector2
   public get mainRect(): IRect {
     return this._mainRect
   }
@@ -51,11 +52,10 @@ export default class PieChart extends Chart implements IChart {
   }
 
   drawPie() {
-    let origin = new Vector2(this.mainRect.width / 2, this.mainRect.height / 2)
     this.angles.forEach((v, i) => {
       let circleShape = new Shape()
-      circleShape.arc(origin.x, origin.y, this.maxRadius, v.thetaStart, v.thetaEnd, false)
-      circleShape.lineTo(origin.x, origin.y)
+      circleShape.arc(this.origin.x, this.origin.y, this.maxRadius, v.thetaStart, v.thetaEnd, false)
+      circleShape.lineTo(this.origin.x, this.origin.y)
       let geometry = new ShapeGeometry(circleShape)
       let material = new MeshBasicMaterial({ color: this.colorScale(i) })
       let mesh = new Mesh(geometry, material)
@@ -71,9 +71,8 @@ export default class PieChart extends Chart implements IChart {
   }
 
   isOutOfArea(vector2) {
-    let origin = new Vector2(this.mainRect.width / 2, this.mainRect.height / 2)
     let isOutside =
-      Math.pow(vector2.x - origin.x, 2) + Math.pow(vector2.y - origin.y, 2) >
+      Math.pow(vector2.x - this.origin.x, 2) + Math.pow(vector2.y - this.origin.y, 2) >
       Math.pow(this.maxRadius, 2)
     return isOutside
   }
@@ -87,8 +86,7 @@ export default class PieChart extends Chart implements IChart {
       this.hideTooltip()
       return
     }
-    let origin = new Vector2(this.mainRect.width / 2, this.mainRect.height / 2)
-    let deg = angle(origin, this.mouse)
+    let deg = angle(this.origin, this.mouse)
 
     let index = this.angles.findIndex(v => {
       if (v.endAngleDegree > v.startAngleDegree) {
@@ -102,7 +100,6 @@ export default class PieChart extends Chart implements IChart {
       return
     }
 
-    // let finalIndex = Math.abs(index - (this.dataSource.length - 1)) || 0
     let [label, value] = this.dataSource[index]
     let percent = ((value / this.total) * 100).toFixed(2)
     let html = `${label} ${value} (${percent}%)`
@@ -125,29 +122,25 @@ export default class PieChart extends Chart implements IChart {
     this.hideTooltip()
   }
 
-  build() {
-    this.dataSource.sort((a, b) => {
-      return a[1] - b[1]
-    })
-    this.total = this.dataSource.reduce(function(acc, arr) {
-      return acc + arr[1]
-    }, 0)
+  buildColorScale() {
+    let indexs = range(this.dataSource.length)
 
+    if (this.options.theme.plotOptions.pie.clockwise) {
+      indexs.reverse()
+    }
     this.colorScale = scaleOrdinal()
-      .domain(range(this.dataSource.length).reverse())
+      .domain(indexs)
       .range(this.options.theme.colors)
+  }
 
+  buildAngles() {
     let arr = this.dataSource.map((v, i) => {
       return v[1] / this.total
-      // return parseFloat((v[1]/count).toFixed(2))
     })
 
-    // arr.sort()
-    let startAngleDegree = 90
+    let startAngleDegree = this.options.theme.plotOptions.pie.startAngle
     let startPer = startAngleDegree / 360
-
     this.angles = arr.map(v => {
-      let percent = v
       if (startAngleDegree > 360) {
         startAngleDegree = startAngleDegree - 360
       }
@@ -155,17 +148,14 @@ export default class PieChart extends Chart implements IChart {
       let thetaLength = v * Math.PI * 2
       let thetaEnd = thetaStart + thetaLength
       let angle = v * 360
-
       let ang = startAngleDegree + angle
       let endAngleDegree = ang < 360 ? ang : ang - 360
       let ret = {
         thetaStart,
         thetaLength,
-        percent,
         thetaEnd,
         startAngleDegree,
-        endAngleDegree,
-        angle
+        endAngleDegree
       }
       startPer += v
       startAngleDegree += angle
@@ -173,8 +163,20 @@ export default class PieChart extends Chart implements IChart {
     })
   }
 
+  build() {
+    this.origin = new Vector2(this.mainRect.width / 2, this.mainRect.height / 2)
+    this.buildColorScale()
+    this.dataSource.sort((a, b) => {
+      return a[1] - b[1]
+    })
+    this.total = this.dataSource.reduce(function(acc, arr) {
+      return acc + arr[1]
+    }, 0)
+
+    this.buildAngles()
+  }
+
   drawTicks() {
-    let origin = new Vector2(this.mainRect.width / 2, this.mainRect.height / 2)
     if (this.options.theme.plotOptions.pie.label.position === 'outside') {
       let tickLineLength = 4
       let tickLineEndRadius = this.maxRadius + tickLineLength
@@ -182,16 +184,16 @@ export default class PieChart extends Chart implements IChart {
       let ticks = this.angles.reduce((accumulator, v) => {
         let cosin = Math.cos(v.thetaStart + v.thetaLength / 2)
         let sine = Math.sin(v.thetaStart + v.thetaLength / 2)
-        let start = [origin.x + offsetRadius * cosin, origin.y + offsetRadius * sine]
-        let endX = origin.x + tickLineEndRadius * cosin
-        let endY = origin.y + tickLineEndRadius * sine
+        let start = [this.origin.x + offsetRadius * cosin, this.origin.y + offsetRadius * sine]
+        let endX = this.origin.x + tickLineEndRadius * cosin
+        let endY = this.origin.y + tickLineEndRadius * sine
         if (endY <= 0 || endY >= this.size.height) {
           let x = start[0]
-          let offsetLength = x < origin.x ? -v.thetaLength : v.thetaLength
+          let offsetLength = x < this.origin.x ? -v.thetaLength : v.thetaLength
           let cosin = Math.cos(v.thetaStart + offsetLength)
           let sine = Math.sin(v.thetaStart + offsetLength)
-          endX = origin.x + tickLineEndRadius * cosin
-          endY = origin.y + tickLineEndRadius * sine
+          endX = this.origin.x + tickLineEndRadius * cosin
+          endY = this.origin.y + tickLineEndRadius * sine
         }
         let end = [endX, endY]
         return accumulator.concat(start, 0, end, 0)
@@ -207,8 +209,6 @@ export default class PieChart extends Chart implements IChart {
         let y = ends[i + 1]
         let z = ends[i + 2]
 
-        // let finalIndex = Math.abs(j - (this.dataSource.length - 1)) || 0
-        // let arcLength = Math.PI * 2 * this.maxRadius * this.angles[j].percent
         let a = Math.sin(this.angles[j].thetaLength) * this.maxRadius
         if (a < size * 2) {
           continue
@@ -219,12 +219,12 @@ export default class PieChart extends Chart implements IChart {
         let percent = ((value / this.total) * 100).toFixed(2)
         let label2 = createLabel(`${value} (${percent}%)`, x, y - size / 2, 0, size, color)
         let maxTextWidth = Math.max(label1.userData.textWidth, label2.userData.textWidth)
-        // let textWidth1 = label1.userData.textWidth
-        let offsetX = x < origin.x ? -maxTextWidth : maxTextWidth
+
+        let offsetX = x < this.origin.x ? -maxTextWidth : maxTextWidth
         label1.translateX(offsetX / 2)
         label2.translateX(offsetX / 2)
         this.add(label1, label2)
-        let x2 = x < origin.x ? x - maxTextWidth : x + maxTextWidth
+        let x2 = x < this.origin.x ? x - maxTextWidth : x + maxTextWidth
         labelLines.push(x, y, z, x2, y, 0)
       }
 
