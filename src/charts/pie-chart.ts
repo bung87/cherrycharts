@@ -13,7 +13,7 @@ import {
 import { IRect, ISize } from '../interfaces'
 import { scaleOrdinal } from 'd3-scale'
 import { range, angle } from '../utils'
-import { createBufferGeometry } from '../three-helper'
+import { createBufferGeometry, createLabel } from '../three-helper'
 
 export default class PieChart extends Chart implements IChart {
   type = 'PieChart'
@@ -102,8 +102,8 @@ export default class PieChart extends Chart implements IChart {
       return
     }
 
-    let finalIndex = Math.abs(index - (this.dataSource.length - 1)) || 0
-    let [label, value] = this.dataSource[finalIndex]
+    // let finalIndex = Math.abs(index - (this.dataSource.length - 1)) || 0
+    let [label, value] = this.dataSource[index]
     let percent = ((value / this.total) * 100).toFixed(2)
     let html = `${label} ${value} (${percent}%)`
     this.tooltip.style.display = 'block'
@@ -126,6 +126,9 @@ export default class PieChart extends Chart implements IChart {
   }
 
   build() {
+    this.dataSource.sort((a, b) => {
+      return a[1] - b[1]
+    })
     this.total = this.dataSource.reduce(function(acc, arr) {
       return acc + arr[1]
     }, 0)
@@ -139,11 +142,12 @@ export default class PieChart extends Chart implements IChart {
       // return parseFloat((v[1]/count).toFixed(2))
     })
 
-    arr.reverse()
+    // arr.sort()
     let startAngleDegree = 90
     let startPer = startAngleDegree / 360
 
     this.angles = arr.map(v => {
+      let percent = v
       if (startAngleDegree > 360) {
         startAngleDegree = startAngleDegree - 360
       }
@@ -154,7 +158,15 @@ export default class PieChart extends Chart implements IChart {
 
       let ang = startAngleDegree + angle
       let endAngleDegree = ang < 360 ? ang : ang - 360
-      let ret = { thetaStart, thetaLength, thetaEnd, startAngleDegree, endAngleDegree, angle }
+      let ret = {
+        thetaStart,
+        thetaLength,
+        percent,
+        thetaEnd,
+        startAngleDegree,
+        endAngleDegree,
+        angle
+      }
       startPer += v
       startAngleDegree += angle
       return ret
@@ -167,21 +179,64 @@ export default class PieChart extends Chart implements IChart {
       let tickLineLength = 4
       let tickLineEndRadius = this.maxRadius + tickLineLength
       let offsetRadius = this.maxRadius
-      let arr = this.angles.reduce((accumulator, v) => {
+      let ticks = this.angles.reduce((accumulator, v) => {
         let cosin = Math.cos(v.thetaStart + v.thetaLength / 2)
         let sine = Math.sin(v.thetaStart + v.thetaLength / 2)
         let start = [origin.x + offsetRadius * cosin, origin.y + offsetRadius * sine]
-
-        let end = [origin.x + tickLineEndRadius * cosin, origin.y + tickLineEndRadius * sine]
+        let endX = origin.x + tickLineEndRadius * cosin
+        let endY = origin.y + tickLineEndRadius * sine
+        if (endY <= 0 || endY >= this.size.height) {
+          let x = start[0]
+          let offsetLength = x < origin.x ? -v.thetaLength : v.thetaLength
+          let cosin = Math.cos(v.thetaStart + offsetLength)
+          let sine = Math.sin(v.thetaStart + offsetLength)
+          endX = origin.x + tickLineEndRadius * cosin
+          endY = origin.y + tickLineEndRadius * sine
+        }
+        let end = [endX, endY]
         return accumulator.concat(start, 0, end, 0)
       }, [])
+      let ends = ticks.filter((v, index) => {
+        return Math.floor(index / 3) % 2
+      })
+      let labelLines = []
+      let size = this.options.theme.labels.style.fontSize
+      let color = this.options.theme.labels.style.color
+      for (let i = 0, j = 0; i < ends.length; i += 3, j++) {
+        let x = ends[i]
+        let y = ends[i + 1]
+        let z = ends[i + 2]
+
+        // let finalIndex = Math.abs(j - (this.dataSource.length - 1)) || 0
+        // let arcLength = Math.PI * 2 * this.maxRadius * this.angles[j].percent
+        let a = Math.sin(this.angles[j].thetaLength) * this.maxRadius
+        if (a < size * 2) {
+          continue
+        }
+        let name = this.dataSource[j][0]
+        let value = this.dataSource[j][1]
+        let label1 = createLabel(name, x, y + size / 2, 0, size, color)
+        let percent = ((value / this.total) * 100).toFixed(2)
+        let label2 = createLabel(`${value} (${percent}%)`, x, y - size / 2, 0, size, color)
+        let maxTextWidth = Math.max(label1.userData.textWidth, label2.userData.textWidth)
+        // let textWidth1 = label1.userData.textWidth
+        let offsetX = x < origin.x ? -maxTextWidth : maxTextWidth
+        label1.translateX(offsetX / 2)
+        label2.translateX(offsetX / 2)
+        this.add(label1, label2)
+        let x2 = x < origin.x ? x - maxTextWidth : x + maxTextWidth
+        labelLines.push(x, y, z, x2, y, 0)
+      }
 
       let material = new LineBasicMaterial({
         color: this.options.theme.axisTick.style.color
       })
       material.depthWrite = false
       material.fog = false
-      let geometry = createBufferGeometry(arr, 'tickLine')
+      let geometry = createBufferGeometry(
+        ticks.slice(-labelLines.length).concat(labelLines),
+        'tickLine'
+      )
       let lines = new LineSegments(geometry, material)
       this.add(lines)
     }

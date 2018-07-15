@@ -52,7 +52,7 @@ export default class DonutChart extends Chart implements IChart {
       // return parseFloat((v[1]/count).toFixed(2))
     })
 
-    arr.reverse()
+    // arr.reverse()
     let startAngleDegree = 90
     let startPer = startAngleDegree / 360
     let innerRadiusPer = 0.5
@@ -132,8 +132,8 @@ export default class DonutChart extends Chart implements IChart {
       this.hideTooltip()
       return
     }
-    let finalIndex = Math.abs(index - (this.dataSource.length - 1)) || 0
-    let [label, value] = this.dataSource[finalIndex]
+    // let finalIndex = Math.abs(index - (this.dataSource.length - 1)) || 0
+    let [label, value] = this.dataSource[index]
     let percent = (value / this.total * 100).toFixed(2)
     let html = `${label} ${value} (${percent}%)`
     let size = this.options.theme.labels.style.fontSize
@@ -177,6 +177,9 @@ export default class DonutChart extends Chart implements IChart {
 
   build() {
     this.isCenterLabel = this.options.theme.plotOptions.donut.label.position === 'center'
+    this.dataSource.sort((a, b) => {
+      return a[1] - b[1]
+    })
     this.total = this.dataSource.reduce(function(acc, arr) {
       return acc + arr[1]
     }, 0)
