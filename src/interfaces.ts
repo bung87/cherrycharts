@@ -14,6 +14,8 @@ export interface ICartesianInfo {
   dataMin?: number
   yMax?: number
   yMin?: number
+  xMin?: number
+  xMax?: number
   xScale?: Continuous
   yScale?: Continuous
 }

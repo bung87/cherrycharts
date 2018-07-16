@@ -58,7 +58,7 @@ export default class PieChart extends Chart implements IChart {
 
   bindingEvents() {
     this.onMouseMoveHandle = this.onMouseMove.bind(this)
-    let canvas = this.director.getCanvas()
+    let canvas = this.getCanvas()
     canvas.addEventListener('mousemove', this.onMouseMoveHandle)
     canvas.onmouseout = canvas.onmouseleave = this.onMouseLeave.bind(this)
   }
@@ -71,7 +71,7 @@ export default class PieChart extends Chart implements IChart {
   }
 
   onMouseMove(event) {
-    let canvas = this.director.getCanvas()
+    let canvas = this.getCanvas()
     let rect = canvas.getBoundingClientRect()
     this.mouse.x = event.clientX - rect.left
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)

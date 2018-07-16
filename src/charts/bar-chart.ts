@@ -109,7 +109,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
   bindingEvents() {
     this.onMouseMoveHandle = this.onMouseMove.bind(this)
-    let domElement = this.director.getCanvas()
+    let domElement = this.getCanvas()
     domElement.addEventListener('mousemove', this.onMouseMoveHandle, false)
     domElement.onmouseout = domElement.onmouseleave = this.onMouseLeave.bind(this)
     // domElement.onmouseover = domElement.onmouseenter = this.onMouseEnter.bind(this)
@@ -117,7 +117,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
   onMouseMove(event) {
     let barsLen = this.bars.children.length
-    let domElement = this.director.getCanvas()
+    let domElement = this.getCanvas()
     let rect = domElement.getBoundingClientRect()
 
     this.mouse.x = event.clientX - rect.left

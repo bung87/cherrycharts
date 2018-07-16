@@ -29,14 +29,14 @@ export default class DonutChart extends PieChart implements IChart {
   }
 
   onMouseMove(event) {
-    let canvas = this.director.getCanvas()
+    let canvas = this.getCanvas()
     let rect = canvas.getBoundingClientRect()
     this.mouse.x = event.clientX - rect.left
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
     if (this.isOutOfArea(this.mouse)) {
       if (this.centerLabel) {
         this.remove(this.centerLabel)
-        this.director._render()
+        this._render()
       }
       this.hideTooltip()
       return
@@ -72,7 +72,7 @@ export default class DonutChart extends PieChart implements IChart {
         this.options.theme.labels.style.color
       )
       this.add(this.centerLabel)
-      this.director._render()
+      this._render()
     }
 
     this.tooltip.style.display = 'block'

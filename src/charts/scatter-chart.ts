@@ -20,8 +20,6 @@ import { DataSource } from '../components/bar'
 export default class ScatterChart extends CartesianChart implements IChartInteractable {
   type = 'ScatterChart'
   dataSource: Array<any>
-  cartesian.xScale
-  cartesian.yScale
   colorScale
   protected onMouseMoveHandle:Function
 
@@ -260,14 +258,14 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
 
   bindingEvents() {
     this.onMouseMoveHandle = this.onMouseMove.bind(this)
-    let canvas = this.director.getCanvas()
+    let canvas = this.getCanvas()
     canvas.addEventListener('mousemove', this.onMouseMoveHandle)
     canvas.onmouseout = canvas.onmouseleave = this.onMouseLeave.bind(this)
   }
 
   onMouseMove(event) {
     let radius = this.options.theme.plotOptions.scatter.radius
-    let canvas = this.director.getCanvas()
+    let canvas = this.getCanvas()
     let rect = canvas.getBoundingClientRect()
     this.mouse.x = event.clientX - rect.left
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)

@@ -22,6 +22,10 @@ export interface IChartInteractable {
   bindingEvents()
 }
 
+export interface IOptions{
+  theme:any
+}
+
 class Chart extends Object3D implements IChart, IChartInteractable {
   xUnit
   xInterval
@@ -43,6 +47,8 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   protected dataProcessed: Boolean
   protected timeStart
   protected timeEnd
+  protected useTimeRange: boolean = false
+  protected onMouseMoveHandle:Function
   private _dataSource
   private _plotOptions
   private _customPlotOptions = {}
@@ -66,12 +72,12 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this._dataSource = [...value]
   }
   private director: Director
-  private useTimeRange: boolean = false
+  
 
   private _size: ISize
   private isResponsive: boolean
-  private _options = { theme: defualtTheme }
-
+  private _options:IOptions = { theme: defualtTheme }
+  
   public get options() {
     return this._options
   }
@@ -164,6 +170,8 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     return this
   }
 
+
+
   public render() {
     this.populateOptions()
     this.updateMainRect()
@@ -237,6 +245,23 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     throw new Error('Method not implemented.')
   }
 
+  protected updateMainRect(size?: ISize) {
+    let theSize = size ? size : this.size
+    this.size = { ...theSize }
+    this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
+    this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
+  }
+
+  protected _render(){
+    this.director._render()
+  }
+
+  protected getCanvas(){
+    return this.director.getCanvas()
+  }
+
+
+
   private addTooltip() {
     this.tooltip = document.createElement('div')
     this.tooltip.className = 'cherrycharts-tooltip'
@@ -253,12 +278,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this.bindingEvents()
   }
 
-  private updateMainRect(size?: ISize) {
-    let theSize = size ? size : this.size
-    this.size = { ...theSize }
-    this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
-    this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
-  }
+ 
 
   private drawCommon() {
     if (this._title) {
