@@ -29,8 +29,9 @@ let labelMap = {}
 
 export function createLabel(text, x, y, z, size, color) {
   let mesh
-  if (text in labelMap) {
-    mesh = labelMap[text].clone()
+  let key = text+size+color
+  if (key in labelMap) {
+    mesh = labelMap[key].clone()
   } else {
     let canvas = document.createElement('canvas')
     let context = canvas.getContext('2d')
@@ -45,7 +46,6 @@ export function createLabel(text, x, y, z, size, color) {
     context.textAlign = 'center'
     context.textBaseline = 'middle'
     context.fillStyle = new Color(color).getStyle()
-
     context.fillText(text, canvas.width / 2, canvas.height / 2)
 
     let texture = new CanvasTexture(canvas)
@@ -66,7 +66,7 @@ export function createLabel(text, x, y, z, size, color) {
       material
     )
     mesh.userData.textWidth = textWidth
-    labelMap[text] = mesh
+    labelMap[key] = mesh
   }
   mesh.position.x = x || -mesh.userData.textWidth / 2
   mesh.position.y = y

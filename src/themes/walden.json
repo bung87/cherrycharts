@@ -3,6 +3,7 @@
   "labels": {
     "style": {
       "color": "#444444",
+      "colorReversed":"#ffffff",
       "fontSize": 12
     }
   },

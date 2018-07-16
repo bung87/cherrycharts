@@ -2,7 +2,7 @@ import Chart, { IChart } from '../chart'
 import { DataSource } from '../components/bar'
 import {
   Vector2,
-  CircleGeometry,
+  Vector3,
   MeshBasicMaterial,
   Mesh,
   ShapeGeometry,
@@ -176,69 +176,107 @@ export default class PieChart extends Chart implements IChart {
     this.buildAngles()
   }
 
-  drawTicks() {
-    if (this.options.theme.plotOptions.pie.label.position === 'outside') {
-      let tickLineLength = 4
-      let tickLineEndRadius = this.maxRadius + tickLineLength
-      let offsetRadius = this.maxRadius
-      let ticks = this.angles.reduce((accumulator, v) => {
-        let cosin = Math.cos(v.thetaStart + v.thetaLength / 2)
-        let sine = Math.sin(v.thetaStart + v.thetaLength / 2)
-        let start = [this.origin.x + offsetRadius * cosin, this.origin.y + offsetRadius * sine]
-        let endX = this.origin.x + tickLineEndRadius * cosin
-        let endY = this.origin.y + tickLineEndRadius * sine
-        if (endY <= 0 || endY >= this.size.height) {
-          let x = start[0]
-          let offsetLength = x < this.origin.x ? -v.thetaLength : v.thetaLength
-          let cosin = Math.cos(v.thetaStart + offsetLength)
-          let sine = Math.sin(v.thetaStart + offsetLength)
-          endX = this.origin.x + tickLineEndRadius * cosin
-          endY = this.origin.y + tickLineEndRadius * sine
-        }
-        let end = [endX, endY]
-        return accumulator.concat(start, 0, end, 0)
-      }, [])
-      let ends = ticks.filter((v, index) => {
-        return Math.floor(index / 3) % 2
-      })
-      let labelLines = []
-      let size = this.options.theme.labels.style.fontSize
-      let color = this.options.theme.labels.style.color
-      for (let i = 0, j = 0; i < ends.length; i += 3, j++) {
-        let x = ends[i]
-        let y = ends[i + 1]
-        let z = ends[i + 2]
-
-        let a = Math.sin(this.angles[j].thetaLength) * this.maxRadius
-        if (a < size * 2) {
-          continue
-        }
-        let name = this.dataSource[j][0]
-        let value = this.dataSource[j][1]
-        let label1 = createLabel(name, x, y + size / 2, 0, size, color)
-        let percent = ((value / this.total) * 100).toFixed(2)
-        let label2 = createLabel(`${value} (${percent}%)`, x, y - size / 2, 0, size, color)
-        let maxTextWidth = Math.max(label1.userData.textWidth, label2.userData.textWidth)
-
-        let offsetX = x < this.origin.x ? -maxTextWidth : maxTextWidth
-        label1.translateX(offsetX / 2)
-        label2.translateX(offsetX / 2)
-        this.add(label1, label2)
-        let x2 = x < this.origin.x ? x - maxTextWidth : x + maxTextWidth
-        labelLines.push(x, y, z, x2, y, 0)
+  drawTicksOutside() {
+    let tickLineLength = 4
+    let tickLineEndRadius = this.maxRadius + tickLineLength
+    let offsetRadius = this.maxRadius
+    let ticks = this.angles.reduce((accumulator, v) => {
+      let cosin = Math.cos(v.thetaStart + v.thetaLength / 2)
+      let sine = Math.sin(v.thetaStart + v.thetaLength / 2)
+      let start = [this.origin.x + offsetRadius * cosin, this.origin.y + offsetRadius * sine]
+      let endX = this.origin.x + tickLineEndRadius * cosin
+      let endY = this.origin.y + tickLineEndRadius * sine
+      if (endY <= 0 || endY >= this.size.height) {
+        let x = start[0]
+        let offsetLength = x < this.origin.x ? -v.thetaLength : v.thetaLength
+        let cosin = Math.cos(v.thetaStart + offsetLength)
+        let sine = Math.sin(v.thetaStart + offsetLength)
+        endX = this.origin.x + tickLineEndRadius * cosin
+        endY = this.origin.y + tickLineEndRadius * sine
       }
+      let end = [endX, endY]
+      return accumulator.concat(start, 0, end, 0)
+    }, [])
+    let ends = ticks.filter((v, index) => {
+      return Math.floor(index / 3) % 2
+    })
+    let labelLines = []
+    let size = this.options.theme.labels.style.fontSize
+    let color = this.options.theme.labels.style.color
+    for (let i = 0, j = 0; i < ends.length; i += 3, j++) {
+      let x = ends[i]
+      let y = ends[i + 1]
+      let z = ends[i + 2]
 
-      let material = new LineBasicMaterial({
-        color: this.options.theme.axisTick.style.color
-      })
-      material.depthWrite = false
-      material.fog = false
-      let geometry = createBufferGeometry(
-        ticks.slice(-labelLines.length).concat(labelLines),
-        'tickLine'
-      )
-      let lines = new LineSegments(geometry, material)
-      this.add(lines)
+      let a = Math.sin(this.angles[j].thetaLength) * this.maxRadius
+      if (a < size * 2) {
+        continue
+      }
+      let name = this.dataSource[j][0]
+      let value = this.dataSource[j][1]
+      let label1 = createLabel(name, x, y + size / 2, 0, size, color)
+      let percent = ((value / this.total) * 100).toFixed(2)
+      let label2 = createLabel(`${value} (${percent}%)`, x, y - size / 2, 0, size, color)
+      let maxTextWidth = Math.max(label1.userData.textWidth, label2.userData.textWidth)
+
+      let offsetX = x < this.origin.x ? -maxTextWidth : maxTextWidth
+      label1.translateX(offsetX / 2)
+      label2.translateX(offsetX / 2)
+      this.add(label1, label2)
+      let x2 = x < this.origin.x ? x - maxTextWidth : x + maxTextWidth
+      labelLines.push(x, y, z, x2, y, 0)
+    }
+
+    let material = new LineBasicMaterial({
+      color: this.options.theme.axisTick.style.color
+    })
+    material.depthWrite = false
+    material.fog = false
+    let geometry = createBufferGeometry(
+      ticks.slice(-labelLines.length).concat(labelLines),
+      'tickLine'
+    )
+    let lines = new LineSegments(geometry, material)
+    this.add(lines)
+  }
+
+  drawTicksInside() {
+    let size = this.options.theme.labels.style.fontSize
+    let color = this.options.theme.labels.style.colorReversed
+
+    let lastX = 0,
+      lastY = 0
+    let cloneAngles = Object.assign([], this.angles).reverse()
+    cloneAngles.forEach((v, i) => {
+      let j = this.angles.length - 1 - i
+      let name = this.dataSource[j][0]
+      let value = this.dataSource[j][1]
+      let percent = ((value / this.total) * 100).toFixed(2)
+      let cosin = Math.cos(v.thetaStart + v.thetaLength / 2)
+      let sine = Math.sin(v.thetaStart + v.thetaLength / 2)
+      let offsetRadius = this.maxRadius / 2
+      let x = this.origin.x + offsetRadius * cosin
+      let y = this.origin.y + offsetRadius * sine
+      let sameSide = Math.abs(x - lastX) <= this.maxRadius
+      let interH = Math.abs(y - lastY) < size
+      if (sameSide && interH) {
+        return
+      }
+      let label1 = createLabel(`${name} (${percent}%)`, x, y, 0, size, color)
+      this.add(label1)
+      lastX = x
+      lastY = y
+    })
+  }
+
+  drawTicks() {
+    switch (this.options.theme.plotOptions.pie.label.position) {
+      case 'outside':
+        this.drawTicksOutside()
+        break
+      case 'inside':
+        this.drawTicksInside()
+        break
     }
   }
 

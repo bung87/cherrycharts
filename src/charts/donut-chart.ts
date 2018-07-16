@@ -1,12 +1,20 @@
 import Chart, { IChart } from '../chart'
 import { DataSource } from '../components/bar'
-import { RingGeometry, Vector2, MeshBasicMaterial, Mesh } from 'three'
+import {
+  RingGeometry,
+  Vector2,
+  MeshBasicMaterial,
+  Mesh,
+  LineBasicMaterial,
+  LineSegments
+} from 'three'
 import { IRect, ISize } from '../interfaces'
 import { scaleOrdinal } from 'd3-scale'
 import { range, angle } from '../utils'
-import { createLabel } from '../three-helper'
+import { createLabel, createBufferGeometry } from '../three-helper'
+import PieChart from './pie-chart'
 
-export default class DonutChart extends Chart implements IChart {
+export default class DonutChart extends PieChart implements IChart {
   type = 'DonutChart'
   dataSource: DataSource
   maxRadius: number
@@ -16,16 +24,7 @@ export default class DonutChart extends Chart implements IChart {
   centerLabel: Mesh
   isCenterLabel: boolean
   innerRadiusPer: number
-  origin: Vector2;
-  public get mainRect(): IRect {
-    return this._mainRect
-  }
-  public set mainRect(value: IRect) {
-    this._mainRect = { ...value }
-  }
-  protected onMouseMoveHandle
-  private _mainRect: IRect
-
+  origin: Vector2
   constructor(dom: Element) {
     super(dom)
     this.mainRect = {
@@ -85,7 +84,7 @@ export default class DonutChart extends Chart implements IChart {
       this.hideTooltip()
       return
     }
-  
+
     let [label, value] = this.dataSource[index]
     let percent = ((value / this.total) * 100).toFixed(2)
     let html = `${label} ${value} (${percent}%)`
@@ -195,7 +194,49 @@ export default class DonutChart extends Chart implements IChart {
     })
   }
 
+  drawTicksInside() {
+    let size = this.options.theme.labels.style.fontSize
+    let color = this.options.theme.labels.style.colorReversed
+
+    let lastX = 0,
+      lastY = 0
+    let cloneAngles = Object.assign([], this.angles).reverse()
+    cloneAngles.forEach((v, i) => {
+      let j = this.angles.length - 1 - i
+      let name = this.dataSource[j][0]
+      let value = this.dataSource[j][1]
+      let percent = ((value / this.total) * 100).toFixed(2)
+      let cosin = Math.cos(v.thetaStart + v.thetaLength / 2)
+      let sine = Math.sin(v.thetaStart + v.thetaLength / 2)
+      let offsetRadius =
+        this.maxRadius * this.innerRadiusPer + (this.maxRadius * (1 - this.innerRadiusPer)) / 2
+      let x = this.origin.x + offsetRadius * cosin
+      let y = this.origin.y + offsetRadius * sine
+      let sameSide = Math.abs(x - lastX) <= this.maxRadius
+      let interH = Math.abs(y - lastY) < size
+      if (sameSide && interH) {
+        return
+      }
+      let label1 = createLabel(`${name} (${percent}%)`, x, y, 0, size, color)
+      this.add(label1)
+      lastX = x
+      lastY = y
+    })
+  }
+
+  drawTicks() {
+    switch (this.options.theme.plotOptions.donut.label.position) {
+      case 'outside':
+        this.drawTicksOutside()
+        break
+      case 'inside':
+        this.drawTicksInside()
+        break
+    }
+  }
+
   draw() {
+    this.drawTicks()
     this.drawDonut()
   }
 }
