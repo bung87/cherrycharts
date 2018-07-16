@@ -10,6 +10,7 @@ import './src/scss/cherrycharts.scss'
 ;(function(data) {
   let ele = document.getElementById('bar-chart-responsive')
   let c = new BarChart(ele)
+  .title("TIOBE Index for June 2018")
   c.datum(data).render()
 })(require('./data/bar-chart-data.json'))
 
@@ -22,7 +23,9 @@ import './src/scss/cherrycharts.scss'
   let series = [data, data2]
   let ele = document.getElementById('line-chart')
   let c = new LineChart(ele)
+  
   c.setOptions({theme:{colors:["#626c91", "#a0a7e6", "#c4ebad"]}})
+  .title("Ether Price History (USD)")
   .datum(series)
   .render()
 })(require('./data/line-chart-data.json'))
@@ -43,6 +46,7 @@ import './src/scss/cherrycharts.scss'
 
   c
   .datum(series)
+  
   .renderTo(ele)
   let data3 = data1.map(v => {
     let v2 = parseFloat( (v + 500 + Math.random() * v).toFixed(2)) 

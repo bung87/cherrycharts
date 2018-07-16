@@ -16,13 +16,7 @@ export default class CartesianChart extends Chart {
   public set cartesian(value: ICartesianInfo) {
     this._cartesian = { ...value }
   }
-  public get mainRect(): IRect {
-    return this._mainRect
-  }
-  public set mainRect(value: IRect) {
-    this._mainRect = { ...value }
-  }
-  private _mainRect: IRect
+
   private _cartesian: ICartesianInfo
   constructor(dom?: Element) {
     super(dom)
@@ -36,7 +30,7 @@ export default class CartesianChart extends Chart {
   }
 
   build(data?: DataSource) {
-    this.updateMainRect()
+    
     let theData = data ? data : this.dataSource
     this.buildCartesianInfo(theData)
   }
@@ -60,13 +54,6 @@ export default class CartesianChart extends Chart {
       dataMin,
       yScale
     }
-  }
-
-  updateMainRect(size?: ISize) {
-    let theSize = size ? size : this.size
-    this.size = { ...theSize }
-    this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
-    this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
   }
 
   updateSize(size: ISize) {
@@ -127,7 +114,7 @@ export default class CartesianChart extends Chart {
       let h = this.cartesian.yScale(v) 
       let mesh = createLabel(
         v.toString(),
-        0,
+        null,
         h,
         0,
         size,

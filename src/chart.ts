@@ -1,12 +1,12 @@
-
 import Director from './director'
 import { Object3D, Vector2 } from 'three'
-import {  ISize } from './interfaces'
-import {  defaultsDeep } from 'lodash'
+import { ISize, IRect } from './interfaces'
+import { defaultsDeep } from 'lodash'
 import optimizedResize from './interactions/optimized-resize'
 import * as themes from './themes'
 import * as d3time from 'd3-time'
 import { capitalize } from './utils'
+import { createLabel } from './three-helper'
 
 const defualtTheme = 'walden'
 type TimeUnit = 'year' | 'month' | 'week' | 'day' | 'hour' | 'minute' | 'second' | 'millisecond'
@@ -22,15 +22,14 @@ export interface IChartInteractable {
   bindingEvents()
 }
 
-class Chart  extends Object3D implements IChart, IChartInteractable {
-  
+class Chart extends Object3D implements IChart, IChartInteractable {
   xUnit
   xInterval
   xFormat
   labelUnit
   labelFormat
   labelInterval
-  
+  _title
 
   protected get size(): ISize {
     return this._size
@@ -44,19 +43,26 @@ class Chart  extends Object3D implements IChart, IChartInteractable {
   protected dataProcessed: Boolean
   protected timeStart
   protected timeEnd
-  private _dataSource;
+  private _dataSource
+  public get mainRect(): IRect {
+    return this._mainRect
+  }
+  public set mainRect(value: IRect) {
+    this._mainRect = { ...value }
+  }
+  private _mainRect: IRect
   public get dataSource() {
-    return this._dataSource;
+    return this._dataSource
   }
   public set dataSource(value) {
-    this._dataSource = [...value];
+    this._dataSource = [...value]
   }
-  private _director: Director;
+  private _director: Director
   protected get director(): Director {
-    return this._director;
+    return this._director
   }
   protected set director(value: Director) {
-    this._director = value;
+    this._director = value
   }
   private _useTimeRange: boolean = false
   protected get useTimeRange(): boolean {
@@ -88,6 +94,13 @@ class Chart  extends Object3D implements IChart, IChartInteractable {
     }
   }
 
+  updateMainRect(size?: ISize) {
+    let theSize = size ? size : this.size
+    this.size = { ...theSize }
+    this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
+    this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
+  }
+
   renderTo(container: Element) {
     this.container = container
     this.director = new Director(container)
@@ -100,7 +113,7 @@ class Chart  extends Object3D implements IChart, IChartInteractable {
 
   makeCopy() {
     // dirty work
-    let obj = Object.assign({},this)
+    let obj = Object.assign({}, this)
     obj.container = null
     obj.dataSource = []
     obj.dataProcessed = false
@@ -114,7 +127,7 @@ class Chart  extends Object3D implements IChart, IChartInteractable {
     delete obj.scale
     const theClass = Object.getPrototypeOf(this).constructor
     let a = new theClass()
-    Object.assign(a,obj)
+    Object.assign(a, obj)
     return a
   }
 
@@ -163,6 +176,15 @@ class Chart  extends Object3D implements IChart, IChartInteractable {
 
     this.addTooltip()
     this.bindingEvents()
+  }
+
+  title(text?: String) {
+    if (text) {
+      this._title = text
+      return this
+    } else {
+      return this._title
+    }
   }
 
   onResize() {
@@ -245,9 +267,29 @@ class Chart  extends Object3D implements IChart, IChartInteractable {
     this.draw()
   }
 
+  drawTitle() {
+    let style = this.options.theme.title.style
+    let position = this.options.theme.title.position
+    let horizontal = parseInt(position.x, 10) / 100
+    let vetical = parseInt(position.y, 10) / 100
+    let x = this.size.width * horizontal
+    let y = this.size.height * vetical - style.fontSize / 2
+    let label = createLabel(this._title, x, y, 0, style.fontSize, style.color)
+    this.add(label)
+  }
+
+  drawCommon() {
+    if (this._title) {
+      this.drawTitle()
+    }
+  }
+
   render() {
     this.populateOptions()
+    this.updateMainRect()
+    this.drawCommon()
     this.build(this.dataSource)
+
     this.dataProcessed = true
     this.draw()
     this.director._render()
@@ -262,6 +304,5 @@ class Chart  extends Object3D implements IChart, IChartInteractable {
     return responsive
   }
 }
-
 
 export default Chart

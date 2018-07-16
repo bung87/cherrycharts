@@ -23,14 +23,6 @@ export default class PieChart extends Chart implements IChart {
   colorScale
   angles: Array<any>
   origin: Vector2
-  public get mainRect(): IRect {
-    return this._mainRect
-  }
-  public set mainRect(value: IRect) {
-    this._mainRect = { ...value }
-  }
-  protected onMouseMoveHandle
-  private _mainRect: IRect
 
   constructor(dom: Element) {
     super(dom)

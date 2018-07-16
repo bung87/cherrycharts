@@ -72,7 +72,7 @@ export function createLabel(text, x, y, z, size, color) {
     mesh.userData.textWidth = textWidth
     labelMap[key] = mesh
   }
-  mesh.position.x = x || -mesh.userData.textWidth / 2
+  mesh.position.x = x === null?  -mesh.userData.textWidth / 2 :x
   mesh.position.y = y
   mesh.position.z = z
   
