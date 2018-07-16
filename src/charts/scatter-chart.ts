@@ -80,7 +80,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
     )
     let yScale = scaleLinear()
       .domain([yMin, yMax])
-      .range([0, this.mainRect.height])
+      .range([this.mainRect.bottom,this.mainRect.bottom + this.mainRect.height])
       .nice()
 
     this.colorScale = scaleOrdinal()
@@ -102,13 +102,6 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   //   let theData = data ? data : this.dataSource
   //   this.buildScale(theData)
   // }
-
-  updateMainRect(size?: ISize) {
-    let theSize = size ? size : this.size
-    this.size = { ...theSize }
-    this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
-    this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
-  }
 
   drawXAxisTick() {
     let material = new LineBasicMaterial({
@@ -169,7 +162,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
         let circle = new Mesh(geometry, material)
         geometry.translate(
           this.cartesian.xScale(v.x) ,
-          this.cartesian.yScale(v.y) + this.mainRect.bottom,
+          this.cartesian.yScale(v.y) ,
           0
         )
         this.add(circle)
@@ -235,7 +228,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
     const X2 = this.mainRect.left + this.mainRect.width
 
     let arr = ticks.reduce((accumulator, currentValue) => {
-      let h = this.cartesian.yScale(currentValue) + this.mainRect.bottom
+      let h = this.cartesian.yScale(currentValue) 
       return accumulator.concat(X1, h, 0, X2, h, 0)
     }, [])
 
@@ -285,7 +278,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
       let indx = data.findIndex(x => {
         let vector = new Vector2(
           this.cartesian.xScale(x.x) ,
-          this.cartesian.yScale(x.y) + this.mainRect.bottom
+          this.cartesian.yScale(x.y) 
         )
         let dis = vector.distanceTo(this.mouse)
         return dis <= radius
