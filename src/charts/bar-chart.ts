@@ -133,11 +133,16 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
       )
     })
 
+    
     if (finalIndex === -1) {
       this.hideTooltip()
       return
     }
-
+    let [label, value] = this.dataSource[finalIndex]
+    if(this.mouse.y> this.cartesian.yScale(value) ){
+      this.hideTooltip()
+      return
+    }
     let position = this.bars.children[finalIndex].position
     const keys = Array(barsLen).keys()
     if (!(finalIndex in Array.from(keys))) {
@@ -147,7 +152,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
     this.showTooltip()
     let offsetX = rect.left + position.x
-    let [label, value] = this.dataSource[finalIndex]
+   
     let tooltipRect = this.tooltip.getBoundingClientRect()
     this.tooltip.style.left = `${offsetX - tooltipRect.width / 2}px`
     this.tooltip.style.top = `${event.clientY - tooltipRect.height}px`

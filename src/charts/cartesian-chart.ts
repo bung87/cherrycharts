@@ -52,7 +52,7 @@ export default class CartesianChart extends Chart {
     }, Infinity)
     let yScale = scaleLinear()
       .domain([dataMin, dataMax])
-      .range([0, this.mainRect.height])
+      .range([this.mainRect.bottom, this.mainRect.bottom+this.mainRect.height])
       .nice()
 
     this.cartesian = {
@@ -105,7 +105,7 @@ export default class CartesianChart extends Chart {
     const X2 = this.mainRect.left + this.mainRect.width
 
     let arr = ticks.reduce((accumulator, currentValue) => {
-      let h = this.cartesian.yScale(currentValue) + this.mainRect.bottom
+      let h = this.cartesian.yScale(currentValue) 
       return accumulator.concat(X1, h, 0, X2, h, 0)
     }, [])
 
@@ -124,7 +124,7 @@ export default class CartesianChart extends Chart {
     let size = this.options.theme.labels.style.fontSize
     
     let labels = ticks.map((v, i) => {
-      let h = this.cartesian.yScale(v) + this.mainRect.bottom
+      let h = this.cartesian.yScale(v) 
       let mesh = createLabel(
         v.toString(),
         0,

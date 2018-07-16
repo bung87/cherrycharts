@@ -153,7 +153,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
 
     let yScale = scaleLinear()
       .domain([yMin, yMax])
-      .range([0, this.mainRect.height])
+      .range([this.mainRect.bottom,this.mainRect.bottom+ this.mainRect.height])
       .nice()
 
     this.cartesian = {
@@ -182,7 +182,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       let vectors = v.reduce((accumulator, currentValue, index) => {
         let value = useTimeRange ? currentValue : currentValue[1]
         let xValue = useTimeRange ? ticks[index] : new Date(currentValue[0])
-        let h = this.cartesian.yScale(value) + this.mainRect.bottom
+        let h = this.cartesian.yScale(value) 
         let x = this.cartesian.xScale(xValue)
         
         return accumulator.concat(new Vector2(x, h))
@@ -212,7 +212,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       let arr = v.reduce((accumulator, currentValue, index) => {
         let value = useTimeRange ? currentValue : currentValue[1]
         let xValue = useTimeRange ? ticks[index] : new Date(currentValue[0])
-        let h = this.cartesian.yScale(value) + this.mainRect.bottom
+        let h = this.cartesian.yScale(value) 
         let x = this.cartesian.xScale(xValue)
         if (index > 0 && index < v.length) {
           return accumulator.concat(x, h, 0, x, h, 0)

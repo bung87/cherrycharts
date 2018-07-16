@@ -19,7 +19,7 @@ export class Bar extends Object3D {
       if (x>rect.left+rect.width){
         return true
       }
-      let h = cartesian.yScale(v[1])
+      let h = cartesian.yScale(v[1]) - rect.bottom
       let g = new PlaneGeometry(barWidth, h, 1)
       // let color = new Color(colorScale(i))
       let m = new Mesh(g, new MeshBasicMaterial({ color: colorScale(i) }))
