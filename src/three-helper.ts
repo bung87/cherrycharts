@@ -8,6 +8,7 @@ import {
   PlaneGeometry,
   ClampToEdgeWrapping,
   NearestFilter,
+  // LinearMipMapLinearFilter,
   LinearFilter
 } from 'three'
 
@@ -39,7 +40,7 @@ export function createLabel(text, x, y, z, size, color) {
     let textWidth = Math.round(context.measureText(text).width)
     canvas.width = textWidth * window.devicePixelRatio
     canvas.height = size * window.devicePixelRatio
-    canvas.style.cssText = `width:${textWidth}px;height:${size}px`
+    canvas.style.cssText = `width:${textWidth}px;height:${size}px;`
 
     context.font = size * window.devicePixelRatio + 'px Arial' // change before fill
 
@@ -52,12 +53,15 @@ export function createLabel(text, x, y, z, size, color) {
     texture.wrapS = ClampToEdgeWrapping
     texture.wrapT = ClampToEdgeWrapping
     texture.minFilter = LinearFilter // or LinearFilter?
+    texture.magFilter = NearestFilter
+    // texture.premultiplyAlpha = true
 
     let material = new MeshBasicMaterial({
       // color: color,
       transparent: true,
       map: texture
     })
+
     mesh = new Mesh(
       new PlaneGeometry(
         canvas.width / window.devicePixelRatio,
