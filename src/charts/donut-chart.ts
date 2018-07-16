@@ -1,17 +1,9 @@
-import Chart, { IChart } from '../chart'
+import { IChart } from '../chart'
 import { DataSource } from '../components/bar'
-import {
-  RingGeometry,
-  Vector2,
-  MeshBasicMaterial,
-  Mesh,
-  LineBasicMaterial,
-  LineSegments
-} from 'three'
-import { IRect, ISize } from '../interfaces'
-import { scaleOrdinal } from 'd3-scale'
-import { range, angle } from '../utils'
-import { createLabel, createBufferGeometry } from '../three-helper'
+import { RingGeometry, Vector2, MeshBasicMaterial, Mesh } from 'three'
+
+import { angle } from '../utils'
+import { createLabel } from '../three-helper'
 import PieChart from './pie-chart'
 
 export default class DonutChart extends PieChart implements IChart {
@@ -23,32 +15,9 @@ export default class DonutChart extends PieChart implements IChart {
   angles: Array<any>
   centerLabel: Mesh
   isCenterLabel: boolean
-  innerRadiusPer: number
   origin: Vector2
   constructor(dom: Element) {
     super(dom)
-    this.mainRect = {
-      top: 20,
-      right: 20,
-      bottom: 20,
-      left: 20
-    }
-    this.updateMainRect()
-  }
-
-  updateMainRect(size?: ISize) {
-    let theSize = size ? size : this.size
-    this.size = { ...theSize }
-    this.mainRect.width = this.size.width - this.mainRect.left - this.mainRect.right
-    this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
-    this.maxRadius = Math.min(this.mainRect.width, this.mainRect.height) / 2
-  }
-
-  bindingEvents() {
-    this.onMouseMoveHandle = this.onMouseMove.bind(this)
-    let canvas = this.director.getCanvas()
-    canvas.addEventListener('mousemove', this.onMouseMoveHandle)
-    canvas.onmouseout = canvas.onmouseleave = this.onMouseLeave.bind(this)
   }
 
   isOutOfArea(vector2) {
@@ -118,65 +87,6 @@ export default class DonutChart extends PieChart implements IChart {
     }
   }
 
-  onMouseLeave(event) {
-    if (event.relatedTarget === this.tooltip) {
-      return
-    }
-    this.hideTooltip()
-  }
-
-  buildColorScale() {
-    let indexs = range(this.dataSource.length)
-
-    if (this.options.theme.plotOptions.donut.clockwise) {
-      indexs.reverse()
-    }
-    this.colorScale = scaleOrdinal()
-      .domain(indexs)
-      .range(this.options.theme.colors)
-  }
-
-  buildAngles() {
-    let arr = this.dataSource.map(v => {
-      return v[1] / this.total
-    })
-    let startAngleDegree = this.options.theme.plotOptions.donut.startAngle
-    let startPer = startAngleDegree / 360
-
-    this.angles = arr.map(v => {
-      if (startAngleDegree > 360) {
-        startAngleDegree = startAngleDegree - 360
-      }
-      let thetaStart = startPer * Math.PI * 2
-      let thetaLength = v * Math.PI * 2
-      let angle = v * 360
-
-      let ang = startAngleDegree + angle
-      let endAngleDegree = ang < 360 ? ang : ang - 360
-      let ret = { thetaStart, thetaLength, startAngleDegree, endAngleDegree }
-      startPer += v
-      startAngleDegree += angle
-      return ret
-    })
-  }
-
-  build() {
-    this.origin = new Vector2(this.mainRect.width / 2, this.mainRect.height / 2)
-    this.innerRadiusPer = parseInt(this.options.theme.plotOptions.donut.innerRadius, 10) / 100
-    this.buildColorScale()
-    this.dataSource.sort((a, b) => {
-      return a[1] - b[1]
-    })
-    if (!this.options.theme.plotOptions.donut.clockwise) {
-      this.dataSource.reverse()
-    }
-
-    this.total = this.dataSource.reduce(function(acc, arr) {
-      return acc + arr[1]
-    }, 0)
-    this.buildAngles()
-  }
-
   drawDonut() {
     this.angles.forEach((v, i) => {
       let geometry = new RingGeometry(
@@ -192,47 +102,6 @@ export default class DonutChart extends PieChart implements IChart {
       geometry.translate(this.mainRect.width / 2, this.mainRect.height / 2, 0)
       this.add(mesh)
     })
-  }
-
-  drawTicksInside() {
-    let size = this.options.theme.labels.style.fontSize
-    let color = this.options.theme.labels.style.colorReversed
-
-    let lastX = 0,
-      lastY = 0
-    let cloneAngles = Object.assign([], this.angles).reverse()
-    cloneAngles.forEach((v, i) => {
-      let j = this.angles.length - 1 - i
-      let name = this.dataSource[j][0]
-      let value = this.dataSource[j][1]
-      let percent = ((value / this.total) * 100).toFixed(2)
-      let cosin = Math.cos(v.thetaStart + v.thetaLength / 2)
-      let sine = Math.sin(v.thetaStart + v.thetaLength / 2)
-      let offsetRadius =
-        this.maxRadius * this.innerRadiusPer + (this.maxRadius * (1 - this.innerRadiusPer)) / 2
-      let x = this.origin.x + offsetRadius * cosin
-      let y = this.origin.y + offsetRadius * sine
-      let sameSide = Math.abs(x - lastX) <= this.maxRadius
-      let interH = Math.abs(y - lastY) < size
-      if (sameSide && interH) {
-        return
-      }
-      let label1 = createLabel(`${name} (${percent}%)`, x, y, 0, size, color)
-      this.add(label1)
-      lastX = x
-      lastY = y
-    })
-  }
-
-  drawTicks() {
-    switch (this.options.theme.plotOptions.donut.label.position) {
-      case 'outside':
-        this.drawTicksOutside()
-        break
-      case 'inside':
-        this.drawTicksInside()
-        break
-    }
   }
 
   draw() {

@@ -44,7 +44,7 @@
       "startAngle": 90,
       "innerRadius": "50%",
       "label": {
-        "position": "center"
+        "position": "inside"
       }
     },
     "pie": {

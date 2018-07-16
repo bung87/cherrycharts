@@ -16,6 +16,7 @@ import { range, angle } from '../utils'
 import { createBufferGeometry, createLabel } from '../three-helper'
 
 export default class PieChart extends Chart implements IChart {
+  
   type = 'PieChart'
   dataSource: DataSource
   maxRadius: number
@@ -23,7 +24,7 @@ export default class PieChart extends Chart implements IChart {
   colorScale
   angles: Array<any>
   origin: Vector2
-
+  innerRadiusPer = 0
   constructor(dom: Element) {
     super(dom)
     this.mainRect = {
@@ -117,7 +118,7 @@ export default class PieChart extends Chart implements IChart {
   buildColorScale() {
     let indexs = range(this.dataSource.length)
 
-    if (this.options.theme.plotOptions.pie.clockwise) {
+    if (this.plotOptions.clockwise) {
       indexs.reverse()
     }
     this.colorScale = scaleOrdinal()
@@ -130,7 +131,7 @@ export default class PieChart extends Chart implements IChart {
       return v[1] / this.total
     })
 
-    let startAngleDegree = this.options.theme.plotOptions.pie.startAngle
+    let startAngleDegree = this.plotOptions.startAngle
     let startPer = startAngleDegree / 360
     this.angles = arr.map(v => {
       if (startAngleDegree > 360) {
@@ -156,6 +157,9 @@ export default class PieChart extends Chart implements IChart {
   }
 
   build() {
+    if(this.type === "DonutChart"){
+      this.innerRadiusPer = (parseInt(this.plotOptions.innerRadius,10)/100)
+    }
     this.origin = new Vector2(this.mainRect.width / 2, this.mainRect.height / 2)
     this.buildColorScale()
     this.dataSource.sort((a, b) => {
@@ -239,22 +243,35 @@ export default class PieChart extends Chart implements IChart {
     let lastX = 0,
       lastY = 0
     let cloneAngles = Object.assign([], this.angles).reverse()
+    let minPercent = this.plotOptions.label['minPercent']
+ 
     cloneAngles.forEach((v, i) => {
       let j = this.angles.length - 1 - i
       let name = this.dataSource[j][0]
       let value = this.dataSource[j][1]
       let percent = ((value / this.total) * 100).toFixed(2)
+
+      if (minPercent && Number(percent) < parseFloat(minPercent)) {
+        return
+      }
       let cosin = Math.cos(v.thetaStart + v.thetaLength / 2)
       let sine = Math.sin(v.thetaStart + v.thetaLength / 2)
-      let offsetRadius = this.maxRadius / 2
+      let offsetRadius =
+        this.maxRadius * this.innerRadiusPer + (this.maxRadius * (1 - this.innerRadiusPer)) / 2
       let x = this.origin.x + offsetRadius * cosin
       let y = this.origin.y + offsetRadius * sine
       let sameSide = Math.abs(x - lastX) <= this.maxRadius
-      let interH = Math.abs(y - lastY) < size
-      if (sameSide && interH) {
+      let interH = Math.abs(Math.round(y - lastY)) < size
+      if (interH && y < lastY) {
+        y -= size / 2
+      } else if (interH && y > lastY) {
+        y += size / 2
+      }
+      let interH2 = Math.abs(Math.round(y - lastY)) < size
+      if (sameSide && interH2) {
         return
       }
-      let label1 = createLabel(`${name} (${percent}%)`, x, y, 0, size, color)
+      let label1 = createLabel(`${name} (${percent}%)`, x, y, 0, size, color, 1, this.colorScale(j))
       this.add(label1)
       lastX = x
       lastY = y
@@ -262,7 +279,7 @@ export default class PieChart extends Chart implements IChart {
   }
 
   drawTicks() {
-    switch (this.options.theme.plotOptions.pie.label.position) {
+    switch (this.plotOptions.label.position) {
       case 'outside':
         this.drawTicksOutside()
         break

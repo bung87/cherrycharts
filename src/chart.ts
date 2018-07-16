@@ -1,7 +1,7 @@
 import Director from './director'
 import { Object3D, Vector2 } from 'three'
 import { ISize, IRect } from './interfaces'
-import { defaultsDeep } from 'lodash'
+import { defaultsDeep,merge } from 'lodash'
 import optimizedResize from './interactions/optimized-resize'
 import * as themes from './themes'
 import * as d3time from 'd3-time'
@@ -30,7 +30,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   labelFormat
   labelInterval
   _title
-
+  
   protected get size(): ISize {
     return this._size
   }
@@ -44,6 +44,14 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   protected timeStart
   protected timeEnd
   private _dataSource
+  private _plotOptions;
+  private _customPlotOptions = {}
+  public get plotOptions() {
+    return this._plotOptions;
+  }
+  public set plotOptions(value) {
+    this._plotOptions = {...value};
+  }
   public get mainRect(): IRect {
     return this._mainRect
   }
@@ -230,6 +238,21 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     } else {
       defaultsDeep(this.options.theme, themes[defualtTheme])
     }
+    this.plotOptions = this.getGlobalPlotOptions()
+    merge(this.plotOptions,this._customPlotOptions)
+  }
+
+  getGlobalPlotOptions() {
+    let chartType = this.type.toLowerCase()
+    let index = chartType.indexOf('chart')
+    if (index !== -1) {
+      chartType = chartType.substring(0, index)
+      return this.options.theme.plotOptions[chartType]
+    }
+  }
+
+  setPlotOptions(value){
+    merge(this._customPlotOptions,value)
   }
 
   datum(data) {
