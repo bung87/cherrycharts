@@ -1,12 +1,12 @@
-import { Legend } from './../components/legend';
+import { Legend } from './../components/legend'
 import { Color, LineBasicMaterial, LineSegments } from 'three'
-import { createBufferGeometry,createLabel } from '../three-helper'
+import { createBufferGeometry, createLabel } from '../three-helper'
 import { DataSource, Bar } from '../components/bar'
 import { IRect, ICartesian, ICartesianInfo } from '../interfaces'
 import { IChartInteractable } from '../chart'
 import CartesianChart from './cartesian-chart'
 import { scaleOrdinal, scaleBand } from 'd3-scale'
-import {range} from '../utils'
+import { range } from '../utils'
 
 export default class BarChart extends CartesianChart implements ICartesian, IChartInteractable {
   dataSource: DataSource
@@ -16,7 +16,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
   type = 'BarChart'
   colorScale
   protected onMouseMoveHandle
-  constructor(dom: Element) {
+  constructor(dom: HTMLElement) {
     super(dom)
     this.barWidth = 20
     this.barGap = 10
@@ -36,7 +36,6 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
       .paddingOuter(padding)
 
     this.cartesian.xScale = xScale
-    
   }
 
   drawXAxisTick() {
@@ -84,19 +83,14 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
       if (v > xMax) {
         return true
       }
-      let mesh = createLabel(
-        this.dataSource[i][0],
-        v,
-        Y - tickSize - size / 2 - 2,
-        0,
-        size,
-        this.options.labels.style.color
-      )
+      let mesh = createLabel(this.dataSource[i][0], size, this.options.labels.style.color)
+      mesh.position.x = v
+      mesh.position.y = Y - tickSize - size / 2 - 2
+      mesh.position.z = 0
       this.add(mesh)
       return false
     })
   }
-
 
   draw() {
     this.drawAxis()
@@ -113,10 +107,9 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
       this.drawLegends()
     }
   }
-  
-  drawLegends(){
-    
-    this.add(new Legend(this.dataSource,this.colorScale,this.options.legends))
+
+  drawLegends() {
+    this.add(new Legend(this.dataSource, this.colorScale, this.options.legends))
   }
 
   bindingEvents() {
@@ -145,13 +138,12 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
       )
     })
 
-    
     if (finalIndex === -1) {
       this.hideTooltip()
       return
     }
     let [label, value] = this.dataSource[finalIndex]
-    if(this.mouse.y> this.cartesian.yScale(value) ){
+    if (this.mouse.y > this.cartesian.yScale(value)) {
       this.hideTooltip()
       return
     }
@@ -164,7 +156,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
     this.showTooltip()
     let offsetX = rect.left + position.x
-   
+
     let tooltipRect = this.tooltip.getBoundingClientRect()
     this.tooltip.style.left = `${offsetX - tooltipRect.width / 2}px`
     this.tooltip.style.top = `${event.clientY - tooltipRect.height}px`

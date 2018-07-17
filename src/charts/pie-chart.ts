@@ -16,7 +16,6 @@ import { range, angle } from '../utils'
 import { createBufferGeometry, createLabel } from '../three-helper'
 
 export default class PieChart extends Chart implements IChart {
-  
   type = 'PieChart'
   dataSource: DataSource
   maxRadius: number
@@ -25,7 +24,7 @@ export default class PieChart extends Chart implements IChart {
   angles: Array<any>
   origin: Vector2
   innerRadiusPer = 0
-  constructor(dom: Element) {
+  constructor(dom: HTMLElement) {
     super(dom)
     this.mainRect = {
       top: 20,
@@ -157,8 +156,8 @@ export default class PieChart extends Chart implements IChart {
   }
 
   build() {
-    if(this.type === "DonutChart"){
-      this.innerRadiusPer = (parseInt(this.plotOptions.innerRadius,10)/100)
+    if (this.type === 'DonutChart') {
+      this.innerRadiusPer = parseInt(this.plotOptions.innerRadius, 10) / 100
     }
     this.origin = new Vector2(this.mainRect.width / 2, this.mainRect.height / 2)
     this.buildColorScale()
@@ -210,14 +209,18 @@ export default class PieChart extends Chart implements IChart {
       }
       let name = this.dataSource[j][0]
       let value = this.dataSource[j][1]
-      let label1 = createLabel(name, x, y + size / 2, 0, size, color)
       let percent = ((value / this.total) * 100).toFixed(2)
-      let label2 = createLabel(`${value} (${percent}%)`, x, y - size / 2, 0, size, color)
-      let maxTextWidth = Math.max(label1.userData.textWidth, label2.userData.textWidth)
 
+      let label1 = createLabel(name, size, color)
+      let label2 = createLabel(`${value} (${percent}%)`, size, color)
+      let maxTextWidth = Math.max(label1.userData.textWidth, label2.userData.textWidth)
       let offsetX = x < this.origin.x ? -maxTextWidth : maxTextWidth
-      label1.translateX(offsetX / 2)
-      label2.translateX(offsetX / 2)
+      label1.position.x = x + offsetX / 2
+      label1.position.y = y + size / 2
+
+      label2.position.x = x + offsetX / 2
+      label2.position.y = y - size / 2
+
       this.add(label1, label2)
       let x2 = x < this.origin.x ? x - maxTextWidth : x + maxTextWidth
       labelLines.push(x, y, z, x2, y, 0)
@@ -244,7 +247,7 @@ export default class PieChart extends Chart implements IChart {
       lastY = 0
     let cloneAngles = Object.assign([], this.angles).reverse()
     let minPercent = this.plotOptions.label['minPercent']
- 
+
     cloneAngles.forEach((v, i) => {
       let j = this.angles.length - 1 - i
       let name = this.dataSource[j][0]
@@ -271,7 +274,10 @@ export default class PieChart extends Chart implements IChart {
       if (sameSide && interH2) {
         return
       }
-      let label1 = createLabel(`${name} (${percent}%)`, x, y, 0, size, color, 1, this.colorScale(j))
+      let label1 = createLabel(`${name} (${percent}%)`,size, color, 1, this.colorScale(j))
+      label1.position.x = x
+      label1.position.y = y
+      label1.position.z = 0
       this.add(label1)
       lastX = x
       lastY = y

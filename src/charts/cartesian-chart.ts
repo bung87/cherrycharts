@@ -3,7 +3,7 @@ import Chart from '../chart'
 import { DataSource } from '../components/bar'
 import { IRect, ISize, ICartesianInfo } from '../interfaces'
 import { scaleLinear } from 'd3-scale'
-import { createBufferGeometry,createLabel } from '../three-helper'
+import { createBufferGeometry, createLabel } from '../three-helper'
 
 import { LineBasicMaterial, LineDashedMaterial, LineSegments } from 'three'
 
@@ -18,7 +18,7 @@ export default class CartesianChart extends Chart {
   }
 
   private _cartesian: ICartesianInfo
-  constructor(dom?: Element) {
+  constructor(dom?: HTMLElement) {
     super(dom)
     this.mainRect = {
       top: 20,
@@ -26,11 +26,9 @@ export default class CartesianChart extends Chart {
       bottom: 20,
       left: 20
     }
-   
   }
 
   build(data?: DataSource) {
-    
     let theData = data ? data : this.dataSource
     this.buildCartesianInfo(theData)
   }
@@ -46,7 +44,7 @@ export default class CartesianChart extends Chart {
     }, Infinity)
     let yScale = scaleLinear()
       .domain([dataMin, dataMax])
-      .range([this.mainRect.bottom, this.mainRect.bottom+this.mainRect.height])
+      .range([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
       .nice()
 
     this.cartesian = {
@@ -92,7 +90,7 @@ export default class CartesianChart extends Chart {
     const X2 = this.mainRect.left + this.mainRect.width
 
     let arr = ticks.reduce((accumulator, currentValue) => {
-      let h = this.cartesian.yScale(currentValue) 
+      let h = this.cartesian.yScale(currentValue)
       return accumulator.concat(X1, h, 0, X2, h, 0)
     }, [])
 
@@ -109,17 +107,13 @@ export default class CartesianChart extends Chart {
   drawYAxisLabel() {
     let ticks = this.cartesian.yScale.ticks().slice(1)
     let size = this.options.labels.style.fontSize
-    
+
     let labels = ticks.map((v, i) => {
-      let h = this.cartesian.yScale(v) 
-      let mesh = createLabel(
-        v.toString(),
-        null,
-        h,
-        0,
-        size,
-        this.options.labels.style.color
-      )
+      let h = this.cartesian.yScale(v)
+      let mesh = createLabel(v.toString(), size, this.options.labels.style.color)
+      mesh.position.x = -mesh.userData.textWidth / 2
+      mesh.position.y = h
+      mesh.position.z = 0
       return mesh
     })
     // adjust mainRect
@@ -127,13 +121,13 @@ export default class CartesianChart extends Chart {
       return Math.max(max, arr.userData.textWidth)
     }, -Infinity)
     const labelMarginRight = 4
-    let offsetX = Math.max(this.mainRect.left,maxTextWidth + labelMarginRight) 
+    let offsetX = Math.max(this.mainRect.left, maxTextWidth + labelMarginRight)
     this.mainRect.left = offsetX
-    if(this.cartesian.xScale){
-      this.cartesian.xScale.range([offsetX,offsetX+this.mainRect.width])
+    if (this.cartesian.xScale) {
+      this.cartesian.xScale.range([offsetX, offsetX + this.mainRect.width])
     }
-    labels.forEach( (v,i)=>{
-      v.translateX(offsetX-labelMarginRight)
+    labels.forEach((v, i) => {
+      v.translateX(offsetX - labelMarginRight)
     })
     this.add(...labels)
   }
@@ -145,7 +139,6 @@ export default class CartesianChart extends Chart {
   drawAxisLabel(): void {
     this.drawYAxisLabel()
     this.drawXAxisLabel()
-    
   }
   drawAxisTick(): void {
     this.drawXAxisTick()
@@ -157,7 +150,7 @@ export default class CartesianChart extends Chart {
   drawAxis() {
     this.drawAxisLabel()
     this.drawAxisLine()
-    
+
     this.drawAxisTick()
     this.drawSplitLine()
   }

@@ -25,7 +25,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
   dataSource: DataSource
   protected onMouseMoveHandle
 
-  constructor(dom?: Element) {
+  constructor(dom?: HTMLElement) {
     super(dom)
   }
 
@@ -37,12 +37,12 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
     let arr = []
 
     let ticks
-    if(this.useTimeRange){
+    if (this.useTimeRange) {
       ticks = this.cartesian.xScale.ticks(this.labelUnit.every(this.labelInterval))
-    }else{
+    } else {
       ticks = this.cartesian.xScale.ticks()
     }
-     
+
     let xArr = ticks.map((v, i) => {
       return this.cartesian.xScale(v)
     }, this)
@@ -84,20 +84,13 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       if (v > xMax) {
         return true
       }
-      let mesh = createLabel(
-        tickFormat(ticks[i]),
-        v,
-        Y - tickSize - size / 2 - 2,
-        0,
-        size,
-        this.options.labels.style.color
-      )
+      let mesh = createLabel(tickFormat(ticks[i]), size, this.options.labels.style.color)
+      mesh.position.x = v
+      mesh.position.y = Y - tickSize - size / 2 - 2
       this.add(mesh)
       return false
     })
   }
-
-  
 
   buildCartesianInfo(data?: DataSource) {
     let theData = data ? data : this.dataSource
@@ -153,7 +146,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
 
     let yScale = scaleLinear()
       .domain([yMin, yMax])
-      .range([this.mainRect.bottom,this.mainRect.bottom+ this.mainRect.height])
+      .range([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
       .nice()
 
     this.cartesian = {
@@ -176,15 +169,15 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
     let colorScale = scaleOrdinal()
       .domain(range(this.dataSource[0].length))
       .range(this.options.colors)
-      let useTimeRange = this.useTimeRange
+    let useTimeRange = this.useTimeRange
     let ticks = useTimeRange ? this.cartesian.xScale.ticks(this.xUnit.every(this.xInterval)) : null
     this.dataSource.forEach((v, i) => {
       let vectors = v.reduce((accumulator, currentValue, index) => {
         let value = useTimeRange ? currentValue : currentValue[1]
         let xValue = useTimeRange ? ticks[index] : new Date(currentValue[0])
-        let h = this.cartesian.yScale(value) 
+        let h = this.cartesian.yScale(value)
         let x = this.cartesian.xScale(xValue)
-        
+
         return accumulator.concat(new Vector2(x, h))
       }, [])
       let shape = new Shape()
@@ -212,7 +205,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       let arr = v.reduce((accumulator, currentValue, index) => {
         let value = useTimeRange ? currentValue : currentValue[1]
         let xValue = useTimeRange ? ticks[index] : new Date(currentValue[0])
-        let h = this.cartesian.yScale(value) 
+        let h = this.cartesian.yScale(value)
         let x = this.cartesian.xScale(xValue)
         if (index > 0 && index < v.length) {
           return accumulator.concat(x, h, 0, x, h, 0)
@@ -250,24 +243,22 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       return
     }
     let data = this.dataSource[0]
-    
-    let finalIndex 
+
+    let finalIndex
     let ticks
-    if(this.useTimeRange){
+    if (this.useTimeRange) {
       ticks = this.cartesian.xScale.ticks(this.xUnit.every(this.xInterval))
       finalIndex = binarySearch(ticks, x => {
         let dateX = this.cartesian.xScale(x)
         return Math.floor(dateX) >= this.mouse.x || Math.round(dateX) >= this.mouse.x
       })
-    }else{
+    } else {
       finalIndex = binarySearch(data, x => {
         let dateX = this.cartesian.xScale(new Date(x[0]))
         return Math.floor(dateX) >= this.mouse.x || Math.round(dateX) >= this.mouse.x
       })
-  
     }
-    
-    
+
     if (finalIndex === -1) {
       this.hideTooltip()
       return
@@ -280,21 +271,20 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
     // }
     this.tooltip.style.display = 'block'
     let html = ''
-    if(this.useTimeRange){
-      let tickFormat = this.cartesian.xScale.tickFormat(this.xUnit,this.xFormat)
-      this.dataSource.forEach( (v,i) => {
+    if (this.useTimeRange) {
+      let tickFormat = this.cartesian.xScale.tickFormat(this.xUnit, this.xFormat)
+      this.dataSource.forEach((v, i) => {
         let label = tickFormat(ticks[finalIndex])
         let value = v[finalIndex]
         html += `${label} ${value}<br>`
       })
-     
-    }else{
+    } else {
       this.dataSource.forEach(v => {
         let [label, value] = v[finalIndex]
         html += `${label} ${value}<br>`
       })
     }
-   
+
     let offsetX = rect.left + this.mouse.x
     let tooltipRect = this.tooltip.getBoundingClientRect()
     this.tooltip.style.left = `${offsetX - tooltipRect.width / 2}px`

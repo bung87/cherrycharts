@@ -8,7 +8,7 @@ import { timeMonth, timeDay } from 'd3-time'
 
 class LineChart extends AreaChart implements ICartesian {
   type = 'LineChart'
-  constructor(dom?: Element) {
+  constructor(dom?: HTMLElement) {
     super(dom)
   }
   drawBasicLine() {

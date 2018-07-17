@@ -16,7 +16,7 @@ export default class DonutChart extends PieChart implements IChart {
   centerLabel: Mesh
   isCenterLabel: boolean
   origin: Vector2
-  constructor(dom: Element) {
+  constructor(dom: HTMLElement) {
     super(dom)
   }
 
@@ -57,20 +57,17 @@ export default class DonutChart extends PieChart implements IChart {
     let [label, value] = this.dataSource[index]
     let percent = ((value / this.total) * 100).toFixed(2)
     let html = `${label} ${value} (${percent}%)`
-    let size = this.options.labels.style.fontSize
+    let style = this.options.labels.style
 
     if (this.options.plotOptions.donut.label.position === 'center') {
       if (this.centerLabel) {
         this.remove(this.centerLabel)
       }
-      this.centerLabel = createLabel(
-        `${label} ${value} (${percent}%)`,
-        this.origin.x,
-        this.origin.y,
-        0,
-        size,
-        this.options.labels.style.color
-      )
+      this.centerLabel = createLabel(`${label} ${value} (${percent}%)`, style.fontSize, style.color)
+      this.centerLabel.position.x = this.origin.x
+      this.centerLabel.position.y = this.origin.y
+      this.centerLabel.position.z = 0
+
       this.add(this.centerLabel)
       this._render()
     }

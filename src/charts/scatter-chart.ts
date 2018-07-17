@@ -21,7 +21,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   colorScale
   protected onMouseMoveHandle:Function
 
-  constructor(dom: Element) {
+  constructor(dom: HTMLElement) {
     super(dom)
     this.mainRect = {
       top: 20,
@@ -136,7 +136,9 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
       if (x > xMax) {
         return true
       }
-      let mesh = createLabel(v, x, Y - tickSize - size / 2 - 2, 0, size, this.options.labels.style.color)
+      let mesh = createLabel(v, size, this.options.labels.style.color)
+      mesh.position.x = x
+      mesh.position.y = Y - tickSize - size / 2 - 2
       this.add(mesh)
       return false
     })

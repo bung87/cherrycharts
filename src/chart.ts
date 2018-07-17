@@ -42,7 +42,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   protected set size(value: ISize) {
     this._size = { ...value }
   }
-  protected container: Element
+  protected container: HTMLElement
   protected mouse: Vector2 = new Vector2()
   protected tooltip
   protected dataProcessed: Boolean
@@ -85,7 +85,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this._options = { ...value }
   }
 
-  constructor(container?: Element) {
+  constructor(container?: HTMLElement) {
     super()
     if (container) {
       this.container = container
@@ -191,7 +191,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this.director._render()
   }
 
-  public renderTo(container: Element) {
+  public renderTo(container: HTMLElement) {
     this.container = container
     this.director = new Director(container)
     this.size = this.director.size
@@ -307,7 +307,9 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     let vetical = parseInt(position.y, 10) / 100
     let x = this.size.width * horizontal
     let y = this.size.height * vetical - style.fontSize / 2
-    let label = createLabel(this._title, x, y, 0, style.fontSize, style.color)
+    let label = createLabel(this._title, style.fontSize, style.color)
+    label.position.x = x
+    label.position.y = y
     this.add(label)
   }
 
