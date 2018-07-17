@@ -10,6 +10,9 @@
       "fontSize": 14
     }
   },
+  "legends":{
+    "show":false
+  },
   "labels": {
     "style": {
       "color": "#444444",

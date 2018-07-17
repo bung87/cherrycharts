@@ -14,7 +14,7 @@ class LineChart extends AreaChart implements ICartesian {
   drawBasicLine() {
     let colorScale = scaleOrdinal()
       .domain(range(this.dataSource[0].length))
-      .range(this.options.theme.colors)
+      .range(this.options.colors)
     let useTimeRange = this.useTimeRange
     let ticks = useTimeRange ? this.cartesian.xScale.ticks(timeDay) : null
     this.dataSource.forEach((v, i) => {

@@ -123,7 +123,7 @@ export default class PieChart extends Chart implements IChart {
     }
     this.colorScale = scaleOrdinal()
       .domain(indexs)
-      .range(this.options.theme.colors)
+      .range(this.options.colors)
   }
 
   buildAngles() {
@@ -197,8 +197,8 @@ export default class PieChart extends Chart implements IChart {
       return Math.floor(index / 3) % 2
     })
     let labelLines = []
-    let size = this.options.theme.labels.style.fontSize
-    let color = this.options.theme.labels.style.color
+    let size = this.options.labels.style.fontSize
+    let color = this.options.labels.style.color
     for (let i = 0, j = 0; i < ends.length; i += 3, j++) {
       let x = ends[i]
       let y = ends[i + 1]
@@ -224,7 +224,7 @@ export default class PieChart extends Chart implements IChart {
     }
 
     let material = new LineBasicMaterial({
-      color: this.options.theme.axisTick.style.color
+      color: this.options.axisTick.style.color
     })
     material.depthWrite = false
     material.fog = false
@@ -237,8 +237,8 @@ export default class PieChart extends Chart implements IChart {
   }
 
   drawTicksInside() {
-    let size = this.options.theme.labels.style.fontSize
-    let color = this.options.theme.labels.style.colorReversed
+    let size = this.options.labels.style.fontSize
+    let color = this.options.labels.style.colorReversed
 
     let lastX = 0,
       lastY = 0

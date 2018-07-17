@@ -64,7 +64,7 @@ export default class CartesianChart extends Chart {
 
   drawAxisLine() {
     let material = new LineBasicMaterial({
-      color: this.options.theme.axisLine.style.color
+      color: this.options.axisLine.style.color
     })
     let lineWidth = 1 / window.devicePixelRatio
     let hStart = [this.mainRect.left, this.mainRect.bottom - lineWidth, 0]
@@ -81,9 +81,9 @@ export default class CartesianChart extends Chart {
     let ticks = this.cartesian.yScale.ticks().slice(1)
 
     let material = new LineDashedMaterial({
-      color: this.options.theme.splitLine.style.color,
-      dashSize: this.options.theme.splitLine.style.dashSize,
-      gapSize: this.options.theme.splitLine.style.gapSize,
+      color: this.options.splitLine.style.color,
+      dashSize: this.options.splitLine.style.dashSize,
+      gapSize: this.options.splitLine.style.gapSize,
       fog: false,
       depthWrite: false
     })
@@ -108,7 +108,7 @@ export default class CartesianChart extends Chart {
 
   drawYAxisLabel() {
     let ticks = this.cartesian.yScale.ticks().slice(1)
-    let size = this.options.theme.labels.style.fontSize
+    let size = this.options.labels.style.fontSize
     
     let labels = ticks.map((v, i) => {
       let h = this.cartesian.yScale(v) 
@@ -118,7 +118,7 @@ export default class CartesianChart extends Chart {
         h,
         0,
         size,
-        this.options.theme.labels.style.color
+        this.options.labels.style.color
       )
       return mesh
     })

@@ -31,7 +31,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
 
   drawXAxisTick() {
     let material = new LineBasicMaterial({
-      color: this.options.theme.axisTick.style.color
+      color: this.options.axisTick.style.color
     })
     let Y = this.mainRect.bottom
     let arr = []
@@ -52,7 +52,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       if (v > xMax) {
         return true
       }
-      arr.push(v, Y, 0, v, Y - this.options.theme.axisTick.style.length, 0)
+      arr.push(v, Y, 0, v, Y - this.options.axisTick.style.length, 0)
       return false
     })
     let geometry = createBufferGeometry(arr, 'xAxisTick')
@@ -62,8 +62,8 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
   }
 
   drawXAxisLabel() {
-    let size = this.options.theme.labels.style.fontSize
-    let tickSize = this.options.theme.axisTick.style.length
+    let size = this.options.labels.style.fontSize
+    let tickSize = this.options.axisTick.style.length
     let Y = this.mainRect.bottom
 
     let ticks, tickFormat
@@ -90,7 +90,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
         Y - tickSize - size / 2 - 2,
         0,
         size,
-        this.options.theme.labels.style.color
+        this.options.labels.style.color
       )
       this.add(mesh)
       return false
@@ -175,7 +175,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
 
     let colorScale = scaleOrdinal()
       .domain(range(this.dataSource[0].length))
-      .range(this.options.theme.colors)
+      .range(this.options.colors)
       let useTimeRange = this.useTimeRange
     let ticks = useTimeRange ? this.cartesian.xScale.ticks(this.xUnit.every(this.xInterval)) : null
     this.dataSource.forEach((v, i) => {

@@ -3,7 +3,7 @@ import { Object3D, Vector2 } from 'three'
 import { ISize, IRect } from './interfaces'
 import { defaultsDeep, merge } from 'lodash'
 import optimizedResize from './interactions/optimized-resize'
-import * as themes from './themes'
+const themes = require('./themes/')
 import * as d3time from 'd3-time'
 import { capitalize } from './utils'
 import { createLabel } from './three-helper'
@@ -22,8 +22,8 @@ export interface IChartInteractable {
   bindingEvents()
 }
 
-export interface IOptions{
-  theme:any
+export interface IOptions {
+  [key: string]: any
 }
 
 class Chart extends Object3D implements IChart, IChartInteractable {
@@ -48,7 +48,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   protected timeStart
   protected timeEnd
   protected useTimeRange: boolean = false
-  protected onMouseMoveHandle:Function
+  protected onMouseMoveHandle: Function
   private _dataSource
   private _plotOptions
   private _customPlotOptions = {}
@@ -72,12 +72,11 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this._dataSource = [...value]
   }
   private director: Director
-  
 
   private _size: ISize
   private isResponsive: boolean
-  private _options:IOptions = { theme: defualtTheme }
-  
+  private _options: IOptions = { theme: defualtTheme }
+
   public get options() {
     return this._options
   }
@@ -108,12 +107,14 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   public populateOptions() {
     if (typeof this.options.theme === 'string') {
       let themeName = this.options.theme
-      this.options.theme = themes[themeName]
+      this.options['theme'] = themes[themeName]
     } else {
       defaultsDeep(this.options.theme, themes[defualtTheme])
     }
     this.plotOptions = this.getGlobalPlotOptions()
+
     merge(this.plotOptions, this._customPlotOptions)
+    defaultsDeep(this.options, this.options.theme)
   }
 
   public build(data) {
@@ -131,6 +132,13 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     } else {
       return this._title
     }
+  }
+
+  legends(options) {
+    if (typeof this.options['legends'] === 'undefined') {
+      this.options['legends'] = {}
+    }
+    merge(this.options['legends'], options)
   }
 
   onResize() {
@@ -169,8 +177,6 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this.dataSource = data
     return this
   }
-
-
 
   public render() {
     this.populateOptions()
@@ -252,15 +258,13 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this.mainRect.height = this.size.height - this.mainRect.top - this.mainRect.bottom
   }
 
-  protected _render(){
+  protected _render() {
     this.director._render()
   }
 
-  protected getCanvas(){
+  protected getCanvas() {
     return this.director.getCanvas()
   }
-
-
 
   private addTooltip() {
     this.tooltip = document.createElement('div')
@@ -278,17 +282,22 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this.bindingEvents()
   }
 
- 
-
   private drawCommon() {
     if (this._title) {
       this.drawTitle()
     }
+    if (this.options.legends['show'] === true) {
+      this.drawLegends()
+    }
   }
 
+  private drawLegends() {
+  
+  }
+  
   private drawTitle() {
-    let style = this.options.theme.title.style
-    let position = this.options.theme.title.position
+    let style = this.options.title.style
+    let position = this.options.title.position
     let horizontal = parseInt(position.x, 10) / 100
     let vetical = parseInt(position.y, 10) / 100
     let x = this.size.width * horizontal

@@ -9,6 +9,7 @@ import './src/scss/cherrycharts.scss'
 ;(function(data) {
   let ele = document.getElementById('bar-chart-responsive')
   let c = new BarChart(ele).title('TIOBE Index for June 2018')
+  c.legends({show:true})
   c.datum(data).render()
 })(require('./data/bar-chart-data.json'))
 ;(function(data) {

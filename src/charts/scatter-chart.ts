@@ -83,7 +83,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
 
     this.colorScale = scaleOrdinal()
       .domain(range(data.length))
-      .range(this.options.theme.colors)
+      .range(this.options.colors)
 
       this.cartesian = {
         xMin,
@@ -103,7 +103,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
 
   drawXAxisTick() {
     let material = new LineBasicMaterial({
-      color: this.options.theme.axisTick.style.color
+      color: this.options.axisTick.style.color
     })
     let Y = this.mainRect.bottom
     let arr = []
@@ -116,7 +116,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
         return true
       }
 
-      arr.push(x, Y, 0, x, Y - this.options.theme.axisTick.style.length, 0)
+      arr.push(x, Y, 0, x, Y - this.options.axisTick.style.length, 0)
       return false
     })
     let geometry = createBufferGeometry(arr, 'xAxisTick')
@@ -126,8 +126,8 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   }
 
   drawXAxisLabel() {
-    let size = this.options.theme.labels.style.fontSize
-    let tickSize = this.options.theme.axisTick.style.length
+    let size = this.options.labels.style.fontSize
+    let tickSize = this.options.axisTick.style.length
     let Y = this.mainRect.bottom
 
     let xMax = this.mainRect.left + this.mainRect.width
@@ -138,7 +138,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
       if (x > xMax) {
         return true
       }
-      let mesh = createLabel(v, x, Y - tickSize - size / 2 - 2, 0, size, this.options.theme.labels.style.color)
+      let mesh = createLabel(v, x, Y - tickSize - size / 2 - 2, 0, size, this.options.labels.style.color)
       this.add(mesh)
       return false
     })
@@ -151,7 +151,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   }
 
   draw() {
-    let radius = this.options.theme.plotOptions.scatter.radius
+    let radius = this.options.plotOptions.scatter.radius
     this.drawAxis()
     this.dataSource.forEach((data, index) =>
       data.forEach(v => {
@@ -172,7 +172,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
 
   drawAxisLine() {
     let material = new LineBasicMaterial({
-      color: this.options.theme.axisLine.style.color
+      color: this.options.axisLine.style.color
     })
     let lineWidth = 1 / window.devicePixelRatio
 
@@ -190,9 +190,9 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
     let ticks = this.cartesian.xScale.ticks().slice(1)
 
     let material = new LineDashedMaterial({
-      color: this.options.theme.splitLine.style.color,
-      dashSize: this.options.theme.splitLine.style.dashSize,
-      gapSize: this.options.theme.splitLine.style.gapSize,
+      color: this.options.splitLine.style.color,
+      dashSize: this.options.splitLine.style.dashSize,
+      gapSize: this.options.splitLine.style.gapSize,
       fog: false,
       depthWrite: false
     })
@@ -215,9 +215,9 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
     let ticks = this.cartesian.yScale.ticks().slice(1)
 
     let material = new LineDashedMaterial({
-      color: this.options.theme.splitLine.style.color,
-      dashSize: this.options.theme.splitLine.style.dashSize,
-      gapSize: this.options.theme.splitLine.style.gapSize,
+      color: this.options.splitLine.style.color,
+      dashSize: this.options.splitLine.style.dashSize,
+      gapSize: this.options.splitLine.style.gapSize,
       fog: false,
       depthWrite: false
     })
@@ -264,7 +264,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   }
 
   onMouseMove(event) {
-    let radius = this.options.theme.plotOptions.scatter.radius
+    let radius = this.options.plotOptions.scatter.radius
     let canvas = this.getCanvas()
     let rect = canvas.getBoundingClientRect()
     this.mouse.x = event.clientX - rect.left
