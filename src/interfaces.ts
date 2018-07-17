@@ -1,10 +1,10 @@
 import { Continuous } from 'd3-scale'
 
 export interface IRect {
-  bottom: number
-  left: number
-  right: number
-  top: number
+  bottom?: number
+  left?: number
+  right?: number
+  top?: number
   width?: number
   height?: number
 }

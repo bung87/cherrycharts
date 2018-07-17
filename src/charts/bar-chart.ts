@@ -1,3 +1,4 @@
+import { Legend } from './../components/legend';
 import { Color, LineBasicMaterial, LineSegments } from 'three'
 import { createBufferGeometry,createLabel } from '../three-helper'
 import { DataSource, Bar } from '../components/bar'
@@ -13,7 +14,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
   barGap: number
   bars: Bar
   type = 'BarChart'
-
+  colorScale
   protected onMouseMoveHandle
   constructor(dom: Element) {
     super(dom)
@@ -25,7 +26,9 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     let theData = data ? data : this.dataSource
     let padding = 0.2 // this.barGap /this.mainRect.width
     super.buildCartesianInfo(theData)
-
+    this.colorScale = scaleOrdinal()
+      .domain(range(data.length))
+      .range(this.options.colors)
     let xScale = scaleBand()
       .domain(range(theData.length))
       .rangeRound([this.mainRect.left, this.mainRect.left + this.mainRect.width])
@@ -33,6 +36,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
       .paddingOuter(padding)
 
     this.cartesian.xScale = xScale
+    
   }
 
   drawXAxisTick() {
@@ -100,11 +104,19 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
       this.dataSource,
       this.cartesian,
       this.mainRect,
-      this.options.colors,
+      this.colorScale,
       this.barWidth,
       this.barGap
     )
     this.add(this.bars)
+    if (this.options.legends['show'] === true) {
+      this.drawLegends()
+    }
+  }
+  
+  drawLegends(){
+    
+    this.add(new Legend(this.dataSource,this.colorScale,this.options.legends))
   }
 
   bindingEvents() {

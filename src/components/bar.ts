@@ -6,13 +6,9 @@ import {range} from '../utils'
 export type DataSource = Array<Array<any>>
 
 export class Bar extends Object3D {
-  constructor(data: DataSource,cartesian: ICartesianInfo, rect: IRect, colors: Array<any>, barWidth: number, barGap: number) {
+  constructor(data: DataSource,cartesian: ICartesianInfo, rect: IRect, colorScale:Function, barWidth: number, barGap: number) {
     super()
     
-    let colorScale = scaleOrdinal()
-      .domain(range(data.length))
-      .range(colors)
-   
     data.some((v, i) => {
       // let x = i * (barWidth + barGap) + rect.left + barGap + barWidth / 2
       let x = cartesian.xScale(i) + cartesian.xScale.bandwidth() / 2 

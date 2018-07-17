@@ -1,5 +1,4 @@
 import {
-  Color,
   LineBasicMaterial,
   Vector2,
   LineSegments,
@@ -9,13 +8,12 @@ import {
   CircleGeometry
 } from 'three'
 
-import { scaleLinear, scaleTime, scaleOrdinal } from 'd3-scale'
+import { scaleLinear, scaleOrdinal } from 'd3-scale'
 import { createBufferGeometry, createLabel } from '../three-helper'
-import { ISize, IRect } from '../interfaces'
-import Chart, { IChartInteractable } from '../chart'
+import { ISize } from '../interfaces'
+import  { IChartInteractable } from '../chart'
 import CartesianChart from './cartesian-chart'
 import { range } from '../utils'
-import { DataSource } from '../components/bar'
 
 export default class ScatterChart extends CartesianChart implements IChartInteractable {
   type = 'ScatterChart'

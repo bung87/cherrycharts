@@ -7,6 +7,7 @@ const themes = require('./themes/')
 import * as d3time from 'd3-time'
 import { capitalize } from './utils'
 import { createLabel } from './three-helper'
+import { Legend } from './components/legend';
 
 const defualtTheme = 'walden'
 type TimeUnit = 'year' | 'month' | 'week' | 'day' | 'hour' | 'minute' | 'second' | 'millisecond'
@@ -134,11 +135,12 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     }
   }
 
-  legends(options) {
-    if (typeof this.options['legends'] === 'undefined') {
+  legends(options: object | Function) {
+    let opts = typeof options === 'object' ? options : options.call(this)
+    if(typeof this.options['legends'] === "undefined"){
       this.options['legends'] = {}
     }
-    merge(this.options['legends'], options)
+    merge(this.options['legends'], opts)
   }
 
   onResize() {
@@ -185,6 +187,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this.build(this.dataSource)
     this.dataProcessed = true
     this.draw()
+    // this.beforeRender()
     this.director._render()
   }
 
@@ -266,6 +269,10 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     return this.director.getCanvas()
   }
 
+  protected drawLegends() {
+    //  this.add(new Legend())
+  }
+
   private addTooltip() {
     this.tooltip = document.createElement('div')
     this.tooltip.className = 'cherrycharts-tooltip'
@@ -286,15 +293,13 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     if (this._title) {
       this.drawTitle()
     }
-    if (this.options.legends['show'] === true) {
-      this.drawLegends()
-    }
+    
   }
 
-  private drawLegends() {
-  
-  }
-  
+  // private beforeRender(){
+    
+  // }
+
   private drawTitle() {
     let style = this.options.title.style
     let position = this.options.title.position
