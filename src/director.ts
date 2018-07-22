@@ -1,29 +1,21 @@
-// tslint:disable:one-variable-per-declaration
+
 import {
   Scene,
   PerspectiveCamera,
   WebGLRenderer,
-  CanvasRenderer,
   OrthographicCamera,
-  SVGRenderer,
   AmbientLight,
-  Raycaster,
   Light,
-  DirectionalLight,
   AxesHelper,
   CameraHelper,
-  Object3D,
   Color,
-  Vector2,
-  Vector3,
   Camera
 } from 'three'
-
+import CanvasRenderer = require('./renderers/CanvasRenderer.js')
 import { ISize } from './interfaces'
 
 type RendererAlias = 'webgl' | 'canvas' | 'svg'
 type dimensionAlias = '2d' | '3d'
-
 
 function isElementVisible(elm) {
   let rect = elm.getBoundingClientRect()
@@ -32,13 +24,26 @@ function isElementVisible(elm) {
   return r
 }
 
+function webglAvailable() {
+  try {
+    let canvas = document.createElement( 'canvas' );
+    return !!( window["WebGLRenderingContext"] && (
+      canvas.getContext( 'webgl' ) ||
+      canvas.getContext( 'experimental-webgl' ) )
+    );
+  } catch ( e ) {
+    return false;
+  }
+}
+
+const isWebglAvailable = webglAvailable()
+
 class Director {
-  
   public get size(): ISize {
-    return this._size;
+    return this._size
   }
   public set size(value: ISize) {
-    this._size = {...value};
+    this._size = { ...value }
     // this._size = value
   }
   public scene: Scene
@@ -48,7 +53,7 @@ class Director {
   protected rendererAlias: RendererAlias
   protected mainLight: Light
   protected container: Element
-  private _size: ISize;
+  private _size: ISize
   constructor(container: Element) {
     let rect = container.getBoundingClientRect()
     this.size = {
@@ -87,8 +92,12 @@ class Director {
         this.renderer = new SVGRenderer()
         break
       default:
-        this.renderer = new WebGLRenderer({ antialias: true })
-        
+        if (isWebglAvailable) {
+          this.renderer = new WebGLRenderer({ antialias: true })
+        } else {
+          this.renderer = new CanvasRenderer()
+        }
+
         break
     }
     this.renderer.setPixelRatio(window.devicePixelRatio)
@@ -98,16 +107,16 @@ class Director {
     // this.debug()
   }
 
-  debug(){
+  debug() {
     let helper = new CameraHelper(this.mainCamera)
     this.scene.add(helper)
     let axishelper = new AxesHelper(200)
     this.scene.add(axishelper)
   }
 
-  updateSize(size: ISize){
+  updateSize(size: ISize) {
     this.size = size
-    this.renderer.setSize(size.width, size.height ,false) // needs to be false here
+    this.renderer.setSize(size.width, size.height, false) // needs to be false here
     // this.updateCamera()
     // this.scene.updateMatrix()
     // this.scene.updateMatrixWorld(true)
@@ -127,10 +136,10 @@ class Director {
   //     this.mainCamera.position.set(right, top, 1)
   //     this.mainCamera.updateMatrix()
   //     this.mainCamera.updateMatrixWorld(true)
-     
+
   // }
 
-  getCanvas() {
+  getCanvas(): HTMLCanvasElement {
     return this.renderer.domElement
   }
 

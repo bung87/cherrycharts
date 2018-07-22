@@ -11,7 +11,11 @@
     }
   },
   "legends":{
-    "show":false
+    "show":false,
+    "style": {
+      "color": "#444444",
+      "fontSize": 12
+    }
   },
   "labels": {
     "style": {

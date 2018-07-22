@@ -109,7 +109,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
   }
 
   drawLegends() {
-    this.add(new Legend(this.dataSource, this.colorScale, this.options.legends))
+    this.add(new Legend(this.size,this.dataSource, this.colorScale, this.options.legends))
   }
 
   bindingEvents() {

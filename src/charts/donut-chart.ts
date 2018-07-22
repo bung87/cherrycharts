@@ -59,7 +59,7 @@ export default class DonutChart extends PieChart implements IChart {
     let html = `${label} ${value} (${percent}%)`
     let style = this.options.labels.style
 
-    if (this.options.plotOptions.donut.label.position === 'center') {
+    if (this.plotOptions["label"].position === 'center') {
       if (this.centerLabel) {
         this.remove(this.centerLabel)
       }

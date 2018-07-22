@@ -11,7 +11,7 @@ import {
 import { scaleLinear, scaleOrdinal } from 'd3-scale'
 import { createBufferGeometry, createLabel } from '../three-helper'
 import { ISize } from '../interfaces'
-import  { IChartInteractable } from '../chart'
+import { IChartInteractable } from '../chart'
 import CartesianChart from './cartesian-chart'
 import { range } from '../utils'
 
@@ -19,7 +19,6 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   type = 'ScatterChart'
   dataSource: Array<any>
   colorScale
-  protected onMouseMoveHandle:Function
 
   constructor(dom: HTMLElement) {
     super(dom)
@@ -76,23 +75,22 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
     )
     let yScale = scaleLinear()
       .domain([yMin, yMax])
-      .range([this.mainRect.bottom,this.mainRect.bottom + this.mainRect.height])
+      .range([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
       .nice()
 
     this.colorScale = scaleOrdinal()
       .domain(range(data.length))
       .range(this.options.colors)
 
-      this.cartesian = {
-        xMin,
-        xMax,
-        yMin,
-        yMax,
-        yScale,
-        xScale
-      }
+    this.cartesian = {
+      xMin,
+      xMax,
+      yMin,
+      yMax,
+      yScale,
+      xScale
+    }
   }
-
 
   // build(data?: any) {
   //   let theData = data ? data : this.dataSource
@@ -109,7 +107,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
     let xMax = this.mainRect.left + this.mainRect.width
     let ticks = this.cartesian.xScale.ticks().slice(1)
     ticks.some((v, i) => {
-      let x = this.cartesian.xScale(v) 
+      let x = this.cartesian.xScale(v)
       if (x > xMax) {
         return true
       }
@@ -129,15 +127,25 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
     let Y = this.mainRect.bottom
 
     let xMax = this.mainRect.left + this.mainRect.width
-    let ticks = this.cartesian.xScale.ticks().slice(1)
+    let ticks: Array<number> = this.cartesian.xScale.ticks().slice(1)
+    let hasNegative = ticks.some(v => {
+      return v < 0
+    })
+    let negativeSignWidth = 0
+    if (hasNegative) {
+      let canvas = document.createElement('canvas')
+      let context = canvas.getContext('2d')
+      context.font = size + 'px Arial'
+      negativeSignWidth = Math.round(context.measureText('-').width)
+    }
 
     ticks.some((v, i) => {
-      let x = this.cartesian.xScale(v) 
+      let x = this.cartesian.xScale(v)
       if (x > xMax) {
         return true
       }
       let mesh = createLabel(v, size, this.options.labels.style.color)
-      mesh.position.x = x
+      mesh.position.x = v < 0 ? x + negativeSignWidth / 2 : x + negativeSignWidth
       mesh.position.y = Y - tickSize - size / 2 - 2
       this.add(mesh)
       return false
@@ -151,18 +159,15 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   }
 
   draw() {
-    let radius = this.options.plotOptions.scatter.radius
+    let radius = this.plotOptions["radius"]
     this.drawAxis()
     this.dataSource.forEach((data, index) =>
       data.forEach(v => {
         let geometry = new CircleGeometry(radius, 32)
         let material = new MeshBasicMaterial({ color: this.colorScale(index) })
         let circle = new Mesh(geometry, material)
-        geometry.translate(
-          this.cartesian.xScale(v.x) ,
-          this.cartesian.yScale(v.y) ,
-          0
-        )
+        circle.name = "scatter"
+        geometry.translate(this.cartesian.xScale(v.x), this.cartesian.yScale(v.y), 0)
         this.add(circle)
       })
     )
@@ -201,7 +206,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
     const Y2 = this.mainRect.bottom + this.mainRect.height
 
     let arr = ticks.reduce((accumulator, currentValue) => {
-      let x = this.cartesian.xScale(currentValue) 
+      let x = this.cartesian.xScale(currentValue)
       return accumulator.concat(x, Y1, 0, x, Y2, 0)
     }, [])
 
@@ -226,7 +231,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
     const X2 = this.mainRect.left + this.mainRect.width
 
     let arr = ticks.reduce((accumulator, currentValue) => {
-      let h = this.cartesian.yScale(currentValue) 
+      let h = this.cartesian.yScale(currentValue)
       return accumulator.concat(X1, h, 0, X2, h, 0)
     }, [])
 
@@ -251,7 +256,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   drawAxis() {
     this.drawAxisLabel()
     this.drawAxisLine()
-    
+
     this.drawAxisTick()
     this.drawSplitLine()
   }
@@ -264,7 +269,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   }
 
   onMouseMove(event) {
-    let radius = this.options.plotOptions.scatter.radius
+    let radius = this.plotOptions["radius"]
     let canvas = this.getCanvas()
     let rect = canvas.getBoundingClientRect()
     this.mouse.x = event.clientX - rect.left
@@ -274,10 +279,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
     this.dataSource.some((data, index) => {
       seriesIndex = index
       let indx = data.findIndex(x => {
-        let vector = new Vector2(
-          this.cartesian.xScale(x.x) ,
-          this.cartesian.yScale(x.y) 
-        )
+        let vector = new Vector2(this.cartesian.xScale(x.x), this.cartesian.yScale(x.y))
         let dis = vector.distanceTo(this.mouse)
         return dis <= radius
       }, this)

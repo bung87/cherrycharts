@@ -69,6 +69,9 @@ export function createLabel(text, size, color, strokeWidth = 0, strokeColor?) {
     transparent: true,
     map: texture
   })
+  material.depthWrite = false
+  // material.dithering = true
+  material.fog = false
 
   mesh = new Mesh(
     new PlaneGeometry(

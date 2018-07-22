@@ -13,20 +13,36 @@ function calculate(num) {
   num % 2 === 0 ? ((i = 2), (j = 1)) : ((i = 3), (j = 2))
 
   for (i; i <= half; i += j) {
-    if(num % i === 0 ) ret.push(i) 
+    if (num % i === 0) ret.push(i)
   }
 
   return [ret[ret.length / 2 - 1], ret[ret.length / 2]]
 }
 
 export class Legend extends Object3D {
-  constructor(data: Array<any>, colorScale, options) {
+  constructor(containerRect: IRect, data: Array<any>, colorScale, options) {
     super()
-    let padding = 0.2
+    let style = options.style
     let radius = 6
-
+    let gap = 4
     let [cols, rows] = calculate(data.length)
-    let rect: IRect = { left: 200, width: 400, height: 100, bottom: 200 }
+    let labels = data.map((v, index) => {
+      return createLabel(data[index][0], style.fontSize, style.color)
+    })
+
+    let maxTextWidth = labels.reduce(function(max, arr) {
+      return Math.max(max, arr.userData.textWidth)
+    }, -Infinity)
+
+    let rect: IRect = {
+      width: (maxTextWidth + radius * 2) * cols + gap * 2 * (cols - 2),
+      height: style.fontSize * 1.5 * rows
+    }
+
+    // right top
+    rect.left = containerRect.width - rect.width
+    rect.bottom = containerRect.height - rect.height
+
     let xScale = scaleBand()
       .domain(range(cols))
       .rangeRound([rect.left, rect.left + rect.width])
@@ -45,10 +61,10 @@ export class Legend extends Object3D {
       let circle = new Mesh(geometry, material)
       let x = xScale(index % cols)
       let y = yScale(Math.floor(index / cols) % rows)
-      let size = 12
+
       geometry.translate(x, y, 0)
-      let mesh = createLabel(data[index][0], size, '#444444')
-      mesh.position.x = x + mesh.userData.textWidth / 2 + radius + 4
+      let mesh = labels[index]
+      mesh.position.x = x + mesh.userData.textWidth / 2 + radius + gap
       mesh.position.y = y
       this.add(mesh)
       this.add(circle)

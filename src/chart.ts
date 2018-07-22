@@ -1,7 +1,7 @@
 import Director from './director'
 import { Object3D, Vector2 } from 'three'
 import { ISize, IRect } from './interfaces'
-import { defaultsDeep, merge } from 'lodash'
+import { defaultsDeep,defaults, merge } from 'lodash'
 import optimizedResize from './interactions/optimized-resize'
 const themes = require('./themes/')
 import * as d3time from 'd3-time'
@@ -49,15 +49,15 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   protected timeStart
   protected timeEnd
   protected useTimeRange: boolean = false
-  protected onMouseMoveHandle: Function
+  protected onMouseMoveHandle: EventListener
   private _dataSource
-  private _plotOptions
+  private _plotOptions  = {}
   private _customPlotOptions = {}
   public get plotOptions() {
     return this._plotOptions
   }
   public set plotOptions(value) {
-    this._plotOptions = { ...value }
+    merge(this._plotOptions,value)
   }
   public get mainRect(): IRect {
     return this._mainRect
@@ -82,7 +82,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     return this._options
   }
   public set options(value) {
-    this._options = { ...value }
+    merge(this._options,value)
   }
 
   constructor(container?: HTMLElement) {
@@ -102,20 +102,30 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   }
 
   public setPlotOptions(value) {
-    merge(this._customPlotOptions, value)
+    merge(this._customPlotOptions,value)
   }
 
   public populateOptions() {
     if (typeof this.options.theme === 'string') {
       let themeName = this.options.theme
       this.options['theme'] = themes[themeName]
-    } else {
+    } else{
       defaultsDeep(this.options.theme, themes[defualtTheme])
     }
-    this.plotOptions = this.getGlobalPlotOptions()
 
+    defaults(this.options, this.options.theme)
+
+    this.plotOptions = this.getGlobalPlotOptions()
+    
     merge(this.plotOptions, this._customPlotOptions)
-    defaultsDeep(this.options, this.options.theme)
+    let chartType = this.type.toLowerCase()
+    let index = chartType.indexOf('chart')
+    if (index !== -1) {
+      chartType = chartType.substring(0, index)
+      merge(this.options.plotOptions[chartType],this.plotOptions) 
+    }
+    
+   
   }
 
   public build(data) {
@@ -137,9 +147,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
 
   legends(options: object | Function) {
     let opts = typeof options === 'object' ? options : options.call(this)
-    if(typeof this.options['legends'] === "undefined"){
-      this.options['legends'] = {}
-    }
+    
     merge(this.options['legends'], opts)
   }
 
