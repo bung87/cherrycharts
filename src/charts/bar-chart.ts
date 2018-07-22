@@ -103,13 +103,13 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
       this.barGap
     )
     this.add(this.bars)
-    if (this.options.legends['show'] === true) {
+    if (this.legendOptions['show'] === true) {
       this.drawLegends()
     }
   }
 
   drawLegends() {
-    this.add(new Legend(this.size,this.dataSource, this.colorScale, this.options.legends))
+    this.add(new Legend(this.size,this.dataSource, this.colorScale, this.legendOptions))
   }
 
   bindingEvents() {

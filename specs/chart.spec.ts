@@ -36,7 +36,7 @@ describe(`using ${theChartType.name} testing basic features`, () => {
     c.datum(data).render()
 
     expect(c.plotOptions["radius"]).toEqual(radius)
-    expect(c.options.plotOptions.scatter.radius).toEqual(radius)
+    // expect(c.options.plotOptions.scatter.radius).toEqual(radius)
     expect(Math.floor(c.getObjectByName('scatter')["geometry"].boundingSphere.radius)).toEqual(radius)
   })
 })

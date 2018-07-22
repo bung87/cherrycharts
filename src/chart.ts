@@ -35,7 +35,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   labelFormat
   labelInterval
   _title
-
+  
   protected get size(): ISize {
     return this._size
   }
@@ -53,6 +53,14 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   private _dataSource
   private _plotOptions  = {}
   private _customPlotOptions = {}
+  private _customeLegendOptions = {}
+  private _legendOptions = {};
+  public get legendOptions() {
+    return this._legendOptions;
+  }
+  public set legendOptions(value) {
+     merge(this._legendOptions,value)
+  }
   public get plotOptions() {
     return this._plotOptions
   }
@@ -114,17 +122,12 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     }
 
     defaults(this.options, this.options.theme)
+    defaults(this.legendOptions, this.options.legends)
+    merge(this.legendOptions,this._customeLegendOptions)
 
     this.plotOptions = this.getGlobalPlotOptions()
     
     merge(this.plotOptions, this._customPlotOptions)
-    let chartType = this.type.toLowerCase()
-    let index = chartType.indexOf('chart')
-    if (index !== -1) {
-      chartType = chartType.substring(0, index)
-      merge(this.options.plotOptions[chartType],this.plotOptions) 
-    }
-    
    
   }
 
@@ -147,8 +150,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
 
   legends(options: object | Function) {
     let opts = typeof options === 'object' ? options : options.call(this)
-    
-    merge(this.options['legends'], opts)
+    merge(this._customeLegendOptions,opts)
   }
 
   onResize() {

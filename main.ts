@@ -11,6 +11,7 @@ import './src/scss/cherrycharts.scss'
   let c = new BarChart(ele).title('TIOBE Index for June 2018')
   c.legends({show:true})
   c.datum(data).render()
+  console.log(c.options)
 })(require('./data/bar-chart-data.json'))
 ;(function(data) {
   let data2 = data.map(v => {
