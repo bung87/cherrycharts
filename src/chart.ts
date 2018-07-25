@@ -1,11 +1,11 @@
 import Director from './director'
 import { Object3D, Vector2 } from 'three'
 import { ISize, IRect } from './interfaces'
-import { defaultsDeep,defaults, merge } from 'lodash'
+import { defaults, merge } from 'lodash'
 import optimizedResize from './interactions/optimized-resize'
 const themes = require('./themes/')
 import * as d3time from 'd3-time'
-import { capitalize } from './utils'
+import { capitalize,keyedMerge } from './utils'
 import { createLabel } from './three-helper'
 import { Legend } from './components/legend';
 
@@ -51,22 +51,16 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   protected useTimeRange: boolean = false
   protected onMouseMoveHandle: EventListener
   private _dataSource
-  private _plotOptions  = {}
-  private _customPlotOptions = {}
-  private _customeLegendOptions = {}
-  private _legendOptions = {};
+  private _plotOptions  
+  private _legendOptions
   public get legendOptions() {
     return this._legendOptions;
   }
-  public set legendOptions(value) {
-     merge(this._legendOptions,value)
-  }
+
   public get plotOptions() {
     return this._plotOptions
   }
-  public set plotOptions(value) {
-    merge(this._plotOptions,value)
-  }
+
   public get mainRect(): IRect {
     return this._mainRect
   }
@@ -89,9 +83,6 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   public get options() {
     return this._options
   }
-  public set options(value) {
-    merge(this._options,value)
-  }
 
   constructor(container?: HTMLElement) {
     super()
@@ -104,31 +95,39 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     }
   }
 
-  public setOptions(value) {
-    this.options = value
+  public setOptions(opts) {
+    this._options ? merge(this._options,opts) :  this._options = {...opts}
     return this
   }
 
-  public setPlotOptions(value) {
-    merge(this._customPlotOptions,value)
+  public setPlotOptions(opts) {
+    this._plotOptions ? merge(this._plotOptions,opts) : this._plotOptions = {...opts}
+    return this
   }
 
   public populateOptions() {
+    if(typeof this._options === "undefined"){
+      this._options = {}
+    }
+    if(typeof this._legendOptions === "undefined"){
+      this._legendOptions = {}
+    }
+    if(typeof this._plotOptions === "undefined"){
+      this._plotOptions = {}
+    }
     if (typeof this.options.theme === 'string') {
       let themeName = this.options.theme
       this.options['theme'] = themes[themeName]
     } else{
-      defaultsDeep(this.options.theme, themes[defualtTheme])
+      keyedMerge(this.options.theme, themes[defualtTheme])
     }
-
+   
     defaults(this.options, this.options.theme)
     defaults(this.legendOptions, this.options.legends)
-    merge(this.legendOptions,this._customeLegendOptions)
-
-    this.plotOptions = this.getGlobalPlotOptions()
-    
-    merge(this.plotOptions, this._customPlotOptions)
-   
+    defaults(this.plotOptions, this.getThemePlotOptions())
+    let chartType = this.getChartType()
+    this.options.plotOptions[chartType] = this.plotOptions
+    this.options.legends = this.legendOptions
   }
 
   public build(data) {
@@ -150,7 +149,8 @@ class Chart extends Object3D implements IChart, IChartInteractable {
 
   legends(options: object | Function) {
     let opts = typeof options === 'object' ? options : options.call(this)
-    merge(this._customeLegendOptions,opts)
+    this._legendOptions ? merge(this._legendOptions,opts) : this._legendOptions = {...opts}
+    return this
   }
 
   onResize() {
@@ -340,13 +340,19 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this.draw()
   }
 
-  private getGlobalPlotOptions() {
+  private getChartType(){
     let chartType = this.type.toLowerCase()
     let index = chartType.indexOf('chart')
     if (index !== -1) {
       chartType = chartType.substring(0, index)
-      return this.options.theme.plotOptions[chartType]
+      return chartType
     }
+  }
+
+  private getThemePlotOptions() {
+      let chartType = this.getChartType()
+      return this.options.theme.plotOptions[chartType]
+    
   }
 
   private getResponsive() {

@@ -1,3 +1,15 @@
+import { mergeWith } from 'lodash'
+
+function customizer(objValue, srcValue) {
+  if (Array.isArray(objValue)) {
+    return objValue
+  }
+}
+
+export function keyedMerge(target,source){
+  mergeWith(target,source,customizer)
+}
+
 export function range(len) {
   let keys = Array(len).keys()
   let domain = Array.from(keys)
