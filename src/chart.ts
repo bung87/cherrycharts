@@ -5,7 +5,7 @@ import { defaults, merge } from 'lodash'
 import optimizedResize from './interactions/optimized-resize'
 const themes = require('./themes/')
 import * as d3time from 'd3-time'
-import { capitalize,keyedMerge } from './utils'
+import { capitalize,keyedDefaultDeep } from './utils'
 import { createLabel } from './three-helper'
 import { Legend } from './components/legend';
 
@@ -119,12 +119,12 @@ class Chart extends Object3D implements IChart, IChartInteractable {
       let themeName = this.options.theme
       this.options['theme'] = themes[themeName]
     } else{
-      keyedMerge(this.options.theme, themes[defualtTheme])
+      keyedDefaultDeep(this.options.theme, themes[defualtTheme])
     }
    
-    defaults(this.options, this.options.theme)
-    defaults(this.legendOptions, this.options.legends)
-    defaults(this.plotOptions, this.getThemePlotOptions())
+    keyedDefaultDeep(this.options, this.options.theme)
+    keyedDefaultDeep(this.legendOptions, this.options.legends)
+    keyedDefaultDeep(this.plotOptions, this.getThemePlotOptions())
     let chartType = this.getChartType()
     this.options.plotOptions[chartType] = this.plotOptions
     this.options.legends = this.legendOptions

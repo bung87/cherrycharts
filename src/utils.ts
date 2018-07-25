@@ -1,4 +1,4 @@
-import { mergeWith } from 'lodash'
+import { mergeWith,merge } from 'lodash'
 
 function customizer(objValue, srcValue) {
   if (Array.isArray(objValue)) {
@@ -6,8 +6,24 @@ function customizer(objValue, srcValue) {
   }
 }
 
+function customizer2(objValue, srcValue,key) {
+  if (Array.isArray(objValue)) {
+    return objValue
+  }else if (typeof objValue !=="undefined"){
+    merge(objValue,srcValue)
+    return objValue
+  }else{
+    return srcValue
+  }
+  
+}
+
 export function keyedMerge(target,source){
   mergeWith(target,source,customizer)
+}
+
+export function keyedDefaultDeep(target,source){
+  mergeWith(target,source,customizer2)
 }
 
 export function range(len) {
