@@ -244,7 +244,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       this.hideTooltip()
       return
     }
-    let data = this.dataSource[0]
+    let oneSeries = this.dataSource[0]
 
     let finalIndex
     let ticks
@@ -255,7 +255,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
         return Math.floor(dateX) >= this.mouse.x || Math.round(dateX) >= this.mouse.x
       })
     } else {
-      finalIndex = binarySearch(data, x => {
+      finalIndex = binarySearch(oneSeries["data"], x => {
         let dateX = this.cartesian.xScale(new Date(x[0]))
         return Math.floor(dateX) >= this.mouse.x || Math.round(dateX) >= this.mouse.x
       })
