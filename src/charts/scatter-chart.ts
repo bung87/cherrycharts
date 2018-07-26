@@ -14,12 +14,14 @@ import { ISize } from '../interfaces'
 import { IChartInteractable } from '../chart'
 import CartesianChart from './cartesian-chart'
 import { range } from '../utils'
-
+import { Legend } from './../components/legend'
+const xIndex  = 0
+const yIndex  = 1
 export default class ScatterChart extends CartesianChart implements IChartInteractable {
   type = 'ScatterChart'
   dataSource: Array<any>
   colorScale
-
+  readonly xIndex = 0
   constructor(dom: HTMLElement) {
     super(dom)
     this.mainRect = {
@@ -32,21 +34,21 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   }
 
   buildCartesianInfo(data?) {
-    let theData = data ? data : this.dataSource
+    let series = data ? data : this.dataSource
     let xMax = Math.max.apply(
       null,
-      theData.map(data =>
-        data.reduce(function(max, arr) {
-          return Math.max(max, arr.x)
+      series.map(oneSeries =>
+        oneSeries.data.reduce(function(max, arr) {
+          return Math.max(max, arr[xIndex])
         }, -Infinity)
       )
     )
 
     let xMin = Math.min.apply(
       null,
-      theData.map(data =>
-        data.reduce(function(min, arr) {
-          return Math.min(min, arr.x)
+      series.map(oneSeries =>
+        oneSeries.data.reduce(function(min, arr) {
+          return Math.min(min, arr[xIndex])
         }, Infinity)
       )
     )
@@ -58,18 +60,18 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
 
     let yMax = Math.max.apply(
       null,
-      theData.map(data =>
-        data.reduce(function(max, arr) {
-          return Math.max(max, arr.y)
+      series.map(oneSeries =>
+        oneSeries.data.reduce(function(max, arr) {
+          return Math.max(max, arr[yIndex])
         }, -Infinity)
       )
     )
 
     let yMin = Math.min.apply(
       null,
-      theData.map(data =>
-        data.reduce(function(min, arr) {
-          return Math.min(min, arr.y)
+      series.map(oneSeries =>
+        oneSeries.data.reduce(function(min, arr) {
+          return Math.min(min, arr[yIndex])
         }, Infinity)
       )
     )
@@ -161,18 +163,24 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   draw() {
     let radius = this.plotOptions["radius"]
     this.drawAxis()
-    this.dataSource.forEach((data, index) =>
-      data.forEach(v => {
+    this.dataSource.forEach((oneSeries, index) =>
+    oneSeries.data.forEach(v => {
         let geometry = new CircleGeometry(radius, 32)
         let material = new MeshBasicMaterial({ color: this.colorScale(index) })
         let circle = new Mesh(geometry, material)
         circle.name = "scatter"
-        geometry.translate(this.cartesian.xScale(v.x), this.cartesian.yScale(v.y), 0)
+        geometry.translate(this.cartesian.xScale(v[xIndex]), this.cartesian.yScale(v[yIndex]), 0)
         this.add(circle)
       })
     )
-
+    if (this.legendOptions['show'] === true) {
+      this.drawLegends()
+    }
     // this.drawArea()
+  }
+
+  drawLegends() {
+    this.add(new Legend(this.size,this.dataSource, this.colorScale, this.legendOptions,true))
   }
 
   drawAxisLine() {
@@ -276,10 +284,10 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
 
     let seriesIndex, dataIndex
-    this.dataSource.some((data, index) => {
+    this.dataSource.some((oneSeries, index) => {
       seriesIndex = index
-      let indx = data.findIndex(x => {
-        let vector = new Vector2(this.cartesian.xScale(x.x), this.cartesian.yScale(x.y))
+      let indx = oneSeries.data.findIndex(x => {
+        let vector = new Vector2(this.cartesian.xScale(x[xIndex]), this.cartesian.yScale(x[yIndex]))
         let dis = vector.distanceTo(this.mouse)
         return dis <= radius
       }, this)
@@ -295,11 +303,11 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
       return
     }
 
-    let finalX = this.cartesian.xScale(this.dataSource[seriesIndex][dataIndex].x)
+    let finalX = this.cartesian.xScale(this.dataSource[seriesIndex].data[dataIndex][xIndex])
     let offsetX = rect.left + finalX
     this.showTooltip()
 
-    let { x, y } = this.dataSource[seriesIndex][dataIndex]
+    let [ x, y ] = this.dataSource[seriesIndex].data[dataIndex]
     let tooltipRect = this.tooltip.getBoundingClientRect()
     this.tooltip.style.left = `${offsetX - tooltipRect.width / 2}px`
     this.tooltip.style.top = `${event.clientY - tooltipRect.height}px`

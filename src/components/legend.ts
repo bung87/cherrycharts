@@ -5,6 +5,9 @@ import { range } from '../utils'
 import { createLabel } from '../three-helper'
 
 function calculate(num) {
+  if (num === 2) {
+    return [2, 1]
+  }
   let ret = []
   let half = Math.floor(num / 2),
     i,
@@ -15,19 +18,19 @@ function calculate(num) {
   for (i; i <= half; i += j) {
     if (num % i === 0) ret.push(i)
   }
-
   return [ret[ret.length / 2 - 1], ret[ret.length / 2]]
 }
 
 export class Legend extends Object3D {
-  constructor(containerRect: IRect, data: Array<any>, colorScale, options) {
+  constructor(containerRect: IRect, data: Array<any>, colorScale, options, isMultiSeries?) {
     super()
     let style = options.style
     let radius = 6
     let gap = 4
     let [cols, rows] = calculate(data.length)
     let labels = data.map((v, index) => {
-      return createLabel(data[index][0], style.fontSize, style.color)
+      let name = isMultiSeries ? v.name : data[index][0]
+      return createLabel(name, style.fontSize, style.color)
     })
 
     let maxTextWidth = labels.reduce(function(max, arr) {

@@ -15,12 +15,13 @@ import './src/scss/cherrycharts.scss'
 
 })(require('./data/bar-chart-data.json'))
 ;(function(data) {
-  let data2 = data.map(v => {
+  let firstSeries = data[0]
+  let data2 = firstSeries.data.map(v => {
     let v1 = v[0]
     let v2 = parseFloat((v[1] + 100 + Math.random() * v[1]).toFixed(2))
     return [v1, v2]
   })
-  let series = [data, data2]
+  let series = [firstSeries, {"data":data2}]
   let ele = document.getElementById('line-chart')
   let c = new LineChart(ele)
 
@@ -31,11 +32,11 @@ import './src/scss/cherrycharts.scss'
 })(require('./data/line-chart-data.json'))
 ;(function(data) {
   let data1 = data[0]
-  let data2 = data1.map(v => {
+  let data2 = data1.data.map(v => {
     let v2 = parseFloat((v + 100 + Math.random() * v).toFixed(2))
     return v2
   })
-  let series = [data1, data2]
+  let series = [data1, {"data":data2}]
   let ele = document.getElementById('line-chart2')
   let c = new LineChart()
   c.setOptions({ theme: { colors: ['#626c91', '#a0a7e6', '#c4ebad'] } })
@@ -44,12 +45,12 @@ import './src/scss/cherrycharts.scss'
 
   c.datum(series)
   .renderTo(ele)
-  let data3 = data1.map(v => {
+  let data3 = data1.data.map(v => {
     let v2 = parseFloat((v + 500 + Math.random() * v).toFixed(2))
     return v2
   })
   let ele3 = document.getElementById('line-chart3')
-  let series3 = [data1, data3]
+  let series3 = [data1, {"data":data3}]
 
   let d = c
     .makeCopy()
@@ -57,12 +58,13 @@ import './src/scss/cherrycharts.scss'
     .renderTo(ele3)
 })(require('./data/line-chart-data2.json'))
 ;(function(data) {
-  let data2 = data.map(v => {
+  let data1 = data[0]
+  let data2 = data1.data.map(v => {
     let v1 = v[0]
     let v2 = parseFloat((v[1] + 100 + Math.random() * v[1]).toFixed(2))
     return [v1, v2]
   })
-  let series = [data, data2]
+  let series = [data1, {"data":data2}]
   let ele = document.getElementById('area-chart')
   let c = new AreaChart(ele)
   c.datum(series).render()
@@ -98,5 +100,5 @@ import './src/scss/cherrycharts.scss'
 ;(function(data) {
   let ele = document.getElementById('scatter-chart')
   let c = new ScatterChart(ele)
-  c.datum(data).render()
+  c.legends({show:true}).datum(data).render()
 })(require('./data/scatter-chart-data.json'))
