@@ -337,6 +337,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this.clearThree(this)
     // this.updateMatrix()
     // this.updateMatrixWorld(true)
+    this.drawCommon()
     this.draw()
   }
 
