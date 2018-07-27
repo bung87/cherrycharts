@@ -19,19 +19,8 @@ const xIndex  = 0
 const yIndex  = 1
 export default class ScatterChart extends CartesianChart implements IChartInteractable {
   type = 'ScatterChart'
-  dataSource: Array<any>
   colorScale
   readonly xIndex = 0
-  constructor(dom: HTMLElement) {
-    super(dom)
-    this.mainRect = {
-      top: 20,
-      right: 20,
-      bottom: 20,
-      left: 20
-    }
-    this.updateMainRect()
-  }
 
   buildCartesianInfo(data?) {
     let series = data ? data : this.dataSource

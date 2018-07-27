@@ -1,4 +1,4 @@
-import { Object3D, MeshBasicMaterial, Mesh, CircleGeometry } from 'three'
+import { Object3D,Group, MeshBasicMaterial, Mesh, CircleGeometry } from 'three'
 import { IRect } from '../interfaces'
 import { scaleBand } from 'd3-scale'
 import { range } from '../utils'
@@ -57,7 +57,8 @@ export class Legend extends Object3D {
       .rangeRound([rect.bottom, rect.bottom + rect.height])
     //   .paddingInner(padding)
     //   .paddingOuter(padding)
-
+    let group = new Group();
+    group.name = "legends"
     data.forEach((v, index) => {
       let geometry = new CircleGeometry(radius, 32)
       let material = new MeshBasicMaterial({ color: colorScale(index) })
@@ -69,8 +70,9 @@ export class Legend extends Object3D {
       let mesh = labels[index]
       mesh.position.x = x + mesh.userData.textWidth / 2 + radius + gap
       mesh.position.y = y
-      this.add(mesh)
-      this.add(circle)
+      group.add(mesh)
+      group.add(circle)
     })
+    this.add(group)
   }
 }

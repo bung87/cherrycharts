@@ -18,6 +18,10 @@ export interface ICartesianInfo {
   xMax?: number
   xScale?: Continuous
   yScale?: Continuous
+  xTicks?:Array<any>
+  yTicks?:Array<any>
+  xLabelTicks?:Array<any>
+  yLabelTicks?:Array<any>
 }
 
 export interface ICartesian {

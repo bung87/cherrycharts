@@ -8,7 +8,6 @@ import { createBufferGeometry, createLabel } from '../three-helper'
 import { LineBasicMaterial, LineDashedMaterial, LineSegments } from 'three'
 
 export default class CartesianChart extends Chart {
-  dataSource: DataSource
 
   public get cartesian(): ICartesianInfo {
     return this._cartesian
@@ -107,7 +106,7 @@ export default class CartesianChart extends Chart {
   drawYAxisLabel() {
     let ticks = this.cartesian.yScale.ticks().slice(1)
     let size = this.options.labels.style.fontSize
-
+    
     let labels = ticks.map((v, i) => {
       let h = this.cartesian.yScale(v)
       let mesh = createLabel(v.toString(), size, this.options.labels.style.color)
@@ -129,7 +128,11 @@ export default class CartesianChart extends Chart {
     labels.forEach((v, i) => {
       v.translateX(offsetX - labelMarginRight)
     })
-    this.add(...labels)
+
+    if(labels.length){
+      this.add(...labels)
+    }
+    
   }
 
   drawXAxisTick(): void {
