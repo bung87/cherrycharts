@@ -27,7 +27,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     let padding = 0.2 // this.barGap /this.mainRect.width
     super.buildCartesianInfo(theData)
     this.colorScale = scaleOrdinal()
-      .domain(range(data.length))
+      .domain(range(theData.length))
       .range(this.options.colors)
     let xScale = scaleBand()
       .domain(range(theData.length))
