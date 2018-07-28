@@ -1,11 +1,11 @@
 import { Legend } from './../components/legend'
 import { Color, LineBasicMaterial, LineSegments } from 'three'
 import { createBufferGeometry, createLabel } from '../three-helper'
-import { DataSource, Bar } from '../components/bar'
+import { DataSource, Bar, StackedBar, GroupedBar } from '../components/bar'
 import { IRect, ICartesian, ICartesianInfo } from '../interfaces'
 import { IChartInteractable } from '../chart'
 import CartesianChart from './cartesian-chart'
-import { scaleOrdinal, scaleBand } from 'd3-scale'
+import { scaleOrdinal, scaleBand, scaleLinear } from 'd3-scale'
 import { range } from '../utils'
 
 export default class BarChart extends CartesianChart implements ICartesian, IChartInteractable {
@@ -16,26 +16,131 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
   type = 'BarChart'
   colorScale
   protected onMouseMoveHandle
+  private _grouped = false
+  private _stacked = false
+  private metaData
+  private originData
   constructor(dom: HTMLElement) {
     super(dom)
     this.barWidth = 20
     this.barGap = 10
   }
 
+  public datum(data) {
+    this.originData = data
+    return this
+  }
+
+  build(data?: DataSource) {
+    let theData = data ? data : this.originData
+    if (this._grouped) {
+      this.metaData = theData[0]
+      this.dataSource = theData.slice(1)
+    } else if (this._stacked) {
+      this.metaData = theData[0]
+      this.dataSource = theData.slice(1)
+    } else {
+      this.dataSource = theData
+    }
+    this.buildCartesianInfo(this.dataSource)
+  }
+
+  grouped(arg?: boolean) {
+    if (arg) {
+      this._grouped = arg
+    } else {
+      this._grouped = true
+    }
+  }
+
+  stacked(arg?: boolean) {
+    if (arg) {
+      this._stacked = arg
+    } else {
+      this._stacked = true
+    }
+  }
+
+  isStacked() {
+    return this._stacked
+  }
+
+  isGrouped() {
+    return this._grouped
+  }
+
   buildCartesianInfo(data?: DataSource) {
     let theData = data ? data : this.dataSource
     let padding = 0.2 // this.barGap /this.mainRect.width
-    super.buildCartesianInfo(theData)
-    this.colorScale = scaleOrdinal()
-      .domain(range(theData.length))
-      .range(this.options.colors)
-    let xScale = scaleBand()
-      .domain(range(theData.length))
-      .rangeRound([this.mainRect.left, this.mainRect.left + this.mainRect.width])
-      .paddingInner(padding)
-      .paddingOuter(padding)
+    if (this._grouped) {
+      let yMax, yMin
+      yMax = Math.max.apply(
+        null,
+        theData.map(oneSeries =>
+          oneSeries.slice(1).reduce(function(max, arr) {
+            return Math.max(max, arr)
+          }, -Infinity)
+        )
+      )
 
-    this.cartesian.xScale = xScale
+      yMin = Math.min.apply(
+        null,
+        theData.map(oneSeries =>
+          oneSeries.slice(1).reduce(function(min, arr) {
+            return Math.min(min, arr)
+          }, Infinity)
+        )
+      )
+
+      let yScale = scaleLinear()
+        .domain([yMin, yMax])
+        .range([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
+        .nice()
+
+      padding = 0.1
+      let colsLen = theData[1].length - 1
+      let xScale = scaleBand()
+        .domain(range(theData.length))
+        .rangeRound([this.mainRect.left, this.mainRect.left + this.mainRect.width])
+        .paddingInner(padding)
+        .paddingOuter(padding)
+
+      let padding2 = 0.1
+      let xScale2 = scaleBand()
+        .domain(range(colsLen))
+        .rangeRound([0, xScale.bandwidth()])
+        .paddingInner(padding2)
+        .paddingOuter(padding2)
+
+      this.colorScale = scaleOrdinal()
+        .domain(range(colsLen))
+        .range(this.options.colors)
+
+      this.cartesian = {
+        yMax,
+        yMin,
+        yScale,
+        xScale,
+        xScale2
+      }
+
+      this.barWidth = this.cartesian.xScale2.bandwidth()
+
+    } else if (this._stacked) {
+    } else {
+      super.buildCartesianInfo(theData)
+      this.colorScale = scaleOrdinal()
+        .domain(range(theData.length))
+        .range(this.options.colors)
+      let xScale = scaleBand()
+        .domain(range(theData.length))
+        .rangeRound([this.mainRect.left, this.mainRect.left + this.mainRect.width])
+        .paddingInner(padding)
+        .paddingOuter(padding)
+
+      this.cartesian.xScale = xScale
+      this.barWidth = this.cartesian.xScale.bandwidth()
+    }
   }
 
   drawXAxisTick() {
@@ -94,14 +199,27 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
   draw() {
     this.drawAxis()
-    this.bars = new Bar(
-      this.dataSource,
-      this.cartesian,
-      this.mainRect,
-      this.colorScale,
-      this.barWidth,
-      this.barGap
-    )
+    if (this._grouped) {
+      this.bars = new GroupedBar(
+        this.dataSource,
+        this.cartesian,
+        this.mainRect,
+        this.colorScale,
+        this.barWidth,
+        this.barGap
+      )
+    } else if (this._stacked) {
+    } else {
+      this.bars = new Bar(
+        this.dataSource,
+        this.cartesian,
+        this.mainRect,
+        this.colorScale,
+        this.barWidth,
+        this.barGap
+      )
+    }
+
     this.add(this.bars)
     if (this.legendOptions['show'] === true) {
       this.drawLegends()
@@ -109,7 +227,13 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
   }
 
   drawLegends() {
-    this.add(new Legend(this.size,this.dataSource, this.colorScale, this.legendOptions))
+    let legends
+    if(this._grouped){
+      legends = this.metaData.slice(1)
+    } else{
+      legends =  this.dataSource.map( v => v[0])
+    }
+    this.add(new Legend(this.size, legends, this.colorScale, this.legendOptions))
   }
 
   bindingEvents() {
@@ -142,7 +266,19 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
       this.hideTooltip()
       return
     }
-    let [label, value] = this.dataSource[finalIndex]
+    let seriesIndex, dataIndex, label, value
+    if (this._grouped) {
+      let rows = this.dataSource.length
+      let colsLen = this.dataSource[0].length - 1
+      dataIndex = finalIndex % colsLen
+      seriesIndex = Math.floor(finalIndex / colsLen) % rows
+      value = this.dataSource[seriesIndex][dataIndex+1]
+      label = this.metaData[dataIndex + 1]
+    } else if (this._stacked) {
+    } else {
+      ;[label, value] = this.dataSource[finalIndex]
+    }
+
     if (this.mouse.y > this.cartesian.yScale(value)) {
       this.hideTooltip()
       return

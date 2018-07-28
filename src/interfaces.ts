@@ -17,7 +17,9 @@ export interface ICartesianInfo {
   xMin?: number
   xMax?: number
   xScale?: Continuous
+  xScale2?: Continuous
   yScale?: Continuous
+  yScale2?: Continuous
   xTicks?:Array<any>
   yTicks?:Array<any>
   xLabelTicks?:Array<any>

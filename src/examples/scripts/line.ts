@@ -1,5 +1,5 @@
 import LineChart from '../../charts/line-chart'
-import '../../scss/cherrycharts.scss'
+import '../styles/main.scss'
 
 const data = require('../../../data/line-chart-data')
 

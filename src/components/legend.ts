@@ -1,4 +1,4 @@
-import { Object3D,Group, MeshBasicMaterial, Mesh, CircleGeometry } from 'three'
+import { Object3D, Group, MeshBasicMaterial, Mesh, CircleGeometry } from 'three'
 import { IRect } from '../interfaces'
 import { scaleBand } from 'd3-scale'
 import { range } from '../utils'
@@ -10,26 +10,25 @@ function calculate(num) {
   }
   let ret = []
   let half = Math.floor(num / 2),
-    i,
-    j
-
-  num % 2 === 0 ? ((i = 2), (j = 1)) : ((i = 3), (j = 2))
+    i = 2,
+    j = 1
 
   for (i; i <= half; i += j) {
-    if (num % i === 0) ret.push(i)
+    ret.push(i)
   }
-  return [ret[ret.length / 2 - 1], ret[ret.length / 2]]
+  let halfIndex = Math.floor(ret.length / 2)
+  let offset = num % 2 === 0 ? 0 : 1
+  return [ret[halfIndex - 1] + offset, ret[halfIndex]]
 }
 
 export class Legend extends Object3D {
-  constructor(containerRect: IRect, data: Array<any>, colorScale, options, isMultiSeries?) {
+  constructor(containerRect: IRect, names: Array<any>, colorScale, options) {
     super()
     let style = options.style
     let radius = 6
     let gap = 4
-    let [cols, rows] = calculate(data.length)
-    let labels = data.map((v, index) => {
-      let name = isMultiSeries ? v.name : data[index][0]
+    let [cols, rows] = calculate(names.length)
+    let labels = names.map(name => {
       return createLabel(name, style.fontSize, style.color)
     })
 
@@ -57,9 +56,9 @@ export class Legend extends Object3D {
       .rangeRound([rect.bottom, rect.bottom + rect.height])
     //   .paddingInner(padding)
     //   .paddingOuter(padding)
-    let group = new Group();
-    group.name = "legends"
-    data.forEach((v, index) => {
+    let group = new Group()
+    group.name = 'legends'
+    names.forEach((_, index) => {
       let geometry = new CircleGeometry(radius, 32)
       let material = new MeshBasicMaterial({ color: colorScale(index) })
       let circle = new Mesh(geometry, material)

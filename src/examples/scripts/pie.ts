@@ -1,5 +1,5 @@
 import PieChart from '../../charts/pie-chart'
-import '../../scss/cherrycharts.scss'
+import '../styles/main.scss'
 
 const data = require('../../../data/bar-chart-data')
 

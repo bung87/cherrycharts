@@ -1,5 +1,5 @@
 import ScatterChart from '../../charts/scatter-chart'
-import '../../scss/cherrycharts.scss'
+import '../styles/main.scss'
 
 const data = require('../../../data/scatter-chart-data')
 

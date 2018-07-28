@@ -169,7 +169,8 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   }
 
   drawLegends() {
-    this.add(new Legend(this.size,this.dataSource, this.colorScale, this.legendOptions,true))
+    let names = this.dataSource.map( v=> v.name)
+    this.add(new Legend(this.size,names, this.colorScale, this.legendOptions,true))
   }
 
   drawAxisLine() {
