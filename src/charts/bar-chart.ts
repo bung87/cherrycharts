@@ -205,6 +205,9 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
   }
 
   drawXAxisTick() {
+    if(this._grouped){
+      return
+    }
     let material = new LineBasicMaterial({
       color: this.options.axisTick.style.color
     })
@@ -308,36 +311,23 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
     this.mouse.x = event.clientX - rect.left
     this.mouse.y = this.size.height - Math.abs(event.clientY - rect.top)
-    let finalIndex
-    if (!this._grouped && !this._stacked) {
-      if (this.mouse.y < this.mainRect.bottom || this.mouse.x < this.mainRect.left) {
-        this.hideTooltip()
-        return
-      }
+    let barIndex
+    
+    if (this.mouse.y < this.mainRect.bottom || this.mouse.x < this.mainRect.left) {
+      this.hideTooltip()
+      return
     }
-
-    let offsetXWithHalfWidth = this.mouse.x + this.barWidth / 2
-    finalIndex = this.bars.children.findIndex(x => {
-      return (
-        offsetXWithHalfWidth >= x.position.x && offsetXWithHalfWidth <= x.position.x + this.barWidth
-      )
-    })
-
-    let seriesIndex, dataIndex, label, value
-    if (this._grouped) {
-      let rows = this.dataSource.length
-      let colsLen = this.dataSource[0].length - 1
-      dataIndex = finalIndex % colsLen
-      seriesIndex = Math.floor(finalIndex / colsLen) % rows
-      value = this.dataSource[seriesIndex][dataIndex + 1]
-      label = this.metaData[dataIndex + 1]
-    } else if (this._stacked) {
-      seriesIndex = this.dataSource.findIndex((x, i) => {
-        let offsetX = this.cartesian.xScale(i)
-        return this.mouse.x >= offsetX && this.mouse.x <= offsetX + this.barWidth
+    
+    if(!this._stacked){
+      let offsetXWithHalfWidth = this.mouse.x + this.barWidth / 2
+      barIndex = this.bars.children.findIndex(x => {
+        return (
+          offsetXWithHalfWidth >= x.position.x && offsetXWithHalfWidth <= x.position.x + this.barWidth
+        )
       })
-
-      finalIndex = this.bars.children.findIndex(item => {
+  
+    }else{
+      barIndex = this.bars.children.findIndex(item => {
         let mesh = item as Mesh
         let { x, y } = mesh.userData
         let geometry = mesh.geometry as PlaneGeometry
@@ -348,34 +338,42 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
           (this.mouse.x >= x - this.barWidth / 2 && this.mouse.x <= x + this.barWidth / 2)
         )
       })
+    }
+    const keys = Array(barsLen).keys()
+    if (barIndex === -1 || !(barIndex in Array.from(keys))) {
+      this.hideTooltip()
+      return
+    }
 
-      if (finalIndex === -1) {
-        this.hideTooltip()
-        return
-      }
+    let seriesIndex, dataIndex, label, value
+    if (this._grouped) {
+      let rows = this.dataSource.length
+      let colsLen = this.dataSource[0].length - 1
+      dataIndex = barIndex % colsLen
+      seriesIndex = Math.floor(barIndex / colsLen) % rows
+      value = this.dataSource[seriesIndex][dataIndex + 1]
+      label = this.metaData[dataIndex + 1]
+    } else if (this._stacked) {
+      seriesIndex = this.dataSource.findIndex((x, i) => {
+        let offsetX = this.cartesian.xScale(i)
+        return this.mouse.x >= offsetX && this.mouse.x <= offsetX + this.barWidth
+      })
 
       let colsLen = this.dataSource[0].length - 1
-      dataIndex = finalIndex % colsLen
+      dataIndex = barIndex % colsLen
       value = this.dataSource[seriesIndex][dataIndex + 1]
       label = this.metaData[dataIndex + 1]
     } else {
-      if (finalIndex === -1) {
-        this.hideTooltip()
-        return
-      }
-      ;[label, value] = this.dataSource[finalIndex]
+      ;[label, value] = this.dataSource[barIndex]
     }
 
     if (!this._stacked && this.mouse.y > this.cartesian.yScale(value)) {
       this.hideTooltip()
       return
     }
-    let position = this.bars.children[finalIndex].position
-    const keys = Array(barsLen).keys()
-    if (!(finalIndex in Array.from(keys))) {
-      this.hideTooltip()
-      return
-    }
+
+    let position = this.bars.children[barIndex].position
+   
 
     this.showTooltip()
     let offsetX = rect.left + position.x
