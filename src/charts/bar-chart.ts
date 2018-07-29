@@ -1,4 +1,4 @@
-import { Legend } from './../components/legend'
+import { Legend } from '../components/legend'
 import { LineBasicMaterial, LineSegments, Mesh, PlaneGeometry } from 'three'
 import { createBufferGeometry, createLabel } from '../three-helper'
 import * as BarComponent from '../components/bar'

@@ -8,6 +8,7 @@ import * as d3time from 'd3-time'
 import { capitalize,keyedDefaultDeep } from './utils'
 import { createLabel } from './three-helper'
 import { Legend } from './components/legend';
+import * as numberFormatters from './formatters/number-formatters'
 
 const defualtTheme = 'walden'
 type TimeUnit = 'year' | 'month' | 'week' | 'day' | 'hour' | 'minute' | 'second' | 'millisecond'
@@ -50,9 +51,12 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   protected timeEnd
   protected useTimeRange: boolean = false
   protected onMouseMoveHandle: EventListener
+  protected _xTickLabelFormatter
+  protected _yTickLabelFormatter
   private _dataSource
   private _plotOptions  
   private _legendOptions
+
   public get legendOptions() {
     return this._legendOptions;
   }
@@ -92,6 +96,32 @@ class Chart extends Object3D implements IChart, IChartInteractable {
       this.size = this.director.size
       this.director.scene.add(this)
       this.init()
+    }
+  }
+
+  public xTickLabelFormatter(formatter?:String | Function){
+    if(formatter){
+      if (typeof formatter === "string"){
+        this._xTickLabelFormatter = numberFormatters[formatter]
+      }else{
+        this._xTickLabelFormatter = formatter
+      }
+      return this
+    }else{
+      return this._xTickLabelFormatter
+    }
+  }
+
+  public yTickLabelFormatter(formatter?:String | Function){
+    if(formatter){
+      if (typeof formatter === "string"){
+        this._yTickLabelFormatter = numberFormatters[formatter]
+      }else{
+        this._yTickLabelFormatter = formatter
+      }
+      return this
+    }else{
+      return this._yTickLabelFormatter
     }
   }
 

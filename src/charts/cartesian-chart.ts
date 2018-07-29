@@ -106,10 +106,12 @@ export default class CartesianChart extends Chart {
   drawYAxisLabel() {
     let ticks = this.cartesian.yScale.ticks().slice(1)
     let size = this.options.labels.style.fontSize
-    
+    let yTickLabelFormatter = this.yTickLabelFormatter()
+    let labelFormatter = yTickLabelFormatter ? yTickLabelFormatter :  String
     let labels = ticks.map((v, i) => {
+      let label = labelFormatter(v)
       let h = this.cartesian.yScale(v)
-      let mesh = createLabel(v.toString(), size, this.options.labels.style.color)
+      let mesh = createLabel(label, size, this.options.labels.style.color)
       mesh.position.x = -mesh.userData.textWidth / 2
       mesh.position.y = h
       mesh.position.z = 0
