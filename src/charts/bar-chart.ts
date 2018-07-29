@@ -1,19 +1,18 @@
 import { Legend } from './../components/legend'
-import { Color, LineBasicMaterial, LineSegments, Mesh, Vector3, PlaneGeometry } from 'three'
+import { LineBasicMaterial, LineSegments, Mesh, PlaneGeometry } from 'three'
 import { createBufferGeometry, createLabel } from '../three-helper'
-import { DataSource, Bar, StackedBar, GroupedBar } from '../components/bar'
 import * as BarComponent from '../components/bar'
-import { IRect, ICartesian, ICartesianInfo } from '../interfaces'
+import { ICartesian } from '../interfaces'
 import { IChartInteractable } from '../chart'
 import CartesianChart from './cartesian-chart'
 import { scaleOrdinal, scaleBand, scaleLinear } from 'd3-scale'
 import { range } from '../utils'
 
 export default class BarChart extends CartesianChart implements ICartesian, IChartInteractable {
-  dataSource: DataSource
+  dataSource: Array<Array<any>>
   barWidth: number
   barGap: number
-  bars: Bar
+  bars
   type = 'BarChart'
   colorScale
   protected onMouseMoveHandle
@@ -32,7 +31,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     return this
   }
 
-  build(data?: DataSource) {
+  build(data?: Array<Array<any>>) {
     let theData = data ? data : this.originData
     if (this._grouped) {
       this.metaData = theData[0]
@@ -70,7 +69,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     return this._grouped
   }
 
-  buildCartesianInfo(data?: DataSource) {
+  buildCartesianInfo(data?: Array<Array<any>>) {
     let theData = data ? data : this.dataSource
     let padding = 0.2 // this.barGap /this.mainRect.width
     let yMax, yMin
