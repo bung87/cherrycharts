@@ -20,7 +20,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
   private _stacked = false
   private metaData
   private originData
-  constructor(dom: HTMLElement) {
+  constructor(dom?: HTMLElement) {
     super(dom)
     this.barWidth = 20
     this.barGap = 10
@@ -51,6 +51,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     } else {
       this._grouped = true
     }
+    return this
   }
 
   stacked(arg?: boolean) {
@@ -59,6 +60,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
     } else {
       this._stacked = true
     }
+    return this
   }
 
   isStacked() {
