@@ -49,6 +49,7 @@
     }
   },
   "jest": {
+    "setupFiles":["./jest.setup.ts"],
     "transform": {
       ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
