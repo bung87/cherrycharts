@@ -35,7 +35,11 @@ export default class HistogramChart extends CartesianChart
 
   build(data?: Array<object>) {
     let theData = data ? data : this._originalData
+    this.buildCartesianInfo(theData)
+  }
 
+  buildCartesianInfo(data?){
+    let theData = data ? data : this._originalData
     let uniqued = theData.reduce((pre, cur) => {
       return pre
         .concat(cur['data'])
@@ -108,7 +112,6 @@ export default class HistogramChart extends CartesianChart
     }
 
     this.barWidth = this.cartesian.xScale.bandwidth()
-    // this.buildCartesianInfo(this.dataSource)
   }
 
   drawXAxisTick() {
@@ -183,9 +186,7 @@ export default class HistogramChart extends CartesianChart
       this.barGap
     )
     this.add(this.bars)
-    if (this.legendOptions['show'] === true) {
-      this.drawLegends()
-    }
+    
   }
 
   drawLegends() {

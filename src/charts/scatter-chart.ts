@@ -145,8 +145,6 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
 
   updateSize(size: ISize) {
     this.updateMainRect(size)
-
-    // this.buildVectors(true)
   }
 
   draw() {
@@ -162,15 +160,12 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
         this.add(circle)
       })
     )
-    if (this.legendOptions['show'] === true) {
-      this.drawLegends()
-    }
-    // this.drawArea()
+ 
   }
 
   drawLegends() {
     let names = this.dataSource.map( v=> v.name)
-    this.add(new Legend(this.size,names, this.colorScale, this.legendOptions,true))
+    this.add(new Legend(this.size,names, this.colorScale, this.legendOptions))
   }
 
   drawAxisLine() {

@@ -1,13 +1,12 @@
 import Director from './director'
 import { Object3D, Vector2 } from 'three'
 import { ISize, IRect } from './interfaces'
-import { defaults, merge } from 'lodash'
+import {  merge } from 'lodash'
 import optimizedResize from './interactions/optimized-resize'
 const themes = require('./themes/')
 import * as d3time from 'd3-time'
 import { capitalize,keyedDefaultDeep } from './utils'
 import { createLabel } from './three-helper'
-import { Legend } from './components/legend';
 import * as numberFormatters from './formatters/number-formatters'
 
 const defualtTheme = 'walden'
@@ -223,9 +222,10 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   public render() {
     this.populateOptions()
     this.updateMainRect()
-    this.drawCommon()
+    
     this.build(this.dataSource)
     this.dataProcessed = true
+    this.drawCommon()
     this.draw()
     // this.beforeRender()
     this.director._render()
@@ -332,6 +332,9 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   private drawCommon() {
     if (this._title) {
       this.drawTitle()
+    }
+    if (this.legendOptions['show'] === true) {
+      this.drawLegends()
     }
     
   }
