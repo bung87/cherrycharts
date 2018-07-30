@@ -5,6 +5,9 @@ import { range } from '../utils'
 import { createLabel } from '../three-helper'
 
 function calculate(num) {
+  if (num === 1) {
+    return [1, 1]
+  }
   if (num === 2) {
     return [2, 1]
   }
@@ -36,8 +39,9 @@ export class Legend extends Object3D {
       return Math.max(max, arr.userData.textWidth)
     }, -Infinity)
 
+    let padding = gap * 2 * (cols - 2)
     let rect: IRect = {
-      width: (maxTextWidth + radius * 2) * cols + gap * 2 * (cols - 2),
+      width: (maxTextWidth + radius * 2) * cols + Math.max(0,padding),
       height: style.fontSize * 1.5 * rows
     }
 

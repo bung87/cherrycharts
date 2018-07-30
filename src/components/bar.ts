@@ -5,6 +5,44 @@ import { range } from '../utils'
 
 export type DataSource = Array<Array<any>>
 
+export class Histogram extends Object3D {
+  constructor(
+    data: Array<any>,
+    cartesian: ICartesianInfo,
+    rect: IRect,
+    colorScale: Function,
+    barWidth: number,
+    barGap: number
+  ) {
+    super()
+
+    data.some((v, i) => {
+      for (let k in v){
+      let x = cartesian.xScale(parseFloat(v[k].x0.toFixed(1))) + cartesian.xScale.bandwidth() / 2
+      if (x > rect.left + rect.width) {
+        return true
+      }
+      let freq = v[k].length
+      let y = cartesian.yScale(freq)
+      let h = y - rect.bottom
+      let g = new PlaneGeometry(barWidth, h, 1)
+      let m = new Mesh(g, new MeshBasicMaterial({ color: colorScale(i) }))
+      m.userData.x = x
+      m.userData.y = y
+      m.userData.x0 = parseFloat(v[k].x0.toFixed(1))
+      m.userData.x1 = parseFloat(v[k].x1.toFixed(1))
+      m.userData.freq = freq
+      m.translateX(x)
+      m.translateY(h / 2 + rect.bottom)
+      this.add(m)
+      
+      }
+      return false
+     
+    })
+  }
+}
+
 export class Bar extends Object3D {
   constructor(
     data: DataSource,
@@ -27,7 +65,8 @@ export class Bar extends Object3D {
       // let color = new Color(colorScale(i))
       let m = new Mesh(g, new MeshBasicMaterial({ color: colorScale(i) }))
       // m.translateX( xScale(i) )
-
+      m.userData.x = x
+      
       m.translateX(x)
       m.translateY(h / 2 + rect.bottom)
       this.add(m)

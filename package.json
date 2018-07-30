@@ -49,7 +49,9 @@
     }
   },
   "jest": {
-    "setupFiles":["./jest.setup.ts"],
+    "setupFiles": [
+      "./jest.setup.ts"
+    ],
     "transform": {
       ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
@@ -115,6 +117,7 @@
     "validate-commit-msg": "^2.12.2"
   },
   "dependencies": {
+    "d3-array": "^1.2.1",
     "d3-scale": "^2.1.0",
     "d3-time": "^1.0.8",
     "lodash": "^4.17.10",
