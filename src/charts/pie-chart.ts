@@ -24,7 +24,7 @@ export default class PieChart extends Chart implements IChart {
   angles: Array<any>
   origin: Vector2
   innerRadiusPer = 0
-  constructor(dom: HTMLElement) {
+  constructor(dom?: HTMLElement) {
     super(dom)
     this.mainRect = {
       top: 20,

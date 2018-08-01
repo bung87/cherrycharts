@@ -97,7 +97,7 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
       let yScale = scaleLinear()
         .domain([yMin, yMax])
-        .range([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
+        .rangeRound([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
         .nice()
 
       padding = 0.1
@@ -160,12 +160,12 @@ export default class BarChart extends CartesianChart implements ICartesian, ICha
 
       let yScale = scaleLinear()
         .domain([yMin, yMax])
-        .range([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
+        .rangeRound([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
         .nice()
 
       let yScale2 = scaleLinear()
         .domain([yMin2, yMax])
-        .range([0, this.mainRect.height])
+        .rangeRound([0, this.mainRect.height])
         .nice()
 
       padding = 0.1

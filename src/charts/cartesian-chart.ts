@@ -43,7 +43,7 @@ export default class CartesianChart extends Chart {
     }, Infinity)
     let yScale = scaleLinear()
       .domain([dataMin, dataMax])
-      .range([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
+      .rangeRound([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
       .nice()
 
     this.cartesian = {
@@ -125,7 +125,7 @@ export default class CartesianChart extends Chart {
     let offsetX = Math.max(this.mainRect.left, maxTextWidth + labelMarginRight)
     this.mainRect.left = offsetX
     if (this.cartesian.xScale) {
-      this.cartesian.xScale.range([offsetX, offsetX + this.mainRect.width])
+      this.cartesian.xScale.rangeRound([offsetX, offsetX + this.mainRect.width])
     }
     labels.forEach((v, i) => {
       v.translateX(offsetX - labelMarginRight)

@@ -88,7 +88,7 @@ export default class HistogramChart extends CartesianChart
 
     let yScale = scaleLinear()
       .domain([yMin, yMax])
-      .range([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
+      .rangeRound([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
 
     let xScale = scaleBand()
       .domain(keys)

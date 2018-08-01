@@ -1,11 +1,11 @@
 import Director from './director'
 import { Object3D, Vector2 } from 'three'
 import { ISize, IRect } from './interfaces'
-import {  merge } from 'lodash'
+import { merge } from 'lodash'
 import optimizedResize from './interactions/optimized-resize'
 const themes = require('./themes/')
 import * as d3time from 'd3-time'
-import { capitalize,keyedDefaultDeep } from './utils'
+import { capitalize, keyedDefaultDeep } from './utils'
 import { createLabel } from './three-helper'
 import * as numberFormatters from './formatters/number-formatters'
 
@@ -35,7 +35,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   labelFormat
   labelInterval
   _title
-  
+
   protected get size(): ISize {
     return this._size
   }
@@ -48,16 +48,17 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   protected dataProcessed: Boolean
   protected timeStart
   protected timeEnd
-  protected useTimeRange: boolean = false
+  protected useTimeRange: Boolean = false
   protected onMouseMoveHandle: EventListener
   protected _xTickLabelFormatter
   protected _yTickLabelFormatter
+  protected _useUTC
   private _dataSource
-  private _plotOptions  
+  private _plotOptions
   private _legendOptions
 
   public get legendOptions() {
-    return this._legendOptions;
+    return this._legendOptions
   }
 
   public get plotOptions() {
@@ -98,59 +99,59 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     }
   }
 
-  public xTickLabelFormatter(formatter?:String | Function){
-    if(formatter){
-      if (typeof formatter === "string"){
+  public xTickLabelFormatter(formatter?: String | Function) {
+    if (formatter) {
+      if (typeof formatter === 'string') {
         this._xTickLabelFormatter = numberFormatters[formatter]
-      }else{
+      } else {
         this._xTickLabelFormatter = formatter
       }
       return this
-    }else{
+    } else {
       return this._xTickLabelFormatter
     }
   }
 
-  public yTickLabelFormatter(formatter?:String | Function){
-    if(formatter){
-      if (typeof formatter === "string"){
+  public yTickLabelFormatter(formatter?: String | Function) {
+    if (formatter) {
+      if (typeof formatter === 'string') {
         this._yTickLabelFormatter = numberFormatters[formatter]
-      }else{
+      } else {
         this._yTickLabelFormatter = formatter
       }
       return this
-    }else{
+    } else {
       return this._yTickLabelFormatter
     }
   }
 
   public setOptions(opts) {
-    this._options ? merge(this._options,opts) :  this._options = {...opts}
+    this._options ? merge(this._options, opts) : (this._options = { ...opts })
     return this
   }
 
   public setPlotOptions(opts) {
-    this._plotOptions ? merge(this._plotOptions,opts) : this._plotOptions = {...opts}
+    this._plotOptions ? merge(this._plotOptions, opts) : (this._plotOptions = { ...opts })
     return this
   }
 
   public populateOptions() {
-    if(typeof this._options === "undefined"){
+    if (typeof this._options === 'undefined') {
       this._options = {}
     }
-    if(typeof this._legendOptions === "undefined"){
+    if (typeof this._legendOptions === 'undefined') {
       this._legendOptions = {}
     }
-    if(typeof this._plotOptions === "undefined"){
+    if (typeof this._plotOptions === 'undefined') {
       this._plotOptions = {}
     }
     if (typeof this.options.theme === 'string') {
       let themeName = this.options.theme
       this.options['theme'] = themes[themeName]
-    } else{
+    } else {
       keyedDefaultDeep(this.options.theme, themes[defualtTheme])
     }
-   
+
     keyedDefaultDeep(this.options, this.options.theme)
     keyedDefaultDeep(this.legendOptions, this.options.legends)
     keyedDefaultDeep(this.plotOptions, this.getThemePlotOptions())
@@ -178,7 +179,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
 
   legends(options: object | Function) {
     let opts = typeof options === 'object' ? options : options.call(this)
-    this._legendOptions ? merge(this._legendOptions,opts) : this._legendOptions = {...opts}
+    this._legendOptions ? merge(this._legendOptions, opts) : (this._legendOptions = { ...opts })
     return this
   }
 
@@ -222,7 +223,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   public render() {
     this.populateOptions()
     this.updateMainRect()
-    
+
     this.build(this.dataSource)
     this.dataProcessed = true
     this.drawCommon()
@@ -265,6 +266,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this.useTimeRange = true
     this.timeStart = start
     this.timeEnd = end
+    
     this.xUnit = d3time[`time${capitalize(unit)}`]
     this.xInterval = interval
     switch (unit) {
@@ -274,6 +276,12 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     }
     return this
   }
+
+  public useUTC(useUTC:Boolean){
+    this._useUTC = useUTC
+    return this
+  }
+
 
   public xLabel(unit: TimeUnit, interval = 1) {
     this.labelUnit = d3time[`time${capitalize(unit)}`]
@@ -336,11 +344,10 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     if (this.legendOptions['show'] === true) {
       this.drawLegends()
     }
-    
   }
 
   // private beforeRender(){
-    
+
   // }
 
   private drawTitle() {
@@ -374,7 +381,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this.draw()
   }
 
-  private getChartType(){
+  private getChartType() {
     let chartType = this.type.toLowerCase()
     let index = chartType.indexOf('chart')
     if (index !== -1) {
@@ -384,9 +391,8 @@ class Chart extends Object3D implements IChart, IChartInteractable {
   }
 
   private getThemePlotOptions() {
-      let chartType = this.getChartType()
-      return this.options.theme.plotOptions[chartType]
-    
+    let chartType = this.getChartType()
+    return this.options.theme.plotOptions[chartType]
   }
 
   private getResponsive() {

@@ -10,7 +10,7 @@ import {
 } from 'three'
 
 import { DataSource } from '../components/bar'
-import { scaleLinear, scaleOrdinal, scaleTime } from 'd3-scale'
+import { scaleLinear, scaleOrdinal, scaleTime, scaleUtc } from 'd3-scale'
 import CartesianChart from './cartesian-chart'
 import { createBufferGeometry, createLabel } from '../three-helper'
 import { ISize, ICartesian } from '../interfaces'
@@ -56,7 +56,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
     let tickSize = this.options.axisTick.style.length
     let Y = this.mainRect.bottom
 
-    let  tickFormat
+    let tickFormat
     if (this.useTimeRange) {
       tickFormat = this.cartesian.xScale.tickFormat(this.labelFormat)
     } else {
@@ -72,7 +72,11 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       if (v > xMax) {
         return true
       }
-      let mesh = createLabel(tickFormat(this.cartesian.xLabelTicks[i]), size, this.options.labels.style.color)
+      let mesh = createLabel(
+        tickFormat(this.cartesian.xLabelTicks[i]),
+        size,
+        this.options.labels.style.color
+      )
       mesh.position.x = v
       mesh.position.y = Y - tickSize - size / 2 - 2
       this.add(mesh)
@@ -82,13 +86,13 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
 
   buildCartesianInfo(data?: DataSource) {
     let series = data ? data : this.dataSource
-    let xScale, yMax, yMin,xMax,xMin,xLabelTicks,xTicks
+    let xScale, yMax, yMin, xMax, xMin, xLabelTicks, xTicks
 
     if (this.useTimeRange) {
       yMax = Math.max.apply(
         null,
         series.map(oneSeries =>
-          oneSeries["data"].reduce(function(max, arr) {
+          oneSeries['data'].reduce(function(max, arr) {
             return Math.max(max, arr)
           }, -Infinity)
         )
@@ -97,14 +101,15 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       yMin = Math.min.apply(
         null,
         series.map(oneSeries =>
-          oneSeries["data"].reduce(function(min, arr) {
+          oneSeries['data'].reduce(function(min, arr) {
             return Math.min(min, arr)
           }, Infinity)
         )
       )
-      xScale = scaleTime()
+      let scaleFactor = this._useUTC ? scaleUtc : scaleTime
+      xScale = scaleFactor()
         .domain([this.timeStart, this.timeEnd])
-        .range([this.mainRect.left, this.mainRect.left + this.mainRect.width])
+        .rangeRound([this.mainRect.left, this.mainRect.left + this.mainRect.width])
 
       xLabelTicks = xScale.ticks(this.labelUnit.every(this.labelInterval))
       xTicks = xScale.ticks(this.xUnit.every(this.xInterval))
@@ -112,7 +117,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       yMax = Math.max.apply(
         null,
         series.map(oneSeries =>
-          oneSeries["data"].reduce(function(max, arr) {
+          oneSeries['data'].reduce(function(max, arr) {
             return Math.max(max, arr[1])
           }, -Infinity)
         )
@@ -121,7 +126,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       yMin = Math.min.apply(
         null,
         series.map(oneSeries =>
-          oneSeries["data"].reduce(function(min, arr) {
+          oneSeries['data'].reduce(function(min, arr) {
             return Math.min(min, arr[1])
           }, Infinity)
         )
@@ -130,7 +135,7 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       xMax = Math.max.apply(
         null,
         series.map(oneSeries =>
-          oneSeries["data"].reduce(function(max, arr) {
+          oneSeries['data'].reduce(function(max, arr) {
             return Math.max(max, new Date(arr[0]).getTime())
           }, -Infinity)
         )
@@ -139,22 +144,22 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       xMin = Math.min.apply(
         null,
         series.map(oneSeries =>
-          oneSeries["data"].reduce(function(min, arr) {
+          oneSeries['data'].reduce(function(min, arr) {
             return Math.min(min, new Date(arr[0]).getTime())
           }, Infinity)
         )
       )
-
-      xScale = scaleTime()
+      let scaleFactor = this._useUTC ? scaleUtc : scaleTime
+      xScale = scaleFactor()
         .domain([new Date(xMin), new Date(xMax)])
-        .range([this.mainRect.left, this.mainRect.left + this.mainRect.width])
+        .rangeRound([this.mainRect.left, this.mainRect.left + this.mainRect.width])
 
       xLabelTicks = xScale.ticks()
     }
 
     let yScale = scaleLinear()
       .domain([yMin, yMax])
-      .range([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
+      .rangeRound([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
       .nice()
 
     this.cartesian = {
@@ -173,14 +178,13 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
   }
 
   drawArea() {
-
     let colorScale = scaleOrdinal()
       .domain(range(this.dataSource.length))
       .range(this.options.colors)
     let useTimeRange = this.useTimeRange
-   
+
     this.dataSource.forEach((oneSeries, seriesIndex) => {
-      let vectors = oneSeries["data"].reduce((accumulator, currentValue, dataIndex) => {
+      let vectors = oneSeries['data'].reduce((accumulator, currentValue, dataIndex) => {
         let yValue = useTimeRange ? currentValue : currentValue[1]
         let xValue = useTimeRange ? this.cartesian.xTicks[dataIndex] : new Date(currentValue[0])
         let y = this.cartesian.yScale(yValue)
@@ -209,15 +213,14 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       let material = new LineBasicMaterial({
         color: color
       })
-    
 
-      let arr = oneSeries["data"].reduce((accumulator, currentValue, dataIndex) => {
+      let arr = oneSeries['data'].reduce((accumulator, currentValue, dataIndex) => {
         let yValue = useTimeRange ? currentValue : currentValue[1]
         let xValue = useTimeRange ? this.cartesian.xTicks[dataIndex] : new Date(currentValue[0])
         let y = this.cartesian.yScale(yValue)
         let x = this.cartesian.xScale(xValue)
-    
-        if (dataIndex > 0 && dataIndex < oneSeries["data"].length) {
+
+        if (dataIndex > 0 && dataIndex < oneSeries['data'].length) {
           return accumulator.concat(x, y, 0, x, y, 0)
         } else {
           return accumulator.concat(x, y, 0)
@@ -254,15 +257,14 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
     let oneSeries = this.dataSource[0]
 
     let finalIndex
-   
+
     if (this.useTimeRange) {
-      
       finalIndex = binarySearch(this.cartesian.xTicks, x => {
         let dateX = this.cartesian.xScale(x)
         return Math.floor(dateX) >= this.mouse.x || Math.round(dateX) >= this.mouse.x
       })
     } else {
-      finalIndex = binarySearch(oneSeries["data"], x => {
+      finalIndex = binarySearch(oneSeries['data'], x => {
         let dateX = this.cartesian.xScale(new Date(x[0]))
         return Math.floor(dateX) >= this.mouse.x || Math.round(dateX) >= this.mouse.x
       })
@@ -279,12 +281,12 @@ export default class AreaChart extends CartesianChart implements ICartesian, ICh
       let tickFormat = this.cartesian.xScale.tickFormat(this.xUnit, this.xFormat)
       this.dataSource.forEach((v, i) => {
         let label = tickFormat(this.cartesian.xTicks[finalIndex])
-        let value = v["data"][finalIndex]
+        let value = v['data'][finalIndex]
         html += `${label} ${value}<br>`
       })
     } else {
       this.dataSource.forEach(v => {
-        let [label, value] = v["data"][finalIndex]
+        let [label, value] = v['data'][finalIndex]
         html += `${label} ${value}<br>`
       })
     }

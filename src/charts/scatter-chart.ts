@@ -44,7 +44,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
 
     let xScale = scaleLinear()
       .domain([xMin, xMax])
-      .range([this.mainRect.left, this.mainRect.left + this.mainRect.width])
+      .rangeRound([this.mainRect.left, this.mainRect.left + this.mainRect.width])
       .nice()
 
     let yMax = Math.max.apply(
@@ -66,7 +66,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
     )
     let yScale = scaleLinear()
       .domain([yMin, yMax])
-      .range([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
+      .rangeRound([this.mainRect.bottom, this.mainRect.bottom + this.mainRect.height])
       .nice()
 
     this.colorScale = scaleOrdinal()

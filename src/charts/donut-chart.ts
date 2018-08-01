@@ -16,7 +16,7 @@ export default class DonutChart extends PieChart implements IChart {
   centerLabel: Mesh
   isCenterLabel: boolean
   origin: Vector2
-  constructor(dom: HTMLElement) {
+  constructor(dom?: HTMLElement) {
     super(dom)
   }
 
