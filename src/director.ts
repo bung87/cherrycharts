@@ -1,4 +1,3 @@
-
 import {
   Scene,
   PerspectiveCamera,
@@ -8,8 +7,7 @@ import {
   Light,
   AxesHelper,
   CameraHelper,
-  Color,
-  Camera
+  Color
 } from 'three'
 import CanvasRenderer = require('./renderers/CanvasRenderer.js')
 import { ISize } from './interfaces'
@@ -26,13 +24,13 @@ function isElementVisible(elm) {
 
 function webglAvailable() {
   try {
-    let canvas = document.createElement( 'canvas' );
-    return !!( window["WebGLRenderingContext"] && (
-      canvas.getContext( 'webgl' ) ||
-      canvas.getContext( 'experimental-webgl' ) )
-    );
-  } catch ( e ) {
-    return false;
+    let canvas = document.createElement('canvas')
+    return !!(
+      window['WebGLRenderingContext'] &&
+      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
+    )
+  } catch (e) {
+    return false
   }
 }
 
@@ -48,7 +46,7 @@ class Director {
   }
   public scene: Scene
   public renderer: CanvasRenderer | SVGRenderer | WebGLRenderer
-  public mainCamera: Camera
+  public mainCamera: PerspectiveCamera | OrthographicCamera
   protected dimensionAlias: dimensionAlias
   protected rendererAlias: RendererAlias
   protected mainLight: Light
@@ -116,28 +114,33 @@ class Director {
 
   updateSize(size: ISize) {
     this.size = size
-    this.renderer.setSize(size.width, size.height, false) // needs to be false here
-    // this.updateCamera()
-    // this.scene.updateMatrix()
-    // this.scene.updateMatrixWorld(true)
+    this.updateCamera()
+    this.renderer.setSize(size.width, size.height, true) // needs to be false here
   }
 
-  // updateCamera(){
-  //   let width = this.size.width,
-  //     height = this.size.height,
-  //     left = width / -2,
-  //     right = width / 2,
-  //     top = height / 2,
-  //     bottom = height / -2
-  //     this.mainCamera.left = left
-  //     this.mainCamera.right = right
-  //     this.mainCamera.top = top
-  //     this.mainCamera.bottom = bottom
-  //     this.mainCamera.position.set(right, top, 1)
-  //     this.mainCamera.updateMatrix()
-  //     this.mainCamera.updateMatrixWorld(true)
+  updateCamera() {
+    switch (this.dimensionAlias) {
+      case '3d':
+        // this.mainCamera = new PerspectiveCamera()
+        break
+      default:
+        let camera = this.mainCamera as OrthographicCamera
+        let width = this.size.width,
+          height = this.size.height,
+          left = width / -2,
+          right = width / 2,
+          top = height / 2,
+          bottom = height / -2
+        camera.left = left
+        camera.right = right
+        camera.top = top
+        camera.bottom = bottom
+        camera.position.set(right, top, 1)
+        break
+    }
 
-  // }
+    this.mainCamera.updateProjectionMatrix()
+  }
 
   getCanvas(): HTMLCanvasElement {
     return this.renderer.domElement
