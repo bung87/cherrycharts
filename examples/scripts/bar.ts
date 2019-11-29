@@ -1,8 +1,8 @@
-import BarChart from '../../charts/bar-chart'
+import BarChart from '../../src/charts/bar-chart'
 import '../styles/main.scss'
 
-const data = require('../../../data/bar-chart-data')
-const data2 = require('../../../data/grouped-bar-chart-data')
+import  data from '../data/bar-chart-data.json'
+import data2 from '../data/grouped-bar-chart-data.json'
 
 let ele = document.getElementById('bar-chart-responsive')
 let c = new BarChart(ele).title('TIOBE Index for June 2018')

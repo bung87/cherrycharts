@@ -15,15 +15,15 @@ if (typeof pkg.repository === "object") {
 
 let parsedUrl = url.parse(repoUrl)
 let repository = (parsedUrl.host || "") + (parsedUrl.path || "")
-let ghToken = process.env.GH_TOKEN
+let ghToken = "bung87"//process.env.GH_TOKEN
 
 echo("Deploying docs!!!")
 cd("docs")
 touch(".nojekyll")
 exec("git init")
 exec("git add .")
-exec('git config user.name "zhoupeng"')
-exec('git config user.email "zhoupeng@xjgreat.com"')
+exec('git config user.name "bung87"')
+exec('git config user.email "crc32@qq.com"')
 exec('git commit -m "docs(docs): update gh-pages"')
 exec(
   `git push --force --quiet "https://${ghToken}@${repository}" master:gh-pages`

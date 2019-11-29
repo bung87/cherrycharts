@@ -1,7 +1,6 @@
-import HistogramChart from '../../charts/histogram-chart'
+import HistogramChart from '../../src/charts/histogram-chart'
 import '../styles/main.scss'
-
-const data = require('../../../data/histogram-chart-data')
+import data from '../data/histogram-chart-data.json'
 
 let ele = document.getElementById('histogram-chart')
 let c = new HistogramChart(ele)

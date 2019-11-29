@@ -1,7 +1,7 @@
-import PieChart from '../../charts/pie-chart'
+import PieChart from '../../src/charts/pie-chart'
 import '../styles/main.scss'
 
-const data = require('../../../data/bar-chart-data')
+import data from '../data/bar-chart-data.json'
 
 let ele = document.getElementById('pie-chart')
 let c = new PieChart(ele)

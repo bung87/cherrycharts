@@ -1,17 +1,17 @@
-import BarChart from './src/charts/bar-chart'
-import LineChart from './src/charts/line-chart'
-import AreaChart from './src/charts/area-chart'
-import DonutChart from './src/charts/donut-chart'
-import PieChart from './src/charts/pie-chart'
-import ScatterChart from './src/charts/scatter-chart'
+import BarChart from '../src/charts/bar-chart'
+import LineChart from '../src/charts/line-chart'
+import AreaChart from '../src/charts/area-chart'
+import DonutChart from '../src/charts/donut-chart'
+import PieChart from '../src/charts/pie-chart'
+import ScatterChart from '../src/charts/scatter-chart'
 
-import './src/scss/cherrycharts.scss'
+import '../src/scss/cherrycharts.scss'
 ;(function(data) {
   let ele = document.getElementById('bar-chart-responsive')
   let c = new BarChart(ele).title('TIOBE Index for June 2018')
   c.legends({ show: true })
   c.datum(data).render()
-})(require('./data/bar-chart-data.json'))
+})(require('../data/bar-chart-data.json'))
 ;(function(data) {
   let firstSeries = data[0]
   let data2 = firstSeries.data.map(v => {
@@ -27,7 +27,7 @@ import './src/scss/cherrycharts.scss'
     .title('Ether Price History (USD)')
     .datum(series)
     .render()
-})(require('./data/line-chart-data.json'))
+})(require('../data/line-chart-data.json'))
 ;(function(data) {
   let data1 = data[0]
   let data2 = data1.data.map(v => {
@@ -53,7 +53,7 @@ import './src/scss/cherrycharts.scss'
     .makeCopy()
     .datum(series3)
     .renderTo(ele3)
-})(require('./data/line-chart-data2.json'))
+})(require('../data/line-chart-data2.json'))
 ;(function(data) {
   let data1 = data[0]
   let data2 = data1.data.map(v => {
@@ -65,12 +65,12 @@ import './src/scss/cherrycharts.scss'
   let ele = document.getElementById('area-chart')
   let c = new AreaChart(ele)
   c.datum(series).render()
-})(require('./data/line-chart-data.json'))
+})(require('../data/line-chart-data.json'))
 ;(function(data) {
   let ele = document.getElementById('bar-chart')
   let c = new BarChart(ele)
   c.datum(data).render()
-})(require('./data/bar-chart-data.json'))
+})(require('../data/bar-chart-data.json'))
 ;(function(data) {
   let ele = document.getElementById('donut-chart')
   let c = new DonutChart(ele)
@@ -88,16 +88,16 @@ import './src/scss/cherrycharts.scss'
     }
   })
   c.datum(data).render()
-})(require('./data/bar-chart-data.json'))
+})(require('../data/bar-chart-data.json'))
 ;(function(data) {
   let ele = document.getElementById('pie-chart')
   let c = new PieChart(ele)
   c.datum(data).render()
-})(require('./data/bar-chart-data.json'))
+})(require('../data/bar-chart-data.json'))
 ;(function(data) {
   let ele = document.getElementById('scatter-chart')
   let c = new ScatterChart(ele)
   c.legends({ show: true })
     .datum(data)
     .render()
-})(require('./data/scatter-chart-data.json'))
+})(require('../data/scatter-chart-data.json'))

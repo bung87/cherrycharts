@@ -2,14 +2,22 @@
 
   "compilerOptions": {
     "resolveJsonModule": true,
-    "target": "es2017",
+    "baseUrl":".",
+    "rootDir": ".",
+    "esModuleInterop":true,
+    "target": "es2015",
     "module":"commonjs",
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
     "sourceMap": true,
     "experimentalDecorators": true,
-    "outDir": "dist/lib"
+    "outDir": "dist/lib",
+    "paths": {
+      "~@/*": ["./*"],
+      "~*": ["./*"],
+      "/*": ["./*"]
+    }
   },
   "include": [
-    "src"
+    "src", "examples"
   ]
 }

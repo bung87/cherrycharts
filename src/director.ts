@@ -45,7 +45,7 @@ class Director {
     // this._size = value
   }
   public scene: Scene
-  public renderer: CanvasRenderer | SVGRenderer | WebGLRenderer
+  public renderer: CanvasRenderer | WebGLRenderer
   public mainCamera: PerspectiveCamera | OrthographicCamera
   protected dimensionAlias: dimensionAlias
   protected rendererAlias: RendererAlias
@@ -85,9 +85,6 @@ class Director {
     switch (this.rendererAlias) {
       case 'canvas':
         this.renderer = new CanvasRenderer()
-        break
-      case 'svg':
-        this.renderer = new SVGRenderer()
         break
       default:
         if (isWebglAvailable) {

@@ -96,7 +96,7 @@ class AreaChartExt extends Chart {
       material2 // color: this.colors[0],
     )
 
-    this.scene.add(m)
+    this.add(m)
   }
 
   drawMeshLine() {
@@ -181,6 +181,6 @@ class AreaChartExt extends Chart {
     let g = new MeshLine()
     g.setGeometry(vertices)
     let mesh = new Mesh(g.geometry, material)
-    this.scene.add(mesh)
+    this.add(mesh)
   }
 }

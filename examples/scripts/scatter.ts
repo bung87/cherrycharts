@@ -1,7 +1,6 @@
-import ScatterChart from '../../charts/scatter-chart'
+import ScatterChart from '../../src/charts/scatter-chart'
 import '../styles/main.scss'
-
-const data = require('../../../data/scatter-chart-data')
+import data from '../data/scatter-chart-data.json'
 
 let ele = document.getElementById('scatter-chart')
 let c = new ScatterChart(ele)
