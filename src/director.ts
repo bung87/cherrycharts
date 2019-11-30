@@ -1,16 +1,16 @@
 import {
-  Scene,
-  PerspectiveCamera,
-  WebGLRenderer,
-  OrthographicCamera,
   AmbientLight,
-  Light,
   AxesHelper,
   CameraHelper,
-  Color
+  Color,
+  Light,
+  OrthographicCamera,
+  PerspectiveCamera,
+  Scene,
+  WebGLRenderer
 } from 'three'
-import CanvasRenderer = require('./renderers/CanvasRenderer.js')
 import { ISize } from './interfaces'
+import CanvasRenderer = require('./renderers/CanvasRenderer.js')
 
 type RendererAlias = 'webgl' | 'canvas' | 'svg'
 type dimensionAlias = '2d' | '3d'

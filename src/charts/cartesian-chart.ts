@@ -1,14 +1,11 @@
-import Chart from '../chart'
-
-import { DataSource } from '../components/bar'
-import { IRect, ISize, ICartesianInfo } from '../interfaces'
 import { scaleLinear } from 'd3-scale'
+import { LineBasicMaterial, LineDashedMaterial, LineSegments } from 'three'
+import Chart from '../chart'
+import { DataSource } from '../components/bar'
+import { ICartesianInfo, ISize } from '../interfaces'
 import { createBufferGeometry, createLabel } from '../three-helper'
 
-import { LineBasicMaterial, LineDashedMaterial, LineSegments } from 'three'
-
 export default class CartesianChart extends Chart {
-
   public get cartesian(): ICartesianInfo {
     return this._cartesian
   }
@@ -107,7 +104,7 @@ export default class CartesianChart extends Chart {
     let ticks = this.cartesian.yScale.ticks().slice(1)
     let size = this.options.labels.style.fontSize
     let yTickLabelFormatter = this.yTickLabelFormatter()
-    let labelFormatter = yTickLabelFormatter ? yTickLabelFormatter :  String
+    let labelFormatter = yTickLabelFormatter ? yTickLabelFormatter : String
     let labels = ticks.map((v, i) => {
       let label = labelFormatter(v)
       let h = this.cartesian.yScale(v)
@@ -131,10 +128,9 @@ export default class CartesianChart extends Chart {
       v.translateX(offsetX - labelMarginRight)
     })
 
-    if(labels.length){
+    if (labels.length) {
       this.add(...labels)
     }
-    
   }
 
   drawXAxisTick(): void {

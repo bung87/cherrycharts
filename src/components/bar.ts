@@ -1,7 +1,5 @@
-import { Object3D, MeshBasicMaterial, PlaneGeometry, Mesh, Vector3 } from 'three'
-import { IRect, ICartesianInfo } from '../interfaces'
-import { scaleOrdinal, scaleLinear } from 'd3-scale'
-import { range } from '../utils'
+import { Mesh, MeshBasicMaterial, Object3D, PlaneGeometry } from 'three'
+import { ICartesianInfo, IRect } from '../interfaces'
 
 export type DataSource = Array<Array<any>>
 
@@ -17,28 +15,26 @@ export class Histogram extends Object3D {
     super()
 
     data.some((v, i) => {
-      for (let k in v){
-      let x = cartesian.xScale(parseFloat(v[k].x0.toFixed(1))) + cartesian.xScale.bandwidth() / 2
-      if (x > rect.left + rect.width) {
-        return true
-      }
-      let freq = v[k].length
-      let y = cartesian.yScale(freq)
-      let h = y - rect.bottom
-      let g = new PlaneGeometry(barWidth, h, 1)
-      let m = new Mesh(g, new MeshBasicMaterial({ color: colorScale(i) }))
-      m.userData.x = x
-      m.userData.y = y
-      m.userData.x0 = parseFloat(v[k].x0.toFixed(1))
-      m.userData.x1 = parseFloat(v[k].x1.toFixed(1))
-      m.userData.freq = freq
-      m.translateX(x)
-      m.translateY(h / 2 + rect.bottom)
-      this.add(m)
-      
+      for (let k in v) {
+        let x = cartesian.xScale(parseFloat(v[k].x0.toFixed(1))) + cartesian.xScale.bandwidth() / 2
+        if (x > rect.left + rect.width) {
+          return true
+        }
+        let freq = v[k].length
+        let y = cartesian.yScale(freq)
+        let h = y - rect.bottom
+        let g = new PlaneGeometry(barWidth, h, 1)
+        let m = new Mesh(g, new MeshBasicMaterial({ color: colorScale(i) }))
+        m.userData.x = x
+        m.userData.y = y
+        m.userData.x0 = parseFloat(v[k].x0.toFixed(1))
+        m.userData.x1 = parseFloat(v[k].x1.toFixed(1))
+        m.userData.freq = freq
+        m.translateX(x)
+        m.translateY(h / 2 + rect.bottom)
+        this.add(m)
       }
       return false
-     
     })
   }
 }
@@ -66,7 +62,7 @@ export class Bar extends Object3D {
       let m = new Mesh(g, new MeshBasicMaterial({ color: colorScale(i) }))
       // m.translateX( xScale(i) )
       m.userData.x = x
-      
+
       m.translateX(x)
       m.translateY(h / 2 + rect.bottom)
       this.add(m)
@@ -134,9 +130,9 @@ export class StackedBar extends Object3D {
         m.userData.x = x
         m.userData.y = y + preH
         m.translateX(x)
-        m.translateY(y + preH )
+        m.translateY(y + preH)
         preH += h + 1 / window.devicePixelRatio
-        
+
         this.add(m)
       })
     })

@@ -3,7 +3,7 @@ import { Object3D, Vector2 } from 'three'
 import { ISize, IRect } from './interfaces'
 import { merge } from 'lodash'
 import optimizedResize from './interactions/optimized-resize'
-const themes = require('./themes/')
+import * as themes from './themes'
 import * as d3time from 'd3-time'
 import { capitalize, keyedDefaultDeep } from './utils'
 import { createLabel } from './three-helper'
@@ -266,7 +266,7 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this.useTimeRange = true
     this.timeStart = start
     this.timeEnd = end
-    
+
     this.xUnit = d3time[`time${capitalize(unit)}`]
     this.xInterval = interval
     switch (unit) {
@@ -277,11 +277,10 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     return this
   }
 
-  public useUTC(useUTC:Boolean){
+  public useUTC(useUTC: Boolean) {
     this._useUTC = useUTC
     return this
   }
-
 
   public xLabel(unit: TimeUnit, interval = 1) {
     this.labelUnit = d3time[`time${capitalize(unit)}`]

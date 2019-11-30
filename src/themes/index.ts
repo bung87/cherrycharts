@@ -1,3 +1,3 @@
-const walden = require("./walden.json")
+import walden from './walden.json'
 
-module.exports.walden = walden
+export { walden }

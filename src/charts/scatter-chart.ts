@@ -1,22 +1,22 @@
+import { scaleLinear, scaleOrdinal } from 'd3-scale'
 import {
+  CircleGeometry,
   LineBasicMaterial,
-  Vector2,
+  LineDashedMaterial,
   LineSegments,
   Mesh,
   MeshBasicMaterial,
-  LineDashedMaterial,
-  CircleGeometry
+  Vector2
 } from 'three'
-
-import { scaleLinear, scaleOrdinal } from 'd3-scale'
-import { createBufferGeometry, createLabel } from '../three-helper'
-import { ISize } from '../interfaces'
 import { IChartInteractable } from '../chart'
-import CartesianChart from './cartesian-chart'
+import { ISize } from '../interfaces'
+import { createBufferGeometry, createLabel } from '../three-helper'
 import { range } from '../utils'
 import { Legend } from './../components/legend'
-const xIndex  = 0
-const yIndex  = 1
+import CartesianChart from './cartesian-chart'
+
+const xIndex = 0
+const yIndex = 1
 export default class ScatterChart extends CartesianChart implements IChartInteractable {
   type = 'ScatterChart'
   colorScale
@@ -148,24 +148,23 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   }
 
   draw() {
-    let radius = this.plotOptions["radius"]
+    let radius = this.plotOptions['radius']
     this.drawAxis()
     this.dataSource.forEach((oneSeries, index) =>
-    oneSeries.data.forEach(v => {
+      oneSeries.data.forEach(v => {
         let geometry = new CircleGeometry(radius, 32)
         let material = new MeshBasicMaterial({ color: this.colorScale(index) })
         let circle = new Mesh(geometry, material)
-        circle.name = "scatter"
+        circle.name = 'scatter'
         geometry.translate(this.cartesian.xScale(v[xIndex]), this.cartesian.yScale(v[yIndex]), 0)
         this.add(circle)
       })
     )
- 
   }
 
   drawLegends() {
-    let names = this.dataSource.map( v=> v.name)
-    this.add(new Legend(this.size,names, this.colorScale, this.legendOptions))
+    let names = this.dataSource.map(v => v.name)
+    this.add(new Legend(this.size, names, this.colorScale, this.legendOptions))
   }
 
   drawAxisLine() {
@@ -262,7 +261,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
   }
 
   onMouseMove(event) {
-    let radius = this.plotOptions["radius"]
+    let radius = this.plotOptions['radius']
     let canvas = this.getCanvas()
     let rect = canvas.getBoundingClientRect()
     this.mouse.x = event.clientX - rect.left
@@ -292,7 +291,7 @@ export default class ScatterChart extends CartesianChart implements IChartIntera
     let offsetX = rect.left + finalX
     this.showTooltip()
 
-    let [ x, y ] = this.dataSource[seriesIndex].data[dataIndex]
+    let [x, y] = this.dataSource[seriesIndex].data[dataIndex]
     let tooltipRect = this.tooltip.getBoundingClientRect()
     this.tooltip.style.left = `${offsetX - tooltipRect.width / 2}px`
     this.tooltip.style.top = `${event.clientY - tooltipRect.height}px`

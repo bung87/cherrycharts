@@ -24,7 +24,7 @@
     "dist": "tsc --module commonjs && rollup -c rollup.config.ts ",
     "docs": "typedoc --out docs --target es6 --theme minimal --mode file src ",
     "start": "rollup -c rollup.config.ts -w",
-    "examples": "parcel build examples/index.html --out-dir docs/examples --public-url https://cherrycharts.github.io/cherrycharts/examples/",
+    "examples": "parcel build examples/index.pug --out-dir docs/examples --public-url https://cherrycharts.github.io/cherrycharts/examples/",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:prod": "npm run lint && npm run test -- --coverage --no-cache",

@@ -1,19 +1,18 @@
+import { scaleOrdinal } from 'd3-scale'
+import {
+  LineBasicMaterial,
+  LineSegments,
+  Mesh,
+  MeshBasicMaterial,
+  Shape,
+  ShapeGeometry,
+  Vector2
+} from 'three'
 import Chart, { IChart } from '../chart'
 import { DataSource } from '../components/bar'
-import {
-  Vector2,
-  Vector3,
-  MeshBasicMaterial,
-  Mesh,
-  ShapeGeometry,
-  Shape,
-  LineSegments,
-  LineBasicMaterial
-} from 'three'
-import { IRect, ISize } from '../interfaces'
-import { scaleOrdinal } from 'd3-scale'
-import { range, angle } from '../utils'
+import { ISize } from '../interfaces'
 import { createBufferGeometry, createLabel } from '../three-helper'
+import { angle, range } from '../utils'
 
 export default class PieChart extends Chart implements IChart {
   type = 'PieChart'
@@ -274,7 +273,7 @@ export default class PieChart extends Chart implements IChart {
       if (sameSide && interH2) {
         return
       }
-      let label1 = createLabel(`${name} (${percent}%)`,size, color, 1, this.colorScale(j))
+      let label1 = createLabel(`${name} (${percent}%)`, size, color, 1, this.colorScale(j))
       label1.position.x = x
       label1.position.y = y
       label1.position.z = 0

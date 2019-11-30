@@ -1,27 +1,22 @@
-import Chart from '../chart'
+import { scaleLinear } from 'd3-scale'
 import {
-  Geometry,
-  Line,
-  Color,
-  Object3D,
-  Vector3,
-  Vector2,
   CanvasTexture,
-  Shape,
   ClampToEdgeWrapping,
-  ShapeBufferGeometry,
-  NearestFilter,
+  Color,
   LineSegments,
   Mesh,
-  MeshBasicMaterial
+  MeshBasicMaterial,
+  NearestFilter,
+  Shape,
+  ShapeBufferGeometry,
+  Vector2
 } from 'three'
 import { MeshLine, MeshLineMaterial } from 'three.meshline'
-
+import Chart from '../chart'
 import { DataSource } from '../components/bar'
 import { IRect } from '../interfaces'
-import { scaleLinear } from 'd3-scale'
 
-class AreaChartExt extends Chart {
+export default class AreaChartExt extends Chart {
   dataSource: DataSource
   barWidth: number
   barGap: number

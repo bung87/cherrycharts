@@ -1,15 +1,15 @@
 import {
   BufferAttribute,
   BufferGeometry,
-  MeshBasicMaterial,
-  Mesh,
-  Color,
   CanvasTexture,
-  PlaneGeometry,
   ClampToEdgeWrapping,
-  NearestFilter,
+  Color,
+  LinearFilter,
   LinearMipMapLinearFilter,
-  LinearFilter
+  Mesh,
+  MeshBasicMaterial,
+  NearestFilter,
+  PlaneGeometry
 } from 'three'
 
 export function createBufferGeometry(
