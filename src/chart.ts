@@ -226,8 +226,8 @@ class Chart extends Object3D implements IChart, IChartInteractable {
 
     this.build(this.dataSource)
     this.dataProcessed = true
-    this.drawCommon()
     this.draw()
+    this.drawCommon()
     // this.beforeRender()
     this.director._render()
   }
@@ -376,8 +376,8 @@ class Chart extends Object3D implements IChart, IChartInteractable {
     this.clearThree(this)
     // this.updateMatrix()
     // this.updateMatrixWorld(true)
-    this.drawCommon()
     this.draw()
+    this.drawCommon()
   }
 
   private getChartType() {
